@@ -1,4 +1,4 @@
-<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><script>if(/[?&]step\b/.test(location.search)){(function(){var q=[],t=performance.now();window.requestAnimationFrame=function(f){q.push(f);return q.length};window.cancelAnimationFrame=function(){};window.__step=async function(n){for(var i=0;i<n;i++){t+=1000/60;var c=q;q=[];c.forEach(function(f){f(t)});for(var k=0;k<12;k++)await null}return t}})()}</script><title>C&amp;T Maniac (prototyp)</title><script>window.CT_TIDS=true;window.CT_NEXT=true;</script>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><script>if(/[?&]step\b/.test(location.search)){(function(){var q=[],t=performance.now();window.requestAnimationFrame=function(f){q.push(f);return q.length};window.cancelAnimationFrame=function(){};window.__step=async function(n){for(var i=0;i<n;i++){t+=1000/60;var c=q;q=[];c.forEach(function(f){f(t)});for(var k=0;k<12;k++)await null}return t}})()}</script><title>C&amp;T Maniac</title><script>window.CT_TIDS=true;window.CT_NEXT=true;</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Anton&family=Permanent+Marker&family=Alfa+Slab+One&display=swap">
@@ -1370,12 +1370,12 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 .mt-ly b { font-weight: 400; font-size: 2.5em; line-height: .9; }
 .mt-ly.on { opacity: 1; }
 .mt-ly em {
-  position: absolute; left: 50%; top: 100%; translate: -50% -28%; opacity: 0; scale: .3; font-style: normal; font-size: 2.2em; line-height: 1;
+  position: absolute; left: 50%; top: 100%; translate: -50% -28%; opacity: 0; scale: .3; font-style: normal; font-size: 2em; line-height: 1; white-space: nowrap;
   padding: .14em .28em .02em; color: var(--ink); background: #fff6e0; border: calc(var(--u) * .5) solid var(--ink); border-radius: calc(var(--u) * 1.2);
   -webkit-text-stroke: 0; box-shadow: calc(var(--u) * .4) calc(var(--u) * .5) 0 rgba(5, 4, 30, .55);
 }
 .mt-ly.hit em { opacity: 1; scale: 1; animation: mtSlam .3s cubic-bezier(.2, 1.6, .4, 1) both; }
-.mt-ly.hot em { background: #ffd21f; font-size: 2.6em; animation: mtSlamHot .42s cubic-bezier(.2, 1.7, .4, 1) both;
+.mt-ly.hot em { background: #ffd21f; font-size: 2.25em; animation: mtSlamHot .42s cubic-bezier(.2, 1.7, .4, 1) both;
   box-shadow: 0 0 calc(var(--u) * 2.4) calc(var(--u) * .9) rgba(255, 210, 31, .85), calc(var(--u) * .4) calc(var(--u) * .5) 0 rgba(5, 4, 30, .55); }
 @keyframes mtSlam { from { opacity: 0; scale: 2; rotate: -10deg; } to { opacity: 1; scale: 1; rotate: 0deg; } }
 @keyframes mtSlamHot { 0% { opacity: 0; scale: 3.2; rotate: -18deg; } 65% { opacity: 1; scale: .9; rotate: 3deg; } 100% { opacity: 1; scale: 1; rotate: 0deg; } }
@@ -3466,11 +3466,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // 10x för 2 bakåt, 25x för 3 bakåt). Sista hjulet har två block färre av A, K, Q och J, så att Bonusspelet kommer
   // ungefär lika ofta som förut (färre laviner gav färre bomber). Hjul 1–5 är exakt som förut.
   // Bonusspelet: 15 frispinn och multi från x8. Maniac: 10 frispinn; kassetten spolar 2, 3, 4 eller 5 lager (lika chans,
-  // slumpas när bonusen startar), de lagren fylls med nya bräden från grundspelets hjul och ger startmulti x1–x5 var
-  // (vikter 30/25/20/15/10, summan x2–x25), resten fylls på ett per frispinn. Multin växer som i Bonusspelet (LAYER 3 = +3).
-  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,04 % (200 M omgångar), köpt
-  // Bonusspel 96,07 % (2 M köp) och köpt Maniac cirka 96,0 % (två körningar på 1 M köp, 96,17 % sammanvägt, skalan sedan
-  // justerad −0,18 %). Inte certifierat.
+  // slumpas när bonusen startar), de lagren fylls med nya bräden från grundspelets hjul och ger startmulti
+  // x3–x15 var (vikter 30/25/20/15/10, summan x6–x75), resten fylls på ett per frispinn. Multin växer som i Bonusspelet (LAYER 3 = +3).
+  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,07 % (100 M omgångar), köpt
+  // Bonusspel 96,07 % (2 M köp) och köpt Maniac 96,06 % (1 M köp). Inte certifierat.
   if (window.CT_NEXT) {
     Object.assign(M.TIME, {
       payT: {
@@ -3487,8 +3486,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       },
       throwMinT: 10, throwMinC: 25, scale: 0.54108,
       fsAward: { 3: 15, 4: 15, 5: 15, 6: 15 }, fsStart: 8, fsScale: 0.06086,
-      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [1, 2, 3, 4, 5], w: [30, 25, 20, 15, 10] }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [25, 25, 25, 25] },
-      maniacScale: 0.34679,
+      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [3, 6, 9, 12, 15], w: [30, 25, 20, 15, 10] }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [25, 25, 25, 25] },
+      maniacScale: 0.25127,
       baseBlocks: {
         0:  [0, 2, 2, 2, 2, 2],
         1:  [1, 1, 1, 1, 1, 2],
@@ -7917,8 +7916,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function protoInit() {
     if (!PROTO && !NEXT) return;
     M.ENGINE_VERSION += '-proto'; // en avbruten omgång från prototypen spelas inte upp i det vanliga spelet (och tvärtom)
-    var tag = document.createElement('span'); tag.className = 'proto-tag'; tag.textContent = 'PROTOTYP';
-    var top = $('.g-top'); if (top) top.appendChild(tag);
+    // PROTOTYP-märket visas bara i de gamla prototyperna (CT_PROTO); ct-prototyp.html (CT_NEXT) ser ut som spelet (2026-10-20)
+    if (PROTO) { var tag = document.createElement('span'); tag.className = 'proto-tag'; tag.textContent = 'PROTOTYP'; var top = $('.g-top'); if (top) top.appendChild(tag); }
     if (!PROTO) return;
     // skenet runt ramen och skärmkanten (opaciteten styrs av --pulse, så att grafikkortet gör jobbet)
     var fr = $('#frame'); if (fr) { var gl = document.createElement('i'); gl.className = 'pp-glow'; fr.appendChild(gl); }
@@ -11297,9 +11296,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Bara när matten har startmulti per lager (M.TIME.maniacStartDraw, prototypen). Bandspelaren glider upp, Maniac-
   // kassetten (guld med röd rand) hoppar in och spolar bakåt. För varje steg bakåt skjuts en bricka LAYER n upp ur luckan,
   // lagrets startmulti (x1–x5, plan.startDraws) smäller fram under brickan, x4 och x5 hårdare, och flyger in i MULTI, som
-  // räknas upp, och lagret tänds i panelen. Hur många lager kassetten spolar slumpas (M.TIME.maniacLayersDraw: 2, 3, 4 eller
+  // räknas upp, och lagret tänds i panelen, ett lager i taget. Hur många lager kassetten spolar slumpas (M.TIME.maniacLayersDraw: 2, 3, 4 eller
   // 5); när den stannar smäller "3 LAYERSPINS" fram som i grundspelets kassett (alla 5 extra stort). Sist smäller hela
-  // startmultin fram, x20 eller mer extra stort. Cirka 4,5–5 s, i
+  // startmultin fram, x20 eller mer extra stort. Cirka 5 s med 2 lager och 7 s med alla 5, i
   // turbo cirka hälften, och ett tryck gör det snabbare. Utfallet är redan avgjort (playBonus), det här visar det bara.
   var MT_COL = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
   var MT_CAS = CAS_SVG.replace('fill="#ff8629"/>', 'fill="#e8202e"/>')
@@ -11313,13 +11312,18 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // ett lagers startmulti, t.ex. "1–x5" (efter "x"), och hela startmultins spann, t.ex. "2–x25" (efter "MULTI x")
   function mtStartText() { var v = M.TIME.maniacStartDraw.v; return Math.min.apply(null, v) + '–x' + Math.max.apply(null, v); }
   function mtRange() { var v = M.TIME.maniacStartDraw.v; return mtLayersMin() * Math.min.apply(null, v) + '–x' + mtLayersMax() * Math.max.apply(null, v); }
+  // trösklarna följer startmultins värden: de två högsta värdena per lager (x12 och x15) smäller hårdare, det högsta
+  // hårdast, och STARTMULTI smäller extra stort från två tredjedelar av högsta möjliga (x50 av x75)
+  function mtHotMin() { var v = M.TIME.maniacStartDraw.v; return v[Math.max(0, v.length - 2)]; }
+  function mtTopV() { return Math.max.apply(null, M.TIME.maniacStartDraw.v); }
+  function mtMegaMin() { return Math.round(mtLayersMax() * mtTopV() * 2 / 3); }
   // ett "x3" flyger från brickan in i MULTI; done() när det har landat (eller efter en stund, om sidan inte ritas)
   function mtFly(from, v, k, dur, done) {
     var fired = false, fin = function () { if (!fired) { fired = true; done(); } };
     var target = el.fsMult, a = from.getBoundingClientRect(), b = target && target.getBoundingClientRect();
     if (!b || !b.width || !a.width || !document.body.animate) { fin(); return; }
     var chip = document.createElement('span');
-    chip.className = 'fly-chip mt-chip d' + k + (v >= 4 ? ' hot' : ''); chip.textContent = 'x' + v;
+    chip.className = 'fly-chip mt-chip d' + k + (v >= mtHotMin() ? ' hot' : ''); chip.textContent = 'x' + v;
     chip.style.left = (a.left + a.width / 2) + 'px'; chip.style.top = (a.top + a.height / 2) + 'px';
     document.body.appendChild(chip);
     var dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
@@ -11357,7 +11361,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       '<div class="mt-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>' +
       // "3 LAYERSPINS" (bara när antalet lager slumpas)
       (M.TIME.maniacLayersDraw ? '<div class="mt-lsbig' + (n >= M.TIME.maniacDepth ? ' all' : '') + '"><b style="--c:' + MT_COL[n] + '">' + n + '</b>' + lsLockupHtml({ light: true }) + '</div>' : '') +
-      '<div class="mt-big' + (plan.startMult >= 20 ? ' mega' : '') + '"><span>STARTMULTI</span><b>x' + plan.startMult + '</b></div>';
+      '<div class="mt-big' + (plan.startMult >= mtMegaMin() ? ' mega' : '') + '"><span>STARTMULTI</span><b>x' + plan.startMult + '</b></div>';
     // --u: en hundradel av brädets bredd (samma som kassetten i grundspelet)
     host.style.setProperty('--u', (br.width / 100).toFixed(2) + 'px');
     document.body.appendChild(host);
@@ -11389,7 +11393,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       setTimeout(function () { reels.forEach(function (e) { (e.getAnimations ? e.getAnimations() : []).forEach(function (an) { an.playbackRate = p[1]; }); }); }, tt(rewT) * p[0] * 1000);
     });
     await wait(tt(0.15), true);
-    var landed = [], stickers = host.querySelectorAll('.mt-ly');
+    var stickers = host.querySelectorAll('.mt-ly');
     for (var i = 1; i <= n; i++) {
       var v = draws[i - 1], ly = stickers[i - 1], dr = door && door.getBoundingClientRect();
       cnt.textContent = '◀◀ −' + i; led.textContent = '◀◀ ' + i;
@@ -11404,22 +11408,22 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         ], { duration: state.hurry ? 150 : 300 * sp, easing: 'cubic-bezier(.2, 1.3, .4, 1)', fill: 'both' });
       }
       deckSound('tick', 0, i);
-      await wait(tt(0.12), true);
-      // lagrets multi smäller fram under brickan (x4 och x5 hårdare, med gnistor) och flyger in i MULTI
-      var em = ly.querySelector('em'), hot = v >= 4;
+      await wait(tt(0.16), true);
+      // lagrets multi smäller fram under brickan (de två högsta värdena hårdare, med gnistor) och flyger in i MULTI; nästa
+      // lager kommer först när multin har landat och räknats upp, så att man hinner se varje steg
+      var em = ly.querySelector('em'), hot = v >= mtHotMin(), top = v >= mtTopV();
       ly.classList.add('hit'); if (hot) ly.classList.add('hot');
       if (hot) {
-        deckSound('big', 0, i); shakeBoard(v >= 5 ? 2.2 : 1.5);
+        deckSound('big', 0, i); shakeBoard(top ? 2.2 : 1.5);
         var er = em.getBoundingClientRect();
-        for (var e2 = 0; e2 < (v >= 5 ? 16 : 10); e2++) emberPart(er.left + er.width * Math.random(), er.top + er.height * Math.random(), e2 % 3 ? MT_COL[i] : '#ffd21f');
+        for (var e2 = 0; e2 < (top ? 16 : 10); e2++) emberPart(er.left + er.width * Math.random(), er.top + er.height * Math.random(), e2 % 3 ? MT_COL[i] : '#ffd21f');
       } else deckSound('pop');
-      landed.push(new Promise(function (res) {
+      await new Promise(function (res) {
         var k3 = i, v3 = v, from = em;
-        setTimeout(function () { mtFly(from, v3, k3, state.hurry ? 200 : 340 * sp, function () { mtLand(plan, k3, v3); res(); }); }, state.hurry ? 0 : (hot ? 160 : 90) * sp);
-      }));
-      await wait(tt(hot ? 0.26 : 0.16), true);
+        setTimeout(function () { mtFly(from, v3, k3, state.hurry ? 200 : 300 * sp, function () { mtLand(plan, k3, v3); res(); }); }, state.hurry ? 0 : (hot ? 180 : 80) * sp);
+      });
+      await wait(tt(0.08), true);
     }
-    await Promise.all(landed);
     // 3. bandet stannar och "3 LAYERSPINS" smäller fram: så många lager gav kassetten (alla 5 extra stort, med guldsken)
     document.body.classList.remove('cas-rew'); host.classList.remove('rew');
     deckSound('stop');
@@ -11431,18 +11435,18 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       if (all) setTimeout(function () { deckSound('big', 0, n + 3); }, 160);
       var lb = host.querySelector('.mt-lsbig > b'), lbr = lb && lb.getBoundingClientRect();
       if (lbr && lbr.width) for (var e4 = 0; e4 < (all ? 30 : 16); e4++) emberPart(lbr.left + lbr.width * Math.random(), lbr.top + lbr.height * Math.random(), e4 % 3 ? MT_COL[n] : '#fff6e0');
-      await wait(tt(all ? 1.0 : 0.75), true);
+      await wait(tt(all ? 1.05 : 0.85), true);
       host.classList.add('mt-ls-out');
       await wait(tt(0.18), true);
     }
     // 4. hela startmultin smäller fram (x20 eller mer extra stort)
-    var mega = plan.startMult >= 20;
+    var mega = plan.startMult >= mtMegaMin();
     host.classList.add('big'); deckSound('big', 0, mega ? 7 : 5); shakeBoard(mega ? 3 : 2);
     if (mega) setTimeout(function () { deckSound('big', 0, 9); }, 160);
     var bg = host.querySelector('.mt-big > b'), gr = bg && bg.getBoundingClientRect();
     if (gr && gr.width) for (var e3 = 0; e3 < (mega ? 34 : 18); e3++) emberPart(gr.left + gr.width * Math.random(), gr.top + gr.height * Math.random(), e3 % 3 ? '#ffd21f' : '#fff6e0');
     if (el.fsMult) { el.fsMult.classList.remove('pump'); void el.fsMult.offsetWidth; el.fsMult.classList.add('pump'); }
-    await wait(tt(mega ? 0.95 : 0.65), true);
+    await wait(tt(mega ? 1.15 : 0.85), true);
     // 5. allt glider undan
     host.classList.add('big-out', 'out');
     setTimeout(function () { host.remove(); }, 350);
@@ -12938,8 +12942,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   if (TIDS) {
     document.body.classList.add('tids');
-    // fliken visar bara spelets namn (prototypen har "(prototyp)" efter, så att flikarna går att skilja åt)
-    document.title = window.CT_PROTO || window.CT_NEXT ? 'C&T Maniac (prototyp)' : 'C&T Maniac';
+    // fliken visar bara spelets namn (de gamla prototyperna har "(prototyp)" efter; ct-prototyp.html ser ut som spelet)
+    document.title = window.CT_PROTO ? 'C&T Maniac (prototyp)' : 'C&T Maniac';
     // köp-bonus-affischen: bonusbomben och "BONUS SPEL"
     var bpT = document.querySelector('#btnBuy .bp-title');
     if (bpT) {
