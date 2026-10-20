@@ -1391,6 +1391,18 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 .cas-act.big-out .mt-big { animation: bigOut .22s ease-in forwards; }
 @keyframes mtMega { 0% { opacity: 0; scale: 3.4; rotate: -16deg; } 60% { opacity: 1; scale: .92; rotate: -2deg; } 100% { opacity: 1; scale: 1; rotate: -4deg; } }
 @media (prefers-reduced-motion: reduce) { .mt-ly.hit em, .mt-ly.hot em, .cas-act.big .mt-big, .cas-act.big .mt-big.mega { animation: none; } }
+/* "3 LAYERSPINS": så många lager kassetten gav (bara när antalet slumpas), som "2 LAYERSPINS" i grundspelets kassett; alla
+   5 extra stort med guldsken. Brädet tonas ner och bandräknaren försvinner medan det syns. */
+.mt-lsbig { position: absolute; left: 50%; top: 14%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .4); opacity: 0; }
+.mt-lsbig > b { font: 400 calc(var(--u) * 17)/.8 var(--display); color: var(--c); -webkit-text-stroke: .045em var(--ink); paint-order: stroke fill; text-shadow: .04em .05em 0 var(--ink); }
+.mt-lsbig .ls-lock { font-size: calc(var(--u) * 5); }
+.mt-lsbig.all > b { font-size: calc(var(--u) * 21); filter: drop-shadow(0 0 calc(var(--u) * 3) rgba(255, 210, 31, .9)); }
+.cas-act.mt-ls .cas-vhs { opacity: 1; animation: none; }
+.cas-act.mt-ls .cas-count { opacity: 0; scale: .8; }
+.cas-act.mt-ls .mt-lsbig { animation: bigSlam .42s cubic-bezier(.2, 1.6, .4, 1) both; }
+.cas-act.mt-ls .mt-lsbig.all { animation: mtMega .6s cubic-bezier(.2, 1.8, .4, 1) both; }
+.cas-act.mt-ls-out .mt-lsbig, .cas-act.mt-ls-out .mt-lsbig.all { animation: bigOut .22s ease-in forwards; }
+@media (prefers-reduced-motion: reduce) { .cas-act.mt-ls .mt-lsbig, .cas-act.mt-ls .mt-lsbig.all { animation: none; opacity: 1; } }
 .bw-hint { font: 700 12px/1 var(--ui); letter-spacing: .16em; text-transform: uppercase; color: var(--paper); opacity: .75; }
 
 .intro {
@@ -3344,17 +3356,20 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   // En bonus från ett startbräde: Bonusspel (12 frispinn, 3 lager, multi från x5, 3+ bomber ger 5 till) eller Maniac
   // (12 frispinn, 5 lager, multi från x15, 3+ bomber ger 3 till). x0: vad omgången redan har vunnit (för taket).
-  // Maniac kan börja med alla lager fyllda (TIME.maniacPrefill: nya bräden från grundspelets hjul, slumpade när bonusen
-  // startar) och med en startmulti som slumpas per lager (TIME.maniacStartDraw: { v: värden, w: vikter }; summan av alla
-  // lagrens värden). Avstängt (som förut) när de inte är satta.
+  // Maniac kan börja med lagren fyllda (TIME.maniacPrefill: nya bräden från grundspelets hjul, slumpade när bonusen
+  // startar; alla, eller så många som TIME.maniacLayersDraw slumpar fram) och med en startmulti som slumpas per fyllt lager
+  // (TIME.maniacStartDraw: { v: värden, w: vikter }; summan av lagrens värden). Avstängt (som förut) när de inte är satta.
   function randBoard(rng) { var g = []; for (var r = 0; r < REELS; r++) g.push(windowAt(STRIPS.base, r, Math.floor(rng() * STRIPS.base[r].length))); return g; }
   function drawW(rng, d) { var t = 0, i; for (i = 0; i < d.w.length; i++) t += d.w[i]; var u = rng() * t; for (i = 0; i < d.w.length; i++) { u -= d.w[i]; if (u < 0) return d.v[i]; } return d.v[d.v.length - 1]; }
   function playBonus(rng, maniac, startGrid, scatters, x0) {
     var depth = maniac ? TIME.maniacDepth : TIME.fsDepth, scale = maniac ? TIME.maniacScale : TIME.fsScale;
     var awarded = maniac ? TIME.maniacSpins : (TIME.fsAward[Math.min(scatters, 6)] || 0), more = maniac ? 3 : FS_RETRIGGER;
     var left = awarded, mult = maniac ? TIME.maniacStart : TIME.fsStart, layers = [startGrid], spins = [], x = 0, draws = null;
-    if (maniac && TIME.maniacPrefill) while (layers.length < depth) layers.push(randBoard(rng));
-    if (maniac && TIME.maniacStartDraw) { draws = []; mult = 0; for (var q = 0; q < depth; q++) { draws.push(drawW(rng, TIME.maniacStartDraw)); mult += draws[q]; } }
+    // hur många lager kassetten spolar tillbaka när Maniac startar: slumpat (TIME.maniacLayersDraw), annars alla; bara de
+    // lagren fylls och ger startmulti, resten fylls på ett per frispinn som vanligt
+    var nL = maniac && TIME.maniacLayersDraw ? drawW(rng, TIME.maniacLayersDraw) : depth;
+    if (maniac && TIME.maniacPrefill) while (layers.length < nL) layers.push(randBoard(rng));
+    if (maniac && TIME.maniacStartDraw) { draws = []; mult = 0; for (var q = 0; q < nL; q++) { draws.push(drawW(rng, TIME.maniacStartDraw)); mult += draws[q]; } }
     var startMult = mult, layers0 = layers.slice();
     while (left > 0 && x0 + x < TIME.maxX) {
       left--;
@@ -3450,11 +3465,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // betalar 1,6 gånger så mycket som förut, 5 i rad 1,2 och 6 i rad som förut. Kassetten betalar ungefär dubbelt (minst
   // 10x för 2 bakåt, 25x för 3 bakåt). Sista hjulet har två block färre av A, K, Q och J, så att Bonusspelet kommer
   // ungefär lika ofta som förut (färre laviner gav färre bomber). Hjul 1–5 är exakt som förut.
-  // Bonusspelet: 15 frispinn och multi från x8. Maniac: 10 frispinn, alla 5 lager fyllda från start (nya bräden från
-  // grundspelets hjul) och startmulti x1–x5 per lager (vikter 30/25/20/15/10, summan x5–x25). Multin växer som i
-  // Bonusspelet (LAYER 3 = +3).
-  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,06 % (200 M omgångar), köpt
-  // Bonusspel 96,07 % (2 M köp) och köpt Maniac 96,07 % (1 M köp). Inte certifierat.
+  // Bonusspelet: 15 frispinn och multi från x8. Maniac: 10 frispinn; kassetten spolar 2, 3, 4 eller 5 lager (lika chans,
+  // slumpas när bonusen startar), de lagren fylls med nya bräden från grundspelets hjul och ger startmulti x1–x5 var
+  // (vikter 30/25/20/15/10, summan x2–x25), resten fylls på ett per frispinn. Multin växer som i Bonusspelet (LAYER 3 = +3).
+  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,04 % (200 M omgångar), köpt
+  // Bonusspel 96,07 % (2 M köp) och köpt Maniac cirka 96,0 % (två körningar på 1 M köp, 96,17 % sammanvägt, skalan sedan
+  // justerad −0,18 %). Inte certifierat.
   if (window.CT_NEXT) {
     Object.assign(M.TIME, {
       payT: {
@@ -3471,8 +3487,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       },
       throwMinT: 10, throwMinC: 25, scale: 0.54108,
       fsAward: { 3: 15, 4: 15, 5: 15, 6: 15 }, fsStart: 8, fsScale: 0.06086,
-      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [1, 2, 3, 4, 5], w: [30, 25, 20, 15, 10] },
-      maniacScale: 0.28660,
+      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [1, 2, 3, 4, 5], w: [30, 25, 20, 15, 10] }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [25, 25, 25, 25] },
+      maniacScale: 0.34679,
       baseBlocks: {
         0:  [0, 2, 2, 2, 2, 2],
         1:  [1, 1, 1, 1, 1, 2],
@@ -11281,13 +11297,22 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Bara när matten har startmulti per lager (M.TIME.maniacStartDraw, prototypen). Bandspelaren glider upp, Maniac-
   // kassetten (guld med röd rand) hoppar in och spolar bakåt. För varje steg bakåt skjuts en bricka LAYER n upp ur luckan,
   // lagrets startmulti (x1–x5, plan.startDraws) smäller fram under brickan, x4 och x5 hårdare, och flyger in i MULTI, som
-  // räknas upp, och lagret tänds i panelen. Sist smäller hela startmultin fram, x20 eller mer extra stort. Cirka 4,5–5 s, i
+  // räknas upp, och lagret tänds i panelen. Hur många lager kassetten spolar slumpas (M.TIME.maniacLayersDraw: 2, 3, 4 eller
+  // 5); när den stannar smäller "3 LAYERSPINS" fram som i grundspelets kassett (alla 5 extra stort). Sist smäller hela
+  // startmultin fram, x20 eller mer extra stort. Cirka 4,5–5 s, i
   // turbo cirka hälften, och ett tryck gör det snabbare. Utfallet är redan avgjort (playBonus), det här visar det bara.
   var MT_COL = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
   var MT_CAS = CAS_SVG.replace('fill="#ff8629"/>', 'fill="#e8202e"/>')
     .replace('font-size="20" letter-spacing="2" fill="#15111f">C&amp;T MIXTAPE', 'font-size="17" letter-spacing="1.5" fill="#15111f">MANIAC MIXTAPE');
-  // startmultins spann i text, t.ex. "5–x25" (efter "MULTI x"): alla lager gånger lägsta och högsta värdet
-  function mtRange() { var d = M.TIME.maniacStartDraw, n = M.TIME.maniacDepth; return n * Math.min.apply(null, d.v) + '–x' + n * Math.max.apply(null, d.v); }
+  // texterna (affischen, reglerna och guiden): hur många lager kassetten kan ge och vad startmultin kan bli
+  function mtLayersMin() { var L = M.TIME.maniacLayersDraw; return L ? Math.min.apply(null, L.v) : M.TIME.maniacDepth; }
+  function mtLayersMax() { var L = M.TIME.maniacLayersDraw; return L ? Math.max.apply(null, L.v) : M.TIME.maniacDepth; }
+  // "2–5" (eller "5" när det alltid är alla), och "2, 3, 4 eller 5"
+  function mtLayersText() { return mtLayersMin() === mtLayersMax() ? String(mtLayersMax()) : mtLayersMin() + '–' + mtLayersMax(); }
+  function mtLayersList() { var v = M.TIME.maniacLayersDraw ? M.TIME.maniacLayersDraw.v : [M.TIME.maniacDepth]; return v.length < 2 ? String(v[0]) : v.slice(0, -1).join(', ') + ' eller ' + v[v.length - 1]; }
+  // ett lagers startmulti, t.ex. "1–x5" (efter "x"), och hela startmultins spann, t.ex. "2–x25" (efter "MULTI x")
+  function mtStartText() { var v = M.TIME.maniacStartDraw.v; return Math.min.apply(null, v) + '–x' + Math.max.apply(null, v); }
+  function mtRange() { var v = M.TIME.maniacStartDraw.v; return mtLayersMin() * Math.min.apply(null, v) + '–x' + mtLayersMax() * Math.max.apply(null, v); }
   // ett "x3" flyger från brickan in i MULTI; done() när det har landat (eller efter en stund, om sidan inte ritas)
   function mtFly(from, v, k, dur, done) {
     var fired = false, fin = function () { if (!fired) { fired = true; done(); } };
@@ -11330,6 +11355,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     for (var k = 1; k <= n; k++) lays += '<i class="mt-ly" style="--c:' + MT_COL[k] + '"><span>LAYER</span><b>' + k + '</b><em>x' + draws[k - 1] + '</em></i>';
     host.innerHTML = '<i class="cas-vhs"></i><div class="cas-deck">' + DECK_SVG + '</div><div class="cas">' + MT_CAS + '</div>' +
       '<div class="mt-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>' +
+      // "3 LAYERSPINS" (bara när antalet lager slumpas)
+      (M.TIME.maniacLayersDraw ? '<div class="mt-lsbig' + (n >= M.TIME.maniacDepth ? ' all' : '') + '"><b style="--c:' + MT_COL[n] + '">' + n + '</b>' + lsLockupHtml({ light: true }) + '</div>' : '') +
       '<div class="mt-big' + (plan.startMult >= 20 ? ' mega' : '') + '"><span>STARTMULTI</span><b>x' + plan.startMult + '</b></div>';
     // --u: en hundradel av brädets bredd (samma som kassetten i grundspelet)
     host.style.setProperty('--u', (br.width / 100).toFixed(2) + 'px');
@@ -11393,11 +11420,22 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       await wait(tt(hot ? 0.26 : 0.16), true);
     }
     await Promise.all(landed);
-    // 3. bandet stannar och hela startmultin smäller fram (x20 eller mer extra stort)
+    // 3. bandet stannar och "3 LAYERSPINS" smäller fram: så många lager gav kassetten (alla 5 extra stort, med guldsken)
     document.body.classList.remove('cas-rew'); host.classList.remove('rew');
     deckSound('stop');
     state.fs.mult = plan.startMult; state.fs.layers = plan.layers0; renderMeter();
     await wait(tt(0.1), true);
+    if (M.TIME.maniacLayersDraw) {
+      var all = n >= M.TIME.maniacDepth;
+      host.classList.add('mt-ls'); deckSound('big', 0, n); shakeBoard(all ? 3 : 2);
+      if (all) setTimeout(function () { deckSound('big', 0, n + 3); }, 160);
+      var lb = host.querySelector('.mt-lsbig > b'), lbr = lb && lb.getBoundingClientRect();
+      if (lbr && lbr.width) for (var e4 = 0; e4 < (all ? 30 : 16); e4++) emberPart(lbr.left + lbr.width * Math.random(), lbr.top + lbr.height * Math.random(), e4 % 3 ? MT_COL[n] : '#fff6e0');
+      await wait(tt(all ? 1.0 : 0.75), true);
+      host.classList.add('mt-ls-out');
+      await wait(tt(0.18), true);
+    }
+    // 4. hela startmultin smäller fram (x20 eller mer extra stort)
     var mega = plan.startMult >= 20;
     host.classList.add('big'); deckSound('big', 0, mega ? 7 : 5); shakeBoard(mega ? 3 : 2);
     if (mega) setTimeout(function () { deckSound('big', 0, 9); }, 160);
@@ -11405,7 +11443,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (gr && gr.width) for (var e3 = 0; e3 < (mega ? 34 : 18); e3++) emberPart(gr.left + gr.width * Math.random(), gr.top + gr.height * Math.random(), e3 % 3 ? '#ffd21f' : '#fff6e0');
     if (el.fsMult) { el.fsMult.classList.remove('pump'); void el.fsMult.offsetWidth; el.fsMult.classList.add('pump'); }
     await wait(tt(mega ? 0.95 : 0.65), true);
-    // 4. allt glider undan
+    // 5. allt glider undan
     host.classList.add('big-out', 'out');
     setTimeout(function () { host.remove(); }, 350);
     await wait(tt(0.3), true);
@@ -11624,7 +11662,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // Tidsvägar: reglerna i korta, stora rader (multin, hur långt bakåt vinsterna når, med lagerbrickorna, och bomberna),
       // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +5 frispinn i Bonusspelet och +3 i Maniac
       // (samma som playBonus i math.js).
-      (TIDS && !(maniac && coll) ? '<div class="cv-facts"><p><b>MULTI x' + (tape && !resuming ? mtRange() : state.fs.mult) + '</b> nollställs aldrig</p>' +
+      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + (tape && !resuming && M.TIME.maniacLayersDraw ? '<p>Kassetten ger <b>' + mtLayersText() + ' LAYERSPINS</b>, varje lager <b>MULTI x' + mtStartText() + '</b></p>'
+        : '<p><b>MULTI x' + (tape && !resuming ? mtRange() : state.fs.mult) + '</b> nollställs aldrig</p>') +
         '<p>Vinster hämtar symboler <b>upp till ' + state.fs.depth + ' snurr bakåt</b></p></div>' : '') +
       (state.fs.depth ? '<div class="cv-layers">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em></i>'; }).join('') + '</div>' : '') +
       (TIDS && !(maniac && coll) ? '<div class="cv-facts"><p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +' + (maniac ? 3 : M.FS_RETRIGGER) + ' frispinn</p></div>'
@@ -12161,7 +12200,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         '<li>Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i ' + (M.TIME.goldP * 100).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' % av fallen. Guldbomben startar Maniac-bonusen med ' + M.TIME.maniacSpins + ' frispinn.</li>' +
         '<li>Djupare tid: väggen har ' + M.TIME.maniacDepth + ' lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till ' + M.TIME.maniacDepth + ' snurr (siffran vid hörnet visar hur långt bakåt).</li>' +
         // prototypen: alla lager fyllda från start och startmulti per lager (M.TIME.maniacStartDraw)
-        (M.TIME.maniacStartDraw ? '<li>Alla ' + M.TIME.maniacDepth + ' lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x' +
+        (M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>Kassetten: när Maniac startar spolar kassetten tillbaka ' + mtLayersList() + ' lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje sådant lager ger en startmulti på x' +
+          mtStartText() + '. Multin börjar på summan: x' + mtRange() + '. Lagren som inte fylls från start fylls på ett per frispinn.</li>' +
+          '<li>Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>'
+          : M.TIME.maniacStartDraw ? '<li>Alla ' + M.TIME.maniacDepth + ' lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x' +
           Math.min.apply(null, M.TIME.maniacStartDraw.v) + '–x' + Math.max.apply(null, M.TIME.maniacStartDraw.v) + ', och multin börjar på summan: x' + mtRange() + '.</li>' +
           '<li>Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>'
           : '<li>Multin börjar på x' + M.TIME.maniacStart + ' och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>') +
@@ -13266,7 +13308,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     { t: 'Laviner', x: '6 hjul, 6 rader och 46 656 vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.', demo: demoCascade },
     { t: 'Layerspins', x: 'Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.', demo: demoTime },
     { t: 'Kassetten', x: 'Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.', demo: demoLayers },
-    { t: 'Bonusspel & Maniac', x: '3 bomber ger Bonusspelet: ' + M.fsAwardTime(3) + ' frispinn där multin växer och aldrig nollställs. Blir en bomb guld startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + M.TIME.maniacDepth + ' lager bakåt. Köp: Bonusspel ' + BUY_X + 'x, Maniac ' + M.TIME.maniacBuy + 'x.', demo: demoBonus }
+    { t: 'Bonusspel & Maniac', x: '3 bomber ger Bonusspelet: ' + M.fsAwardTime(3) + ' frispinn där multin växer och aldrig nollställs. ' + (M.TIME.maniacLayersDraw ? 'Guldbomben startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + mtLayersText() + ' lager med multi. ' : 'Blir en bomb guld startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + M.TIME.maniacDepth + ' lager bakåt. ') + 'Köp: Bonusspel ' + BUY_X + 'x, Maniac ' + M.TIME.maniacBuy + 'x.', demo: demoBonus }
   ] : [
     { t: 'Laviner', x: 'Vinster sprängs, nya symboler faller in och multin stiger till x5.', demo: gIconDemo(8) },
     { t: 'Maniac Mode', x: '3 bonusstjärnor ger 10–20 frispinn där multin växer utan tak.', demo: gIconDemo(1) },
