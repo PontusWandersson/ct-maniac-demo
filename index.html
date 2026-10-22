@@ -581,6 +581,8 @@ body.tids .time-cap.at-bottom { bottom: -20px; }
   border: 3px solid var(--ink); border-radius: 14px; box-shadow: 5px 5px 0 var(--ink);
 }
 .popmenu.auto { grid-template-columns: repeat(3, auto); right: 100px; width: max-content; max-width: min(320px, 92vw); }
+/* prototypen: sju antal (10–1000) i fyra kolumner */
+.popmenu.auto.many { grid-template-columns: repeat(4, auto); }
 /* autospelets stoppvillkor */
 .popmenu .ao { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font: 600 13px/1.2 var(--ui); cursor: pointer; }
 .popmenu .ao span { flex: 1; }
@@ -1268,9 +1270,10 @@ body.pp-s3 .frame { box-shadow: 0 0 0 3px #ff9f1c, 0 0 26px 6px rgba(255, 59, 31
 .portrait .cv-layers:not(.bs-lay) .ly em { font-size: 25px; }
 .portrait .ov-cover .ov-paper { padding: 24px 18px 22px; }
 .portrait .ov-cover .ov-inner { gap: 8px; }
-/* +n som flyger in i multin: samma märke */
+/* +n som flyger in i multin: samma märke. Lutningen (-6deg) ligger sist i flygningens transform (time-ways.js, win-ball.js,
+   maniac-tape.js), inte som rotate här: rotate läggs utanpå transform och vrider då hela flygvägen, så att brickan landar fel. */
 .fly-chip { border: 3px solid #fff; border-radius: 12px; color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill;
-  box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55); rotate: -6deg; }
+  box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55); }
 .layer-slap { position: fixed; z-index: 37; pointer-events: none; border: 8px solid; border-radius: 10px; box-sizing: border-box; animation: layerSlap .6s ease-out both; }
 @keyframes layerSlap { 0% { opacity: 1; transform: scale(1.04); } 100% { opacity: 0; transform: scale(1); } }
 .base-layers { position: fixed; z-index: 30; transform: translate(-50%, -60%); margin: 0; pointer-events: none; animation: popIn .35s cubic-bezier(.3, 1.7, .5, 1) both; }
@@ -1381,7 +1384,20 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 @keyframes mtSlamHot { 0% { opacity: 0; scale: 3.2; rotate: -18deg; } 65% { opacity: 1; scale: .9; rotate: 3deg; } 100% { opacity: 1; scale: 1; rotate: 0deg; } }
 .mt-chip.hot { font-size: 40px; padding: 6px 14px 3px; box-shadow: 0 0 18px 6px rgba(255, 210, 31, .6); }
 .cas-act.out .mt-lays { animation: casVhsOut .3s ease-in forwards; }
-/* STARTMULTI: hela startmultin smäller fram ovanför brickorna (mega: x20 eller mer, större och med guldsken) */
+/* kassetten spolar ett lager i taget: platserna för lagren som inte kom syns inte (raden står still), utom nästa lager som
+   en blinkande skugga ("LAYER 4 x24?") medan bandet tvekar, snabbare före sista möjliga lagret; kommer det inte tonar den bort */
+.mt-ly.void { visibility: hidden; }
+.mt-ly.ghost { visibility: visible; border-style: dashed; filter: saturate(.55); animation: mtGhost .5s ease-in-out infinite alternate; }
+.mt-ly.ghost.near { animation-duration: .24s; }
+.mt-ly.ghost em, .mt-ly.ghost-out em { opacity: .9; scale: .82; }
+.mt-ly.ghost em::after, .mt-ly.ghost-out em::after { content: '?'; }
+.mt-ly.ghost-out { visibility: visible; border-style: dashed; filter: saturate(.55); animation: mtGhostOut .45s ease-in forwards; }
+@keyframes mtGhost { from { opacity: .2; scale: .95; } to { opacity: .55; scale: 1.04; } }
+@keyframes mtGhostOut { from { opacity: .4; } to { opacity: 0; scale: .8; translate: 0 10%; } }
+@media (prefers-reduced-motion: reduce) { .mt-ly.ghost { animation: none; opacity: .4; } }
+/* STARTMULTI ovanför brickorna. Prototypen (sum): skylten kommer fram på x0 när bandet börjar spola och är lite mindre,
+   lagrens multi samlas och läggs till där; när alla lager har kommit växer den och smäller (mega: x20 eller mer, större och
+   med guldsken), och summan skjuts ut i MULTI (maniac-tape.js) */
 .mt-big { position: absolute; left: 50%; top: 15%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; opacity: 0; }
 .mt-big span { font: 400 calc(var(--u) * 5)/1 var(--display); letter-spacing: .08em; color: #fff6e0; -webkit-text-stroke: .1em var(--ink); paint-order: stroke fill; }
 .mt-big b { font: 400 calc(var(--u) * 19)/.85 var(--display); color: #ffd21f; -webkit-text-stroke: .045em var(--ink); paint-order: stroke fill; text-shadow: .04em .05em 0 var(--ink); }
@@ -1389,8 +1405,15 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 .cas-act.big .mt-big { animation: bigSlam .42s cubic-bezier(.2, 1.6, .4, 1) both; }
 .cas-act.big .mt-big.mega { animation: mtMega .6s cubic-bezier(.2, 1.8, .4, 1) both; }
 .cas-act.big-out .mt-big { animation: bigOut .22s ease-in forwards; }
+.cas-act.sum .mt-big { opacity: 1; scale: .72; rotate: -4deg; animation: mtSumIn .32s cubic-bezier(.2, 1.6, .4, 1) both; }
+.cas-act.sum.big .mt-big { scale: 1; animation: mtSumBig .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+.cas-act.sum.big .mt-big.mega { animation: mtSumMega .6s cubic-bezier(.2, 1.8, .4, 1) both; }
+.cas-act.sum.big-out .mt-big, .cas-act.sum.big-out .mt-big.mega { animation: bigOut .22s ease-in forwards; }
+@keyframes mtSumIn { from { opacity: 0; scale: 1.6; rotate: -10deg; } to { opacity: 1; scale: .72; rotate: -4deg; } }
+@keyframes mtSumBig { 0% { scale: .72; } 55% { scale: 1.2; } 100% { scale: 1; } }
+@keyframes mtSumMega { 0% { scale: .72; rotate: -4deg; } 55% { scale: 1.4; rotate: -10deg; } 100% { scale: 1; rotate: -4deg; } }
 @keyframes mtMega { 0% { opacity: 0; scale: 3.4; rotate: -16deg; } 60% { opacity: 1; scale: .92; rotate: -2deg; } 100% { opacity: 1; scale: 1; rotate: -4deg; } }
-@media (prefers-reduced-motion: reduce) { .mt-ly.hit em, .mt-ly.hot em, .cas-act.big .mt-big, .cas-act.big .mt-big.mega { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .mt-ly.hit em, .mt-ly.hot em, .cas-act.big .mt-big, .cas-act.big .mt-big.mega, .cas-act.sum .mt-big, .cas-act.sum.big .mt-big, .cas-act.sum.big .mt-big.mega { animation: none; } }
 /* "3 LAYERSPINS": så många lager kassetten gav (bara när antalet slumpas), som "2 LAYERSPINS" i grundspelets kassett; alla
    5 extra stort med guldsken. Brädet tonas ner och bandräknaren försvinner medan det syns. */
 .mt-lsbig { position: absolute; left: 50%; top: 14%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .4); opacity: 0; }
@@ -1403,6 +1426,53 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 .cas-act.mt-ls .mt-lsbig.all { animation: mtMega .6s cubic-bezier(.2, 1.8, .4, 1) both; }
 .cas-act.mt-ls-out .mt-lsbig, .cas-act.mt-ls-out .mt-lsbig.all { animation: bigOut .22s ease-in forwards; }
 @media (prefers-reduced-motion: reduce) { .cas-act.mt-ls .mt-lsbig, .cas-act.mt-ls .mt-lsbig.all { animation: none; opacity: 1; } }
+/* Maniac-kassetten (prototypen): mörkret runt bandspelaren och MULTI, skenet bakom bandspelaren som växer för varje lager,
+   högtalare som pumpar hårdare och räknaren som blinkar i "ett till?"-pausen */
+.mt-dim { position: fixed; inset: 0; z-index: 29; pointer-events: none; background: rgba(4, 2, 12, .72); opacity: 0; transition: opacity .35s ease;
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+.mt-dim.on { opacity: 1; }
+/* mörkret vid vinster (prototypen, winDim): inne i #game, under maskinen (z 3), lite ljusare än bandspelarens; det går
+   utanför #game (inset) så att det täcker hela fönstret också när spelet skakar. Sidopanelen lyfts över det. */
+.win-dim { position: fixed; inset: -300px; z-index: 2; pointer-events: none; background: rgba(4, 2, 12, .55); opacity: 0; transition: opacity .35s ease; }
+.win-dim.on { opacity: 1; }
+/* bonusaffischen (flow.js): under varje LAYER-bricka vad lagret ger i multi; raden får plats för värdena */
+.cv-layers.cv-tape { margin-bottom: 30px; row-gap: 34px; }
+/* telefonen: brickorna bryts på två rader (Maniac har fem), den undre raden får inte täcka värdena under den övre */
+.portrait .cv-layers.cv-tape:not(.bs-lay) { row-gap: 30px; }
+.cv-layers .ly .ly-x { position: absolute; left: 50%; top: 100%; translate: -50% 6px; padding: 3px 8px 1px; font: 400 20px/1 var(--display); color: var(--ink); -webkit-text-stroke: 0;
+  background: #fff6e0; border: 2.5px solid var(--ink); border-radius: 8px; box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
+.portrait .cv-layers .ly .ly-x { font-size: 15px; padding: 2px 6px 1px; }
+/* stora ögonblick (prototypen, time-ways.js nxBuildUp): mörkare medan uppbyggnaden pågår, luckan lyser och darrar i lagrets
+   färg med lagrets siffra ovanför, MULTI pulserar i bonusen. */
+.win-dim { transition: opacity .35s ease, background-color .4s ease; }
+.win-dim.deep { background-color: rgba(4, 2, 12, .8); }
+.nx-build { position: fixed; inset: 0; z-index: 30; pointer-events: none; transition: opacity .25s ease; }
+.nx-build.out { opacity: 0; }
+.nx-gap { position: fixed; box-sizing: border-box; border: 6px solid var(--c); border-radius: 16%;
+  box-shadow: 0 0 34px 12px var(--c), inset 0 0 26px 8px var(--c); animation: nxShiver .1s steps(2) infinite, nxGlow .45s ease-in-out infinite alternate; }
+@keyframes nxShiver { 50% { translate: 2px -1px; } }
+@keyframes nxGlow { from { opacity: .5; } to { opacity: 1; } }
+.nx-num { position: fixed; translate: -50% -50%; font: 400 104px/1 var(--display); color: var(--c); -webkit-text-stroke: 4px #fff; paint-order: stroke fill;
+  text-shadow: 0 0 26px var(--c), 0 0 60px var(--c); animation: nxNum .45s ease-in-out infinite alternate; }
+@keyframes nxNum { from { scale: .9; } to { scale: 1.28; } }
+.portrait .nx-num { font-size: 44px; -webkit-text-stroke-width: 2px; }
+.portrait .nx-gap { border-width: 3px; box-shadow: 0 0 14px 5px var(--c), inset 0 0 12px 4px var(--c); }
+@media (prefers-reduced-motion: reduce) { .nx-gap, .nx-num { animation: none; } }
+.win-dim-on .g-left > .meter { position: relative; z-index: 3; }
+.mt-glow { position: absolute; left: 50%; bottom: 4%; width: 96%; aspect-ratio: 1.7; translate: -50% 18%; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--gc, #ffd21f), transparent); opacity: var(--ga, 0); scale: var(--gs, .6); mix-blend-mode: screen;
+  transition: opacity .3s ease, scale .4s cubic-bezier(.2, 1.5, .4, 1); }
+.mt-act.rew .deck-spk { animation-name: mtSpkPump; }
+@keyframes mtSpkPump { to { transform: scale(var(--pump, 1.09)); } }
+.mt-act.mt-sus .cas-count { animation: casBlink .18s steps(2) infinite; }
+@media (prefers-reduced-motion: reduce) { .mt-glow { transition: none; } .mt-act.mt-sus .cas-count { animation: none; } }
+/* "LAYER-numret × 6" på en rad */
+.cv-facts .nw { white-space: nowrap; }
+.tl-tabs { display: flex; gap: 8px; margin: 4px 0 12px; }
+.tl-tabs button { font: 700 14px/1 var(--ui); letter-spacing: .04em; padding: 9px 16px; border: 2.5px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); cursor: pointer; }
+.tl-tabs button.on { background: var(--sun); box-shadow: 2px 2px 0 var(--ink); }
+.tl-group { display: contents; }
+.tl-group[hidden] { display: none; }
 .bw-hint { font: 700 12px/1 var(--ui); letter-spacing: .16em; text-transform: uppercase; color: var(--paper); opacity: .75; }
 
 .intro {
@@ -1461,6 +1531,37 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .paytable td img { width: 44px; height: 44px; vertical-align: middle; }
 .sym-rule { display: flex; gap: 12px; align-items: center; }
 .sym-rule img { width: 64px; height: 64px; flex: none; }
+/* exemplen: två per rad på datorn, ett per rad på telefonen */
+.wb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+.wb-card { border: 2.5px solid var(--ink); border-radius: 12px; padding: 10px; background: #fff; }
+.wb-title { display: block; margin-bottom: 8px; font: 400 18px/1 var(--display); letter-spacing: .04em; color: var(--pop); }
+.wb-card p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.4; }
+.wb-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; padding: 5px; border-radius: 9px; background: var(--ink); }
+.wb-cell { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
+.wb-cell img { display: block; width: 100%; height: 100%; opacity: .32; filter: saturate(.5); }
+/* rutorna som vinner: fullt ljus och ett vitt sken, som i spelet */
+.wb-cell.lit img { opacity: 1; filter: none; }
+.wb-cell.lit { box-shadow: 0 0 0 2px #fff, 0 0 10px 2px rgba(255, 255, 255, .75); }
+/* hörnet från förra snurret som fyller luckan: rivet nere till höger, i lagrets blå färg */
+.wb-corner { position: absolute; right: 0; bottom: 0; width: 82%; height: 82%; clip-path: polygon(100% 0, 100% 100%, 0 100%); background: #fff6e0; padding: 0 0 0 0; }
+.wb-corner::before { content: ''; position: absolute; inset: 3px 0 0 3px; clip-path: polygon(100% 0, 100% 100%, 0 100%); background: #2e105c; }
+/* förra snurrets symbol ligger i hörnet, mindre och nere till höger, som i spelet */
+.wb-corner img { position: absolute; right: 3%; bottom: 3%; width: 60%; height: 60%; opacity: 1 !important; filter: none !important; }
+.wb-cell.cn { box-shadow: 0 0 0 2px #2fb4ff, 0 0 12px 3px rgba(47, 180, 255, .8); }
+.wb-cell.cn > img { opacity: .4; }
+.wb-nums { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; padding: 3px 5px 0; text-align: center; font: 700 11px/1 var(--ui); opacity: .6; }
+/* antalet vägar: sex hjul med sex rader var */
+.wb-cols { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 0; }
+.wb-col { display: grid; gap: 3px; padding: 4px; border-radius: 6px; background: var(--ink); }
+.wb-col i { display: block; width: 9px; height: 9px; border-radius: 50%; background: var(--sun); }
+.wb-cols em { font: 700 14px/1 var(--ui); font-style: normal; opacity: .7; }
+/* vinsttabellen: namnet efter ikonen; på telefonen under ikonen, i mindre text, så att beloppen får plats */
+.paytable .pt-name { margin-left: 6px; }
+.portrait .paytable td { padding: 4px 4px; }
+.portrait .paytable td:first-child { white-space: normal; width: 74px; }
+.portrait .paytable td img { width: 34px; height: 34px; display: block; }
+.portrait .paytable .pt-name { display: block; margin: 2px 0 0; font-size: 10.5px; line-height: 1.15; font-weight: 700; word-break: break-word; }
+.portrait .paytable th { padding: 6px 4px; font-size: 10px; letter-spacing: .04em; }
 /* Spelet är ritat i en fast storlek: dator 1408 x 1018 px (ser ut som 125 % zoom i ett vanligt fönster), telefon 390 px
    bred. layout() (loop-and-layout.js) räknar ut hur mycket det ska skalas för att passa fönstret (--uiz, under 1 i små
    fönster), gör spelets ruta (.game) lika stor och centrerar den. Toppraden, vänster- och högerkolumnen, knappraden,
@@ -1518,13 +1619,16 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
   -webkit-mask: radial-gradient(circle, #000 38%, transparent 70%); mask: radial-gradient(circle, #000 38%, transparent 70%); transform: scale(0);
 }
 .sm-ring { position: absolute; left: 50%; top: 32%; width: 40vmin; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; border: 1.4vmin solid var(--ink); opacity: 0; transform: scale(.3); }
-.sm-mark { position: relative; width: clamp(160px, min(46vmin, 62vw), 320px); height: auto; overflow: visible; }
+/* symbolen (C, t och P tätt ihop) lite bredare än förut, med samma höjd */
+.sm-mark { position: relative; width: clamp(175px, min(50.2vmin, 67.6vw), 349px); height: auto; overflow: visible; }
 .sm-mark g { transform-box: fill-box; transform-origin: 50% 50%; }
 .sm-mark .sm-stem { transform-origin: 50% 100%; }
 .sm-ink { fill: none; stroke: var(--ink); stroke-width: 46; stroke-linecap: round; }
 .sm-fill { fill: none; stroke: var(--sun); stroke-width: 30; stroke-linecap: round; }
-.sm-stem rect { fill: var(--pink); stroke: var(--ink); stroke-width: 7; }
-.sm-bowl path { fill: var(--sky); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
+.sm-stem rect, .sm-stem path { fill: var(--pink); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
+/* t:ets tvärslå och stav i ett stycke: fogen täcker kanten där de möts */
+.sm-stem rect.sm-join, .sm-bowl rect.sm-join { stroke: none; }
+.sm-bowl path, .sm-bowl rect { fill: var(--sky); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
 .sm-bowl circle { fill: var(--paper); stroke: var(--ink); stroke-width: 6; }
 .sm-spark path, .sm-spark circle { fill: var(--sun); stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
 .sm-spark { transform: scale(0); }
@@ -2273,6 +2377,9 @@ body.entering .g-left { animation: neonOn .55s steps(1, end) 1.96s both; }
 body.entering #right { animation: neonOn .55s steps(1, end) 2.02s both; }
 body.entering .g-bar { animation: neonOn .55s steps(1, end) 1.93s both; }
 body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1) 1.9s both; }
+/* telefonen: spelets egen logga i toppraden syntes svagt bakom startskärmens rubrik (två loggor omlott när loggan landade);
+   den döljs medan startskärmen visas och smäller in som vanligt efter SPELA */
+.portrait body:has(#intro:not([hidden])) .g-top .logo { visibility: hidden; }
 @keyframes logoSlam { from { scale: 2.4; } 55% { scale: .9; } to { scale: 1; } }
 /* smash-droppet (events-2.js enterSmash): vit blixt och chockvåg från spelplanens mitt */
 .enter-flash { position: fixed; inset: 0; z-index: 60; pointer-events: none; background: #fffbf2; animation: smashFlash .45s ease-out forwards; }
@@ -3358,7 +3465,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // (12 frispinn, 5 lager, multi från x15, 3+ bomber ger 3 till). x0: vad omgången redan har vunnit (för taket).
   // Maniac kan börja med lagren fyllda (TIME.maniacPrefill: nya bräden från grundspelets hjul, slumpade när bonusen
   // startar; alla, eller så många som TIME.maniacLayersDraw slumpar fram) och med en startmulti som slumpas per fyllt lager
-  // (TIME.maniacStartDraw: { v: värden, w: vikter }; summan av lagrens värden). Avstängt (som förut) när de inte är satta.
+  // (TIME.maniacStartDraw: { v: värden, w: vikter }; summan av lagrens värden). Med seq: true slumpas inget: lager q ger v[q]
+  // (kassetten spolar ett lager i taget, LAYER 1 ger v[0], LAYER 2 v[1] …). Bonusspelet kan ha samma sak (TIME.fsPrefill,
+  // fsLayersDraw, fsStartDraw). Avstängt (som förut) när de inte är satta.
   function randBoard(rng) { var g = []; for (var r = 0; r < REELS; r++) g.push(windowAt(STRIPS.base, r, Math.floor(rng() * STRIPS.base[r].length))); return g; }
   function drawW(rng, d) { var t = 0, i; for (i = 0; i < d.w.length; i++) t += d.w[i]; var u = rng() * t; for (i = 0; i < d.w.length; i++) { u -= d.w[i]; if (u < 0) return d.v[i]; } return d.v[d.v.length - 1]; }
   function playBonus(rng, maniac, startGrid, scatters, x0) {
@@ -3367,9 +3476,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var left = awarded, mult = maniac ? TIME.maniacStart : TIME.fsStart, layers = [startGrid], spins = [], x = 0, draws = null;
     // hur många lager kassetten spolar tillbaka när Maniac startar: slumpat (TIME.maniacLayersDraw), annars alla; bara de
     // lagren fylls och ger startmulti, resten fylls på ett per frispinn som vanligt
-    var nL = maniac && TIME.maniacLayersDraw ? drawW(rng, TIME.maniacLayersDraw) : depth;
-    if (maniac && TIME.maniacPrefill) while (layers.length < nL) layers.push(randBoard(rng));
-    if (maniac && TIME.maniacStartDraw) { draws = []; mult = 0; for (var q = 0; q < nL; q++) { draws.push(drawW(rng, TIME.maniacStartDraw)); mult += draws[q]; } }
+    // Bonusspelet kan ha samma kassett (TIME.fsPrefill, fsLayersDraw, fsStartDraw)
+    var LD = maniac ? TIME.maniacLayersDraw : TIME.fsLayersDraw, SD = maniac ? TIME.maniacStartDraw : TIME.fsStartDraw;
+    var nL = LD ? drawW(rng, LD) : depth;
+    if (maniac ? TIME.maniacPrefill : TIME.fsPrefill) while (layers.length < nL) layers.push(randBoard(rng));
+    if (SD) { draws = []; mult = 0; for (var q = 0; q < nL; q++) { draws.push(SD.seq ? SD.v[Math.min(q, SD.v.length - 1)] : drawW(rng, SD)); mult += draws[q]; } }
     var startMult = mult, layers0 = layers.slice();
     while (left > 0 && x0 + x < TIME.maxX) {
       left--;
@@ -3465,11 +3576,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // betalar 1,6 gånger så mycket som förut, 5 i rad 1,2 och 6 i rad som förut. Kassetten betalar ungefär dubbelt (minst
   // 10x för 2 bakåt, 25x för 3 bakåt). Sista hjulet har två block färre av A, K, Q och J, så att Bonusspelet kommer
   // ungefär lika ofta som förut (färre laviner gav färre bomber). Hjul 1–5 är exakt som förut.
-  // Bonusspelet: 15 frispinn och multi från x8. Maniac: 10 frispinn; kassetten spolar 2, 3, 4 eller 5 lager (lika chans,
-  // slumpas när bonusen startar), de lagren fylls med nya bräden från grundspelets hjul och ger startmulti
-  // x3–x15 var (vikter 30/25/20/15/10, summan x6–x75), resten fylls på ett per frispinn. Multin växer som i Bonusspelet (LAYER 3 = +3).
-  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,07 % (100 M omgångar), köpt
-  // Bonusspel 96,07 % (2 M köp) och köpt Maniac 96,06 % (1 M köp). Inte certifierat.
+  // Kassetten spolar ett lager i taget (användaren 2026-10-21): LAYER 1, LAYER 2 … tills bandet stannar (hur många slumpas när
+  // bonusen startar, varje steg till är ovanligare), de lagren fylls med nya bräden från grundspelets hjul, och LAYER k ger
+  // k × steget i startmulti (seq: inget annat slumpas); resten av lagren fylls på ett per frispinn.
+  // Bonusspelet × 3: 10 frispinn (användaren 2026-10-22, förut 12), 1, 2 eller 3 lager (vikter 45/35/20) = x3, x9 eller x18. Maniac × 6 (dubbelt upp): 10
+  // frispinn, 2, 3, 4 eller 5 lager (vikter 35/30/25/10, alla 5 ungefär var tionde) = x18, x36, x60 eller x90. Multin växer som i Bonusspelet (LAYER 3 = +3).
+  // Kalibrerat och kontrollerat med tools/sim-cert.js (TIME_SET): hela spelet 96,06 % ±0,10, SD 9,92 (volatilitet 4/5; 100 M
+  // omgångar, 2026-10-22, Bonusspelet med 10 frispinn och kassetten som spolar ett lager i taget), köpt Bonusspel 96,03 % ±0,14
+  // (1 M köp, efter kalibrering på 2 M köp) och köpt Maniac 95,95 % ±0,11 (1 M köp, 2026-10-21). Inte certifierat.
   if (window.CT_NEXT) {
     Object.assign(M.TIME, {
       payT: {
@@ -3485,9 +3599,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         11: [0.0, 0.032, 0.06, 0.12]   // J
       },
       throwMinT: 10, throwMinC: 25, scale: 0.54108,
-      fsAward: { 3: 15, 4: 15, 5: 15, 6: 15 }, fsStart: 8, fsScale: 0.06086,
-      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [3, 6, 9, 12, 15], w: [30, 25, 20, 15, 10] }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [25, 25, 25, 25] },
-      maniacScale: 0.25127,
+      fsAward: { 3: 10, 4: 10, 5: 10, 6: 10 }, fsStart: 8, fsScale: 0.11854,
+      fsPrefill: true, fsLayersDraw: { v: [1, 2, 3], w: [45, 35, 20] }, fsStartDraw: { v: [3, 6, 9], w: [1, 1, 1], seq: true },
+      maniacSpins: 10, maniacPrefill: true, maniacStartDraw: { v: [6, 12, 18, 24, 30], w: [1, 1, 1, 1, 1], seq: true }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [35, 30, 25, 10] },
+      maniacScale: 0.20833,
       baseBlocks: {
         0:  [0, 2, 2, 2, 2, 2],
         1:  [1, 1, 1, 1, 1, 2],
@@ -4867,15 +4982,17 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       this.hiss(0.85, { filter: 'highpass', f: 3800, vol: 0.07, attack: 0.03 });
       for (var i = 0; i < 6; i++) this.hiss(0.04, { filter: 'bandpass', f: 2500 + Math.random() * 3000, q: 2, vol: 0.12, when: 0.05 + Math.random() * 0.7 });
     },
-    antic: function () {
+    // dur: sekunder som tonen stiger (prototypen, hela väntan), top: tonen den stiger till
+    antic: function (dur, top) {
       if (!this.ctx) return function () {};
       var h = this.fx('antic_loop', { loop: true });
       if (h) return function () { h.stop(0.15); };
       var c = this.ctx, t = c.currentTime;
       var osc = c.createOscillator(), lfo = c.createOscillator(), lg = c.createGain(), f = c.createBiquadFilter(), g = c.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(110, t); osc.frequency.exponentialRampToValueAtTime(330, t + 1.6);
-      f.type = 'lowpass'; f.frequency.setValueAtTime(500, t); f.frequency.exponentialRampToValueAtTime(2600, t + 1.6);
+      var rt = dur || 1.6;
+      osc.frequency.setValueAtTime(110, t); osc.frequency.exponentialRampToValueAtTime(top || 330, t + rt);
+      f.type = 'lowpass'; f.frequency.setValueAtTime(500, t); f.frequency.exponentialRampToValueAtTime(2600, t + rt);
       lfo.frequency.value = 13; lg.gain.value = 0.04;
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.25);
       lfo.connect(lg); lg.connect(g.gain);
@@ -5534,7 +5651,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     this.tape = {};
     for (var y = 0; y < ROWS; y++) this.tape[y] = this.cells[y] ? this.cells[y].sym : strip[y];
     this.mode = 'spin'; this.d = 0; this.v = 0; this.t = -delay; this.phase = 'wait';
-    this.target = null; this.stopping = false; this.landed = false; this.done = false; this.anticTime = false;
+    this.target = null; this.stopping = false; this.landed = false; this.done = false; this.anticTime = false; this.anticGold = false; this.anticDur = 0; this.anticT = 0; this.anticCrawl = 0; this.anticP = 0;
   };
   Reel.prototype.requestStop = function (col) { this.target = col; };
   Reel.prototype.beginStop = function () {
@@ -5547,7 +5664,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   Reel.prototype.update = function (dt) {
     this.antic += ((this.anticOn ? 1 : 0) - this.antic) * Math.min(1, dt * 8);
     if (this.mode !== 'spin') return;
-    var vmax = T().vmax * (this.anticOn ? 1.25 : 1);
+    // prototypen: ett hjul som väntar på en bomb saktar in under hela väntan (från 1,25 av farten ner till 0,35, på sista
+    // hjulet i guld till 0,25, anticCrawl), så att det sedan kryper in och stannar mjukt och man ser de sista symbolerna
+    // komma (användaren 2026-10-22). anticP: hur långt väntan har gått (0–1), stubinens gnista går fortare ju längre den har gått.
+    var af = 1.25, ap = 0;
+    if (NEXT && this.anticOn && this.anticDur) { ap = Math.max(0, Math.min(1, (this.t - this.anticT) / this.anticDur)); af = 1.25 - (this.anticCrawl || 0.9) * ap * ap * (3 - 2 * ap); }
+    if (NEXT) { this.anticP = ap; this.fuseP = ((this.fuseP || 0) + dt * (0.5 + 1.1 * ap)) % 1; }
+    var vmax = T().vmax * (this.anticOn ? af : 1);
     this.t += dt;
     switch (this.phase) {
       case 'wait':
@@ -5692,7 +5815,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     for (var r = 0; r < REELS; r++) {
       var reel = reels[r], x = r * cell;
       if (reel.antic > 0.01) {
-        g.fillStyle = (reel.anticTime ? 'rgba(180,92,255,' : 'rgba(255,210,31,') + (0.45 * reel.antic) + ')';
+        g.fillStyle = (reel.anticTime ? 'rgba(180,92,255,' : 'rgba(255,210,31,') + ((reel.anticGold ? 0.62 : 0.45) * reel.antic * (NEXT ? 0.75 + 0.5 * (reel.anticP || 0) : 1)) + ')';
         g.fillRect(x, 0, cell, boardPx);
       }
       g.save();
@@ -5719,13 +5842,16 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       var rl = reels[a];
       if (rl.antic > 0.01) {
         var pulse = 0.65 + 0.35 * Math.sin(time * 14);
+        // prototypen: hjärtslaget (spin-reels.js nxBeatT) lyser upp hjulet som väntar
+        if (NEXT) pulse = 0.5 + 0.5 * Math.exp(-(clock - nxBeatT) * 7) + 0.3 * (rl.anticP || 0);
         if (TIDS) {
           // en tänd stubin brinner runt hjulet, som stubinen på bonusbomben
           var fx = a * cell + cell * 0.07, fw = cell * 0.86, fy = cell * 0.07, fh = boardPx - cell * 0.14;
           g.save();
           g.globalAlpha = rl.antic;
-          g.fillStyle = 'rgba(255,79,174,' + (0.1 + 0.06 * pulse) + ')'; rr(g, fx, fy, fw, fh, cell * 0.16); g.fill();
-          drawFuse(g, fx, fy, fw, fh, (time * 0.5 + a * 0.17) % 1);
+          // guldväntan (sista hjulet kan ge guldbomben): guld och starkare
+          g.fillStyle = rl.anticGold ? 'rgba(255,190,40,' + (0.2 + 0.14 * pulse) + ')' : 'rgba(255,79,174,' + (0.1 + 0.06 * pulse) + ')'; rr(g, fx, fy, fw, fh, cell * 0.16); g.fill();
+          drawFuse(g, fx, fy, fw, fh, NEXT ? rl.fuseP || 0 : (time * 0.5 + a * 0.17) % 1);
           g.restore();
         } else {
           g.save();
@@ -5734,7 +5860,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
           g.strokeRect(a * cell + 3, 3, cell - 6, boardPx - 6);
           g.restore();
         }
-        if (Math.random() < 0.5) sparkle(a * cell + cell / 2, boardPx * Math.random());
+        if (Math.random() < (NEXT ? 0.5 + 0.5 * (rl.anticP || 0) : 0.5)) sparkle(a * cell + cell / 2, boardPx * Math.random());
+        if (NEXT && rl.anticGold && Math.random() < 0.6) sparkle(a * cell + cell / 2, boardPx * Math.random());
       }
     }
 
@@ -5743,6 +5870,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 
     if (TIDS) drawGhosts(g, highlight);
     if (TIDS && rewindFx) drawRewind(g);
+    if (TIDS && nxBuildFx) drawNxBuild(g);
     if (TIDS && tedFx && ghostView && ghostView.peel == null) {
       drawBoardGlow(g, Math.min(1, (clock - tedFx.t0) / 0.3) * (0.75 + 0.25 * Math.sin(clock * 4)));
       // smällen: vit blixt och fartstreck som drar över spelplanen från Teds håll
@@ -6159,6 +6287,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // Switch: en vinst som hoppar tillbaka visas alltid i steg, så att man ser den sy sig fram. En lång tidsväg (5–6 hjul)
     // går också i lugnare takt (i grundspelet; i bonusen går stegen ändå ett hjul i taget).
     if (!state.fs && ((w.hops || 0) >= 2 || w.len >= 5) && tier < 1) tier = 1;
+    // prototypen: en jämn takt för alla lagervinster på minst insatsen (samma tempo oavsett storlek, lager och lavinsteg),
+    // så att spelaren lär sig rytmen; bara de stora ögonblicken (nxBigMoment) går lugnast och får en uppbyggnad före lagret
+    var nxBig = NEXT && !tiny && nxBigMoment(tw, winX);
+    if (NEXT && !tiny) { tier = nxBig ? 2 : 1; acc = 1; }
     // [paus innan, efter spolningen, första hjulet från väggen, varje hjul efter]. Även små tidsvägar har en egen takt:
     // varje hjul i väggen får ett slag med stigande ton. I bonusen rappare (cirka 3,5–4 s per lavinsteg).
     var pace = state.fs ? [[0.1, 0.1, 0.2, 0.15], [0.2, 0.25, 0.26, 0.18], [0.4, 0.45, 0.4, 0.26]][tier]
@@ -6176,6 +6308,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       Sound.timeStep(0);
       await wait(showTime(pace[0]), true);
     }
+    // prototypen: uppbyggnaden före lagret i ett stort ögonblick (inte i turbo)
+    if (nxBig && !state.turbo && !state.hurry) await nxBuildUp(w, tw, part);
     // 2. brädet spolar bakåt till förra snurret (rewindShow), 3. förra snurrets symboler hoppar in, ett hjul i taget,
     // var och en med en smäll (under insatsen utan skakning och duns)
     await rewindShow(tw, tier, tiny, acc, part);
@@ -6218,6 +6352,86 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }
     return tier;
   }
+  // Prototypen: ett stort ögonblick? Bara i grundspelet (inte i bonusarna, användaren 2026-10-22): vinsten hämtar från
+  // LAYER 2–3 eller minst 3 hjul bakåt (cirka var 77:e snurr; bara vinster på minst insatsen, en uppbyggnad före en liten
+  // vinst blir ett antiklimax). Regeln gäller varje gång (aldrig en uppbyggnad som inte följs av lagret).
+  function nxBigMoment(tw, winX) {
+    if (state.fs) return false;
+    var deep = 1, back = 0;
+    tw.forEach(function (w) { (w.depth || []).forEach(function (d) { if (d > deep) deep = d; }); back = Math.max(back, w.gcols.filter(function (r) { return r.length; }).length); });
+    return winX >= 1 && (deep >= 2 || back >= 3);
+  }
+  // Uppbyggnaden (som bandspelaren när den kastar ut lager): allt stannar, spelplanen mörknar runt vinsten (bara vinstrutorna
+  // och luckan lyser) och bakgrunden mörknar mer. Bandspelaren kommer upp och spolar bakåt, och brickorna LAYER 1, LAYER 2 …
+  // kommer en i taget (casCount2 i cassette.js) fram till lagret vinsten hämtar från; den brickan hoppar in i luckan, som
+  // lyser i lagrets färg, och sedan rivs lagret in som vanligt. keep: vinstrutorna som redan lyser.
+  var nxBuildFx = null;
+  function drawNxBuild(g) {
+    var f = nxBuildFx, a = f.end ? Math.max(0, 1 - (clock - f.end) / 0.25) : Math.min(1, (clock - f.t0) / 0.25);
+    if (f.end && a <= 0) { nxBuildFx = null; return; }
+    g.save(); g.beginPath(); g.rect(0, 0, boardPx, boardPx);
+    for (var r = 0; r < REELS; r++) for (var y = 0; y < ROWS; y++) if (f.keep[r][y]) g.rect(r * cell, y * cell, cell, cell);
+    g.clip('evenodd'); g.fillStyle = 'rgba(4, 2, 12, ' + (0.62 * a).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
+    g.restore();
+  }
+  async function nxBuildUp(w, tw, keep) {
+    var deep = 1; tw.forEach(function (x) { (x.depth || []).forEach(function (d) { if (d > deep) deep = d; }); });
+    deep = Math.min(deep, DEPTH_COL.length - 1);
+    var col = DEPTH_COL[deep], br = canvas.getBoundingClientRect(), k = br.width / boardPx, c = w.timeAt, rows = w.gcols[c] || [], sz = cell * k;
+    nxBuildFx = { t0: clock, keep: st2keep(keep, c, rows), end: 0 };
+    // luckan lyser och darrar i lagrets färg
+    var glow = document.createElement('div'); glow.className = 'nx-build'; glow.style.setProperty('--c', col);
+    rows.forEach(function (y) {
+      var q = document.createElement('i'); q.className = 'nx-gap';
+      q.style.left = (br.left + c * sz) + 'px'; q.style.top = (br.top + y * sz) + 'px'; q.style.width = q.style.height = sz + 'px';
+      glow.appendChild(q);
+    });
+    document.body.appendChild(glow);
+    if (winDimEl) winDimEl.classList.add('deep');
+    // spolningen: bandspelaren kommer upp (kassetten är en av grundspelets funktioner) och räknar som kassetten (casCount2)
+    var host = document.createElement('div'); host.className = 'cas-act nx-cas';
+    host.style.left = br.left + 'px'; host.style.top = br.top + 'px'; host.style.width = br.width + 'px'; host.style.height = br.height + 'px';
+    host.style.setProperty('--u', (br.width / 100).toFixed(2) + 'px');
+    var lays = '';
+    for (var q = 1; q <= deep; q++) lays += '<i class="cas-ly" style="--c:' + CAS_COL[q] + '">LAYER<b>' + q + '</b></i>';
+    host.innerHTML = '<i class="cas-vhs"></i><div class="cas-deck">' + DECK_SVG + '</div><div class="cas-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>';
+    document.body.appendChild(host);
+    var deck = host.querySelector('.cas-deck'), led = host.querySelector('.deck-led');
+    host.classList.add('deck'); deckSound('up');
+    await wait(casT(0.32), true);
+    deck.classList.add('loaded');
+    var rewT = 0.35 + 0.5 * deep;
+    host.classList.add('rew'); document.body.classList.add('cas-rew'); if (led) led.textContent = '◀◀ 0';
+    deckSound('rew', casT(rewT));
+    var reels2 = Array.prototype.slice.call(host.querySelectorAll('.deck-tape .cas-reel'));
+    [[0, 1.5], [0.35, 3], [0.7, 5.5]].forEach(function (p) {
+      setTimeout(function () { reels2.forEach(function (e) { (e.getAnimations ? e.getAnimations() : []).forEach(function (an) { an.playbackRate = p[1]; }); }); }, casT(rewT) * p[0] * 1000);
+    });
+    await casCount2(host, deep);
+    document.body.classList.remove('cas-rew'); host.classList.remove('rew');
+    deckSound('stop'); deckSound('big', 0, deep);
+    // lagrets bricka hoppar in i luckan
+    var ly = host.querySelectorAll('.cas-ly')[deep - 1], lr = ly && ly.getBoundingClientRect();
+    if (ly && lr && lr.width && rows.length && ly.animate && !state.hurry) {
+      var tx = br.left + (c + 0.5) * sz, ty = br.top + (rows[0] + 0.5) * sz;
+      var dx = tx - (lr.left + lr.width / 2), dy = ty - (lr.top + lr.height / 2), sc = Math.max(0.4, sz * 0.8 / lr.width);
+      var an = ly.animate([{ transform: 'none' }, { transform: 'translate(' + dx * 0.5 + 'px, ' + (dy * 0.5 - 40) + 'px) scale(' + (1 + sc) / 2 * 1.15 + ') rotate(-8deg)', offset: 0.55 },
+        { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + sc + ')', opacity: 0.2 }], { duration: casT(0.5) * 1000, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
+      await animDone(an, casT(0.5) * 1000 + 200);
+      for (var e = 0; e < 16; e++) emberPart(tx + (Math.random() - 0.5) * sz, ty + (Math.random() - 0.5) * sz, e % 3 ? col : '#fff6e0');
+    }
+    host.classList.add('out'); setTimeout(function () { host.remove(); }, 350);
+    glow.classList.add('out'); setTimeout(function () { glow.remove(); }, 300);
+    if (nxBuildFx) nxBuildFx.end = clock;
+    if (winDimEl) winDimEl.classList.remove('deep');
+  }
+  // rutorna som lyser under uppbyggnaden: vinstrutorna före luckan och luckan (hjul c, raderna rows)
+  function st2keep(keep, c, rows) {
+    var k = (keep || []).map(function (col) { return col.slice(); });
+    for (var r = 0; r < REELS; r++) { k[r] = k[r] || []; for (var y = 0; y < ROWS; y++) k[r][y] = !!k[r][y]; }
+    rows.forEach(function (y) { k[c][y] = true; });
+    return k;
+  }
   // Bonusen: när vinsten är visad flyger varje hjul som kom från väggens lager in i multin som "+n" (n = snurr bakåt), ett
   // i taget, från alla vinster i steget. Multin börjar på den multi vinsten betalades med och räknas upp med exakt det som
   // läggs till (samma som matten: summan av djupen), så den hoppar aldrig.
@@ -6242,9 +6456,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     chip.className = 'fly-chip d' + d + (PROTO && d >= 4 ? ' pp-big' : ''); chip.textContent = '+' + d;
     chip.style.left = sx + 'px'; chip.style.top = sy + 'px';
     document.body.appendChild(chip);
-    var a = chip.animate([{ transform: 'translate(-50%, -50%) scale(.6)', opacity: 0 }, { transform: 'translate(calc(-50% - 14px), -50%) scale(1.15)', opacity: 1, offset: 0.25 },
-      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.45) + 'px), calc(-50% + ' + ((ey - sy) * 0.45 - 40) + 'px)) scale(1.05)', opacity: 1, offset: 0.6 },
-      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.7)', opacity: 1 }],
+    var a = chip.animate([{ transform: 'translate(-50%, -50%) scale(.6) rotate(-6deg)', opacity: 0 }, { transform: 'translate(calc(-50% - 14px), -50%) scale(1.15) rotate(-6deg)', opacity: 1, offset: 0.25 },
+      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.45) + 'px), calc(-50% + ' + ((ey - sy) * 0.45 - 40) + 'px)) scale(1.05) rotate(-6deg)', opacity: 1, offset: 0.6 },
+      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.7) rotate(-6deg)', opacity: 1 }],
       { duration: dur || 750, easing: 'cubic-bezier(.4, 0, .7, 1)', delay: delay == null ? 250 : delay, fill: 'backwards' });
     a.onfinish = function () {
       chip.remove();
@@ -6262,10 +6476,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     chip.style.left = sx + 'px'; chip.style.top = sy + 'px';
     document.body.appendChild(chip);
     var a = chip.animate([
-      { transform: 'translate(-50%, -50%) scale(.6)', opacity: 0 },
-      { transform: 'translate(calc(-50% + 14px), -50%) scale(1.15)', opacity: 1, offset: 0.25 },
-      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5 + 14) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - 70) + 'px)) scale(1.05)', opacity: 1, offset: 0.62 },
-      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.7)', opacity: 1 }
+      { transform: 'translate(-50%, -50%) scale(.6) rotate(-6deg)', opacity: 0 },
+      { transform: 'translate(calc(-50% + 14px), -50%) scale(1.15) rotate(-6deg)', opacity: 1, offset: 0.25 },
+      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5 + 14) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - 70) + 'px)) scale(1.05) rotate(-6deg)', opacity: 1, offset: 0.62 },
+      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.7) rotate(-6deg)', opacity: 1 }
     ], { duration: dur || 750, easing: 'cubic-bezier(.4, 0, .7, 1)', delay: delay == null ? 250 : delay, fill: 'backwards' });
     a.onfinish = function () { chip.remove(); if (state.fs) landHome(home, d, ex, ey); };
   }
@@ -6313,6 +6527,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Rivet hörn: varje ny symbol är en affisch, och i ett rivet nedre högerhörn syns förra snurrets symbol.
   // c styr hur mycket som är rivet: den del av rutan där x + y >= c (rutans enheter, 0–1 från övre vänstra hörnet).
   var TEAR_IDLE = 1.4;
+  // prototypen (NEXT): större hörn med en kant i lagrets färg (blått: förra snurret), så att man ser att det ligger något under
+  var TEAR_NX = 1.22;
   function tearHash(n) { var x = Math.sin(n) * 43758.5453; return x - Math.floor(x); }
   // Ritar hålets kontur och ger tillbaka punkterna på rivkanten.
   function tearPath(g, x0, y0, c, seed) {
@@ -6331,7 +6547,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   // Ett rivet hörn i rutan (r, y). size: hur stor förra snurrets symbol är i hålet. light: svagare lila skimmer.
   // spin (valfritt): { rot, scl } snurrar och krymper förra snurrets symbol i hålet (Virvel).
-  function drawTear(g, r, y, sym, c, size, light, spin) {
+  // edgeCol (valfritt): rivkanten i en färg i stället för papper (prototypen)
+  function drawTear(g, r, y, sym, c, size, light, spin, edgeCol) {
     if (c >= 2) return;
     var x0 = r * cell, y0 = y * cell;
     g.save();
@@ -6357,7 +6574,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       g.stroke();
     }
     g.strokeStyle = 'rgba(20, 10, 40, 0.45)'; g.lineWidth = cell * 0.05; edge(cell * 0.018, cell * 0.018);
-    g.strokeStyle = PAPER; g.lineWidth = cell * 0.035; edge(0, 0);
+    g.strokeStyle = edgeCol || PAPER; g.lineWidth = cell * (edgeCol ? 0.055 : 0.035); edge(0, 0);
     g.strokeStyle = INK; g.lineWidth = Math.max(1, cell * 0.011); edge(-cell * 0.014, -cell * 0.014);
     g.restore();
   }
@@ -6487,14 +6704,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
           // förvarning: hålet växer och pulserar, och är större och ljusare när det är låst
           g.globalAlpha = fade;
           g.shadowColor = GHOST; g.shadowBlur = cell * 0.3;
-          drawTear(g, r, y, sym, hint === 2 ? 1.12 : 1.22 + 0.06 * Math.sin(clock * 12), hint === 2 ? 0.6 : 0.56, hint === 2);
+          drawTear(g, r, y, sym, hint === 2 ? (NEXT ? 1.0 : 1.12) : (NEXT ? 1.08 : 1.22) + 0.06 * Math.sin(clock * 12), hint === 2 ? (NEXT ? 0.66 : 0.6) : (NEXT ? 0.62 : 0.56), hint === 2);
           if (hint === 1 && Math.random() < 0.15) sparkle(r * cell + cell * 0.8, y * cell + cell * 0.8);
         } else {
           g.globalAlpha = fade * (highlight ? 0.35 : 1);
           if (bounce) g.translate(0, bounce);
           if (ghostView.paintRow === y) { g.shadowColor = '#ff7e1c'; g.shadowBlur = cell * (0.25 + 0.15 * Math.sin(clock * 6)); }
           // Ted har rivit väggen: hörnet öppnas till hälften (rivlinjen genom mitten), i en våg från höger
-          var tear = TEAR_IDLE, tsz = 0.5;
+          var tear = NEXT ? TEAR_NX : TEAR_IDLE, tsz = NEXT ? 0.58 : 0.5;
           if (tedFx) {
             var tdk = Math.max(0, Math.min(1, (clock - tedFx.t0 - (REELS - 1 - r) * 0.06 - y * 0.025) / 0.28)), tdb = tdk <= 0 ? 0 : 1 + 2.2 * Math.pow(tdk - 1, 3) + 1.2 * Math.pow(tdk - 1, 2);
             tear = TEAR_IDLE - (TEAR_IDLE - 0.98) * tdb; tsz = 0.5 + 0.16 * tdb;
@@ -6505,7 +6722,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
           }
           var ci = 2 - (2 - tear) * tc, ex = exitAt != null ? Math.max(0, Math.min(1, (clock - exitAt - r * EXIT_STAG) / exDur)) : 0;
           var csym = rl.cells[y] ? rl.cells[y].sym : 0;
-          if (!ex) drawTear(g, r, y, sym, ci, tsz, !!tedFx);
+          if (!ex) drawTear(g, r, y, sym, ci, tsz, !!tedFx, null, NEXT && !tedFx ? DEPTH_COL[1] : null);
           else if (exitKind === 'vik') {
             if (ex < 1) {
               // fliken (samma bild som symbolen) täcker hålet vid cirka 40 %; hålet och rivkanten tonas bort mellan 20 och 45 %, medan fliken lägger sig
@@ -6710,26 +6927,33 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     g.fillStyle = '#fff'; g.beginPath(); g.arc(sp[0], sp[1], cell * 0.075, 0, Math.PI * 2); g.fill();
     if (Math.random() < 0.6) parts.push({ kind: 'mist', x0: sp[0], y0: sp[1], tx: sp[0] + (Math.random() - 0.5) * cell * 0.6, ty: sp[1] - cell * (0.2 + Math.random() * 0.4), x: sp[0], y: sp[1], delay: 0, life: 0, max: 0.35, c: Math.random() < 0.5 ? '#ffd21f' : '#ff9447', s: cell * 0.035 });
   }
+  // prototypen: tiden för senaste hjärtslaget under väntan (spin-reels.js), bomberna dunkar i takt
+  var nxBeatT = -9;
   function drawBonusTension(g, time) {
-    var k = 0;
-    reels.forEach(function (rl) { k = Math.max(k, rl.antic); });
+    var k = 0, prog = 0, gold = false;
+    reels.forEach(function (rl) { k = Math.max(k, rl.antic); if (rl.antic > 0.01) { prog = Math.max(prog, rl.anticP || 0); gold = gold || rl.anticGold; } });
     if (k < 0.01) return;
     g.save();
+    // prototypen: det blir mörkare runt om ju längre väntan går
+    var dim = NEXT ? 0.45 + 0.25 * prog : 0.45;
     reels.forEach(function (rl, r) {
       if (rl.antic > 0.01) return;
-      g.fillStyle = 'rgba(21,17,31,' + (0.45 * k) + ')'; g.fillRect(r * cell, 0, cell, boardPx);
+      g.fillStyle = 'rgba(21,17,31,' + (dim * k) + ')'; g.fillRect(r * cell, 0, cell, boardPx);
     });
-    var pulse = 0.5 + 0.5 * Math.sin(time * 9);
+    var beat = NEXT ? Math.exp(-(clock - nxBeatT) * 7) : 0;
+    var pulse = NEXT ? beat : 0.5 + 0.5 * Math.sin(time * 9);
     reels.forEach(function (rl, r) {
       if (!rl.landed || !rl.target) return;
       for (var y = 0; y < ROWS; y++) {
         if (rl.target[y] !== SCAT) continue;
         var cx = r * cell + cell / 2, cy = y * cell + cell / 2;
         g.globalAlpha = k;
-        g.shadowColor = '#b45cff'; g.shadowBlur = cell * (0.3 + 0.3 * pulse);
+        // prototypen: bomben lyser genom mörkret och dunkar i takt med hjärtslaget (lite större), guldsken i guldväntan
+        if (NEXT) { var bs = cell * (1 + 0.09 * beat); g.drawImage(sprites[SCAT], r * cell + (cell - bs) / 2, y * cell + (cell - bs) / 2, bs, bs); }
+        g.shadowColor = NEXT && gold ? '#ffd21f' : '#b45cff'; g.shadowBlur = cell * (0.3 + 0.3 * pulse + (NEXT ? 0.25 * prog : 0));
         g.lineWidth = cell * 0.07; g.strokeStyle = INK; rr(g, r * cell + cell * 0.04, y * cell + cell * 0.04, cell * 0.92, cell * 0.92, cell * 0.18); g.stroke();
         g.shadowBlur = 0;
-        g.lineWidth = cell * 0.045; g.strokeStyle = pulse > 0.5 ? '#e6ccff' : '#b45cff'; g.stroke();
+        g.lineWidth = cell * 0.045; g.strokeStyle = NEXT && gold ? (pulse > 0.5 ? '#fff2b0' : '#ffbe28') : pulse > 0.5 ? '#e6ccff' : '#b45cff'; g.stroke();
         if (Math.random() < 0.2) sparkle(cx, cy);
       }
     });
@@ -7815,7 +8039,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     el.betUp.disabled = state.busy || state.betIdx === BETS.length - 1;
     el.betVal.disabled = state.busy;
     el.buyPrice.textContent = money(bet() * BUY_X);
-    el.buy.disabled = state.busy || state.auto > 0 || state.balance < bet() * BUY_X;
+    // Tidsvägar: köpknappen går alltid att trycka på (utom mitt i en omgång och under autospel), också när insatsen är för
+    // hög för saldot: insatsen för köpet väljs i köpmenyn, och där går KÖP bara att trycka på när saldot räcker (användaren
+    // 2026-10-21)
+    el.buy.disabled = state.busy || state.auto > 0 || (!TIDS && state.balance < bet() * BUY_X);
     // bomben bredvid knappraden på telefonen (events-1.js)
     if (el.buyBar) {
       if (!el.buyBarIcon.getAttribute('src')) el.buyBarIcon.src = icon(SCAT);
@@ -7872,6 +8099,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     nl: { name: 'Nederländerna', autoplay: false, autoMax: 0 }
   };
   var MARKET_IDS = ['se', 'dk', 'mt', 'uk', 'on', 'de', 'nl'];
+  if (window.CT_NEXT) MARKET_IDS.forEach(function (id) { if (MARKETS[id].autoplay) MARKETS[id].autoMax = 1000; });
   // marknaden väljs med ?market=xx i adressen (för test), annars Sverige. Valet sparas inte (TEST-knappen för marknaden är
   // borta), och ett gammalt sparat val tas bort så att ingen fastnar på en annan marknad.
   var marketId = (function () {
@@ -7885,13 +8113,15 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Autospelet: antal snurr och stoppvillkor. Stoppen sparas (ctm.autoStop) och räknas i gånger insatsen när
   // autospelet startar: bonus = stoppa när en bonus startar, loss = stoppa när saldot har minskat med så mycket,
   // win = stoppa när en omgång vinner minst så mycket. 0 = ingen gräns.
-  var AUTO_COUNTS = [10, 25, 50], AUTO_LOSS = [0, 10, 25, 50, 100], AUTO_WIN = [0, 20, 50, 100, 500];
+  // prototypen: också 100, 200, 500 och 1000 snurr (användaren 2026-10-21; marknadernas tak tas senare)
+  var AUTO_COUNTS = window.CT_NEXT ? [10, 25, 50, 100, 200, 500, 1000] : [10, 25, 50], AUTO_LOSS = [0, 10, 25, 50, 100], AUTO_WIN = [0, 20, 50, 100, 500];
   var autoStop = store.get('autoStop', { bonus: true, loss: 0, win: 0 });
   function renderAutoMenu() {
     var m = el.autoMenu; if (!m) return;
     el.auto.hidden = !MARKET.autoplay;
     if (!MARKET.autoplay) { m.hidden = true; return; }
     var opt = function (list, cur) { return list.map(function (x) { return '<option value="' + x + '"' + (x === cur ? ' selected' : '') + '>' + (x ? money(x * bet()) : 'Ingen gräns') + '</option>'; }).join(''); };
+    m.classList.toggle('many', AUTO_COUNTS.length > 4);
     m.innerHTML = '<span class="ttl">Antal snurr</span>' +
       AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }).map(function (n) { return '<button type="button" data-n="' + n + '">' + n + '</button>'; }).join('') +
       '<span class="ttl">Stoppa autospelet</span>' +
@@ -8186,10 +8416,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     document.body.appendChild(chip);
     var lift = Math.min(130, 50 + Math.abs(ex - sx) * 0.2);
     var a = chip.animate([
-      { transform: 'translate(-50%, -50%) scale(.3) rotate(-25deg)', opacity: 0 },
-      { transform: 'translate(-50%, -50%) scale(1.4) rotate(8deg)', opacity: 1, offset: 0.18 },
-      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - lift) + 'px)) scale(1.15) rotate(-10deg)', opacity: 1, offset: 0.6 },
-      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.75) rotate(0deg)', opacity: 1 }
+      { transform: 'translate(-50%, -50%) scale(.3) rotate(-31deg)', opacity: 0 },
+      { transform: 'translate(-50%, -50%) scale(1.4) rotate(2deg)', opacity: 1, offset: 0.18 },
+      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - lift) + 'px)) scale(1.15) rotate(-16deg)', opacity: 1, offset: 0.6 },
+      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.75) rotate(-6deg)', opacity: 1 }
     ], { duration: state.turbo ? 460 : 720, easing: 'cubic-bezier(.45, 0, .6, 1)', fill: 'forwards' });
     a.finished.then(function () { chip.remove(); landHome(home, d, ex, ey); }, function () { chip.remove(); });
   }
@@ -10014,10 +10244,17 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       }
     }
     if (n) { Sound.scatter(spinCtx.scatters); Sound.fizz(); }
+    // prototypen: hjulet som väntade på en bomb: träff ger en smäll, miss ett fräsande när stubinen slocknar
+    if (NEXT && TIDS && reel.anticDur) {
+      if (n) { Sound.tone(90, 0.32, { to: 38, vol: 0.22 }); nxBeatT = clock; }
+      else Sound.hiss(0.45, { f: 2600, to: 260, vol: 0.06 });
+    }
     if (TIDS) { spinCtx.cols = spinCtx.cols || []; spinCtx.cols[reel.i] = col; }
   }
 
-  function spinReels(res, fs) {
+  // board: startbrädet till en köpt (eller i TEST startad) bonus, då är utfallet redan känt och prototypens längre väntan
+  // och guldväntan hoppas över
+  function spinReels(res, fs, board) {
     reels.forEach(function (rl) { rl.goldRow = null; rl.cells.forEach(function (c) { c.goldBomb = false; c.goldT0 = null; }); });
     if (TIDS && res.gold) reels[res.gold.r].goldRow = res.gold.y;
     var t = T();
@@ -10032,7 +10269,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var tedWound = function () { return panelRigs.T && (panelRigs.T.action === 'windup' || panelRigs.T.action === 'run'); };
     if (!tedWound()) setRig(panelRigs.T, 'steer');
     for (var r = 0; r < REELS; r++) reels[r].start(state.turbo ? 0 : r * t.stagger, strips[r]);
-    var stopAntic = null, nAnt = 0;
+    var stopAntic = null, nAnt = 0, goldSum = 0;
     return wait(fs ? t.fsMinSpin : t.minSpin, true).then(function () {
       var r = 0;
       function next() {
@@ -10044,16 +10281,39 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         // Tidsvägar: kan en tidsväg nå just det här hjulet (hjul 4 eller senare) snurrar det längre
         var tAnt = false;
         // Tidsvägar: förväntan bara när två bomber har landat (den slutar när den tredje är inne)
-        var bombAnt = TIDS ? before === 2 : before >= 2;
+        // prototypen: från den tredje bomben kan varje ny bomb bli guld (Maniac), så hjulen efter väntar i guld
+        var goldAnt = NEXT && TIDS && !fs && !board && !!M.TIME.goldP && before >= 3;
+        var bombAnt = TIDS ? before === 2 || goldAnt : before >= 2;
         if (!state.slam && (bombAnt || tAnt) && idx > 0) {
           p = waitFor(function () { return reels[idx - 1].landed || state.slam; }).then(function () {
             if (state.slam) return;
-            reel.anticOn = true; reel.anticTime = tAnt;
+            reel.anticOn = true; reel.anticTime = tAnt; reel.anticGold = goldAnt;
             if (!tedWound()) setRig(panelRigs.T, 'excited');
-            if (stopAntic) stopAntic();
-            stopAntic = Sound.antic();
             if (TIDS) Music.heat = Math.max(Music.heat, 2);
-            var ad = TIDS ? (nAnt++ === 0 ? T().antic : T().anticNext) : T().antic;
+            var ad = TIDS ? (nAnt++ === 0 ? T().antic : T().anticNext) : T().antic, nx = NEXT && TIDS && bombAnt && !board;
+            // prototypen: längre väntan, och hjulet saktar in under den och kryper in mjukt (reels.js). Väntan på den tredje
+            // bomben: längst på första hjulet. Guldväntan växer hjul för hjul och är längst på sista hjulet (lite till när
+            // nästa bomb ger guld säkert), högst 3,6 s väntan sammanlagt (plus krypet). Hjärtslag tills hjulet har landat, snabbare ju längre väntan
+            // har gått; bomberna på brädet dunkar i takt (fuse-and-trail.js).
+            if (nx) {
+              var left = REELS - 1 - idx, tb = state.turbo ? 0.65 : 1;
+              if (goldAnt) {
+                ad = T().anticNext * (left === 0 ? 1.8 : left === 1 ? 1.2 : 0.9) * (before >= M.TIME.maniacMin - 1 ? 1.2 : 1) * tb;
+                ad = Math.max(0.5, Math.min(ad, 3.6 * tb - goldSum)); goldSum += ad;
+              } else ad *= nAnt === 1 ? (state.turbo ? 1.3 : 1.7) : (state.turbo ? 1.15 : 1.4);
+              reel.anticDur = ad; reel.anticT = reel.t; reel.anticCrawl = goldAnt ? (left === 0 ? 1.0 : 0.9) : 0.9;
+              Music.heat = Math.max(Music.heat, goldAnt ? (left === 0 ? 5 : 4) : 3);
+              (function beat() {
+                if (!reel.anticOn || state.slam) return;
+                var k = Math.min(1, (reel.t - reel.anticT) / reel.anticDur);
+                Sound.tone(62, 0.11, { to: 48, vol: goldAnt ? 0.16 : 0.1 }); Sound.tone(58, 0.1, { to: 45, vol: goldAnt ? 0.12 : 0.07, when: 0.16 });
+                nxBeatT = clock;
+                setTimeout(beat, goldAnt ? 520 - 270 * k : 620 - 230 * k);
+              })();
+            }
+            if (stopAntic) stopAntic();
+            // prototypen: tonen stiger under hela väntan, högre i guld
+            stopAntic = nx ? Sound.antic(ad + 0.8, goldAnt ? 520 : 390) : Sound.antic();
             return wait(tAnt ? ad * 0.75 : ad, true);
           });
         }
@@ -11191,10 +11451,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     return '<div class="cas-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>' +
       '<div class="cas-big"><b style="--c:' + CAS_COL[d] + '">' + d + '</b>' + lsLockupHtml({ light: true }) + '</div>';
   }
+  // prototypen: grundspelets kassett 10 % lugnare (användaren 2026-10-21, som bonusarnas kassett); casT för väntan, casSp för
+  // animationerna. Turbo och spelet som förut.
+  function casSp() { return NEXT && !state.turbo ? 1.1 : 1; }
+  function casT(s) { return showTime(s * casSp()); }
   async function casCount2(host, d) {
     var cnt = host.querySelector('.cas-count'), led = host.querySelector('.deck-led'), door = host.querySelector('.deck-door');
     host.classList.add('count');
-    await wait(showTime(0.35), true);
+    await wait(casT(0.35), true);
     for (var k = 1; k <= d; k++) {
       cnt.textContent = '◀◀ −' + k; led.textContent = '◀◀ ' + k;
       cnt.classList.remove('tick'); void cnt.offsetWidth; cnt.classList.add('tick');
@@ -11206,10 +11470,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
           { transform: 'translate(' + ((dr.left + dr.width / 2) - (lr.left + lr.width / 2)) + 'px, ' + ((dr.top + dr.height / 2) - (lr.top + lr.height / 2)) + 'px) scale(.3) rotate(' + (-tilt * 6) + 'deg)', opacity: 0 },
           { transform: 'translateY(-22%) scale(1.18) rotate(' + (-tilt) + 'deg)', opacity: 1, offset: 0.7 },
           { transform: 'rotate(' + tilt + 'deg)', opacity: 1 }
-        ], { duration: state.hurry ? 160 : 380, easing: 'cubic-bezier(.2, 1.3, .4, 1)', fill: 'both' });
+        ], { duration: state.hurry ? 160 : 380 * casSp(), easing: 'cubic-bezier(.2, 1.3, .4, 1)', fill: 'both' });
       }
       deckSound('tick', 0, k);
-      await wait(showTime(0.5), true);
+      await wait(casT(0.5), true);
     }
   }
   async function cassetteSpin(thr) {
@@ -11224,10 +11488,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var deck = host.querySelector('.cas-deck'), cas = host.querySelector('.cas'), led = host.querySelector('.deck-led'), ins = null;
     // 1. bandspelaren glider upp
     host.classList.add('deck'); deckSound('up');
-    await wait(showTime(0.32), true);
+    await wait(casT(0.32), true);
     // 2. kassetten poppar fram, tar sats (trycks ihop), hoppar högt med en volt och dyker ner i luckan
     host.classList.add('load'); deckSound('pop');
-    await wait(showTime(0.4), true);
+    await wait(casT(0.4), true);
     var door = host.querySelector('.deck-door');
     if (cas.animate && door) {
       var a = cas.getBoundingClientRect(), b = door.getBoundingClientRect();
@@ -11235,34 +11499,34 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       var insEnd = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + k + ')';
       ins = cas.animate([{ transform: 'none' }, { transform: 'translateY(6%) scale(1.08, .86)', offset: 0.14 },
         { transform: 'translate(' + (dx * 0.35) + 'px, ' + (dy * 0.35 - a.height * 0.9) + 'px) scale(' + ((1 + k) / 2) + ') rotate(-200deg)', offset: 0.55 },
-        { transform: insEnd + ' rotate(-360deg)' }], { duration: state.hurry ? 140 : 560, easing: 'cubic-bezier(.45, 0, .6, 1)', fill: 'forwards' });
+        { transform: insEnd + ' rotate(-360deg)' }], { duration: state.hurry ? 140 : 560 * casSp(), easing: 'cubic-bezier(.45, 0, .6, 1)', fill: 'forwards' });
       await animDone(ins, 700);
     }
     cas.classList.add('hide'); deck.classList.add('loaded');
     deckSound('insert'); shakeBoard(2);
     // bandspelaren sväljer kassetten (trycks ihop och studsar upp)
-    if (deck.animate) deck.animate([{ transform: 'none' }, { transform: 'translateY(4%) scale(1.05, .9)', offset: 0.4 }, { transform: 'none' }], { duration: 260, easing: 'ease-out' });
-    await wait(showTime(0.14), true);
+    if (deck.animate) deck.animate([{ transform: 'none' }, { transform: 'translateY(4%) scale(1.05, .9)', offset: 0.4 }, { transform: 'none' }], { duration: 260 * casSp(), easing: 'ease-out' });
+    await wait(casT(0.14), true);
     // 3. ◀◀ trycks ner: bandet spolar bakåt allt fortare, brädet spolas som ett VHS-band och högtalarna pumpar, och
     // bandräknaren räknar ett lager i taget (casCount2)
     var rewT = 0.35 + 0.5 * d;
     host.classList.add('rew'); document.body.classList.add('cas-rew'); led.textContent = '◀◀ 0';
-    deckSound('rew', showTime(rewT));
+    deckSound('rew', casT(rewT));
     var reels = Array.prototype.slice.call(host.querySelectorAll('.deck-tape .cas-reel'));
     [[0, 1.5], [0.35, 3], [0.7, 5.5]].forEach(function (p) {
-      setTimeout(function () { reels.forEach(function (el) { (el.getAnimations ? el.getAnimations() : []).forEach(function (an) { an.playbackRate = p[1]; }); }); }, showTime(rewT) * p[0] * 1000);
+      setTimeout(function () { reels.forEach(function (el) { (el.getAnimations ? el.getAnimations() : []).forEach(function (an) { an.playbackRate = p[1]; }); }); }, casT(rewT) * p[0] * 1000);
     });
     await casCount2(host, d);
     // 4. bandet stannar
     document.body.classList.remove('cas-rew'); host.classList.remove('rew');
     deckSound('stop');
-    await wait(showTime(0.12), true);
+    await wait(casT(0.12), true);
     // 5. "2 LAYERSPINS" (eller 3) smäller fram ovanför brickorna och står kvar en stund. Kassetten ligger kvar i
     // bandspelaren: brickorna LAYER 1, 2 (och 3) flyger hem till sina lager i LAYER SPINS, och bandspelaren glider ner.
     host.classList.add('big'); deckSound('big', 0, d); shakeBoard(3);
     var bg = host.querySelector('.cas-big > b'), gr = bg && bg.getBoundingClientRect();
     if (gr && gr.width) for (var e = 0; e < 18; e++) emberPart(gr.left + gr.width * Math.random(), gr.top + gr.height * Math.random(), e % 3 ? CAS_COL[d] : '#fff6e0');
-    await wait(showTime(1.0), true);
+    await wait(casT(1.0), true);
     host.classList.add('big-out', 'out');
     if (!state.hurry) {
       if (!Sound.fx('layer_throw')) Sound.hiss(0.45, { f: 800, to: 2400, q: 0.8, vol: 0.1 });
@@ -11273,10 +11537,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         ly.animate([{ transform: 'none', opacity: 1 },
           { transform: 'translate(' + (dx3 * 0.5) + 'px, ' + (dy3 * 0.5 - 50) + 'px) scale(' + ((1 + s3) / 2) + ') rotate(-10deg)', opacity: 1, offset: 0.55 },
           { transform: 'translate(' + dx3 + 'px, ' + dy3 + 'px) scale(' + s3 + ')', opacity: 0.25 }],
-          { duration: 540, delay: i * 70, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
+          { duration: 540 * casSp(), delay: i * 70 * casSp(), easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
       });
     }
-    await wait(showTime(0.75), true);
+    await wait(casT(0.75), true);
     // lagren tänds ett i taget, med en smäll i lagrets färg
     for (var k2 = 2; k2 <= d; k2++) {
       baseLag(k2, k2);
@@ -11288,10 +11552,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         (function (el) { setTimeout(function () { el.classList.remove('home-hit'); }, 750); })(ly);
       }
       if (!Sound.fx('layer_home', { rate: Sound.semi(k2 * 3) })) Sound.tone(660 * Sound.semi(k2 * 3), 0.12, { type: 'triangle', vol: 0.07 });
-      if (k2 < d) await wait(showTime(0.22), true);
+      if (k2 < d) await wait(casT(0.22), true);
     }
     setTimeout(function () { host.remove(); }, 350);
-    await wait(showTime(0.3), true);
+    await wait(casT(0.3), true);
   }
   // Bara när matten har startmulti per lager (M.TIME.maniacStartDraw, prototypen). Bandspelaren glider upp, Maniac-
   // kassetten (guld med röd rand) hoppar in och spolar bakåt. För varje steg bakåt skjuts en bricka LAYER n upp ur luckan,
@@ -11303,41 +11567,76 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   var MT_COL = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
   var MT_CAS = CAS_SVG.replace('fill="#ff8629"/>', 'fill="#e8202e"/>')
     .replace('font-size="20" letter-spacing="2" fill="#15111f">C&amp;T MIXTAPE', 'font-size="17" letter-spacing="1.5" fill="#15111f">MANIAC MIXTAPE');
-  // texterna (affischen, reglerna och guiden): hur många lager kassetten kan ge och vad startmultin kan bli
-  function mtLayersMin() { var L = M.TIME.maniacLayersDraw; return L ? Math.min.apply(null, L.v) : M.TIME.maniacDepth; }
-  function mtLayersMax() { var L = M.TIME.maniacLayersDraw; return L ? Math.max.apply(null, L.v) : M.TIME.maniacDepth; }
+  // texterna (affischerna, reglerna och guiden) och trösklarna; mn: false = Bonusspelet, annars Maniac
+  function mtMn(mn) { return mn !== false; }
+  function mtLD(mn) { return mtMn(mn) ? M.TIME.maniacLayersDraw : M.TIME.fsLayersDraw; }
+  function mtSD(mn) { return mtMn(mn) ? M.TIME.maniacStartDraw : M.TIME.fsStartDraw; }
+  function mtDepth(mn) { return mtMn(mn) ? M.TIME.maniacDepth : M.TIME.fsDepth; }
+  function mtLayersMin(mn) { var L = mtLD(mn); return L ? Math.min.apply(null, L.v) : mtDepth(mn); }
+  function mtLayersMax(mn) { var L = mtLD(mn); return L ? Math.max.apply(null, L.v) : mtDepth(mn); }
   // "2–5" (eller "5" när det alltid är alla), och "2, 3, 4 eller 5"
-  function mtLayersText() { return mtLayersMin() === mtLayersMax() ? String(mtLayersMax()) : mtLayersMin() + '–' + mtLayersMax(); }
-  function mtLayersList() { var v = M.TIME.maniacLayersDraw ? M.TIME.maniacLayersDraw.v : [M.TIME.maniacDepth]; return v.length < 2 ? String(v[0]) : v.slice(0, -1).join(', ') + ' eller ' + v[v.length - 1]; }
-  // ett lagers startmulti, t.ex. "1–x5" (efter "x"), och hela startmultins spann, t.ex. "2–x25" (efter "MULTI x")
-  function mtStartText() { var v = M.TIME.maniacStartDraw.v; return Math.min.apply(null, v) + '–x' + Math.max.apply(null, v); }
-  function mtRange() { var v = M.TIME.maniacStartDraw.v; return mtLayersMin() * Math.min.apply(null, v) + '–x' + mtLayersMax() * Math.max.apply(null, v); }
-  // trösklarna följer startmultins värden: de två högsta värdena per lager (x12 och x15) smäller hårdare, det högsta
-  // hårdast, och STARTMULTI smäller extra stort från två tredjedelar av högsta möjliga (x50 av x75)
-  function mtHotMin() { var v = M.TIME.maniacStartDraw.v; return v[Math.max(0, v.length - 2)]; }
-  function mtTopV() { return Math.max.apply(null, M.TIME.maniacStartDraw.v); }
-  function mtMegaMin() { return Math.round(mtLayersMax() * mtTopV() * 2 / 3); }
+  function mtLayersText(mn) { return mtLayersMin(mn) === mtLayersMax(mn) ? String(mtLayersMax(mn)) : mtLayersMin(mn) + '–' + mtLayersMax(mn); }
+  function mtLayersList(mn) { var L = mtLD(mn), v = L ? L.v : [mtDepth(mn)]; return v.length < 2 ? String(v[0]) : v.slice(0, -1).join(', ') + ' eller ' + v[v.length - 1]; }
+  // ett lagers startmulti, t.ex. "3–x15" (efter "x"), och hela startmultins spann, t.ex. "6–x75" (efter "MULTI x")
+  function mtStartText(mn) { var v = mtSD(mn).v; return Math.min.apply(null, v) + '–x' + Math.max.apply(null, v); }
+  // varje kast landar på ett LAYER och ger lagrets nummer × steget (Maniac 3, Bonusspelet 2): mtStep, lagret för ett värde,
+  // högsta lagret och listan "1, 2 eller 3"
+  function mtStep(mn) { return Math.min.apply(null, mtSD(mn).v); }
+  function mtLayerOf(v, mn) { return Math.max(1, Math.round(v / mtStep(mn))); }
+  function mtTopLayer(mn) { return mtLayerOf(Math.max.apply(null, mtSD(mn).v), mn); }
+  function mtLayerList(mn) { var t = mtTopLayer(mn), a = []; for (var q = 1; q < t; q++) a.push(q); return a.join(', ') + ' eller ' + t; }
+  // seq: kassetten spolar ett lager i taget och LAYER k ger v[k - 1] (inget slumpas utom hur många lager); summan för n lager
+  function mtSeq(mn) { return !!mtSD(mn).seq; }
+  function mtSumTo(n, mn) { var v = mtSD(mn).v, t = 0; for (var q = 0; q < n; q++) t += v[Math.min(q, v.length - 1)]; return t; }
+  function mtMaxStart(mn) { return mtSeq(mn) ? mtSumTo(mtLayersMax(mn), mn) : mtLayersMax(mn) * Math.max.apply(null, mtSD(mn).v); }
+  function mtRange(mn) { return (mtSeq(mn) ? mtSumTo(mtLayersMin(mn), mn) : mtLayersMin(mn) * Math.min.apply(null, mtSD(mn).v)) + '–x' + mtMaxStart(mn); }
+  // regeltexten om kassetten (reglerna): name 'Bonusspelet' eller 'Maniac'
+  function mtRuleText(mn, name) {
+    var and = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' och ' + a[a.length - 1]; };
+    var head = 'Kassetten: när ' + name + ' startar spolar kassetten tillbaka ', fill = 'De lagren fylls med nya bräden från grundspelets hjul, och ';
+    var tail = ' Lagren som inte fylls från start fylls på ett per frispinn.';
+    if (mtSeq(mn)) {
+      var vals = [], sums = [];
+      for (var q = 1; q <= mtTopLayer(mn); q++) vals.push('LAYER ' + q + ' = x' + mtSD(mn).v[q - 1]);
+      mtLD(mn).v.forEach(function (n) { sums.push(n + ' lager x' + mtSumTo(n, mn)); });
+      return head + 'ett lager i taget, ' + mtLayersList(mn) + ' lager (slumpas). ' + fill + 'varje lager ger sitt nummer × ' + mtStep(mn) + ' i startmulti (' + and(vals) + '). Multin börjar på summan: ' + and(sums) + '.' + tail;
+    }
+    return head + mtLayersList(mn) + ' lager (slumpas). ' + fill + 'för varje sådant lager kastar kassetten ett LAYER: ' + mtLayerList(mn) + ' (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × ' + mtStep(mn) +
+      ' i startmulti (LAYER 1 = x' + mtStep(mn) + ', LAYER ' + mtTopLayer(mn) + ' = x' + mtTopLayer(mn) * mtStep(mn) + '). Multin börjar på summan: x' + mtRange(mn) + '.' + tail;
+  }
+  // trösklarna följer startmultins värden: de två högsta värdena per lager smäller hårdare, det högsta hårdast, och
+  // STARTMULTI smäller extra stort från två tredjedelar av högsta möjliga (Maniac x50 av x75, Bonusspelet x20 av x30)
+  function mtHotMin(mn) { var v = mtSD(mn).v; return v[Math.max(0, v.length - 2)]; }
+  function mtTopV(mn) { return Math.max.apply(null, mtSD(mn).v); }
+  function mtMegaMin(mn) { return Math.round(mtMaxStart(mn) * 2 / 3); }
   // ett "x3" flyger från brickan in i MULTI; done() när det har landat (eller efter en stund, om sidan inte ritas)
-  function mtFly(from, v, k, dur, done) {
+  // to: målet (STARTMULTI-skylten ovanför bandspelaren), annars MULTI
+  function mtFly(from, v, k, hot, dur, done, to) {
     var fired = false, fin = function () { if (!fired) { fired = true; done(); } };
-    var target = el.fsMult, a = from.getBoundingClientRect(), b = target && target.getBoundingClientRect();
+    var target = to || el.fsMult, a = from.getBoundingClientRect(), b = target && target.getBoundingClientRect();
     if (!b || !b.width || !a.width || !document.body.animate) { fin(); return; }
     var chip = document.createElement('span');
-    chip.className = 'fly-chip mt-chip d' + k + (v >= mtHotMin() ? ' hot' : ''); chip.textContent = 'x' + v;
+    chip.className = 'fly-chip mt-chip d' + k + (hot ? ' hot' : ''); chip.textContent = 'x' + v;
     chip.style.left = (a.left + a.width / 2) + 'px'; chip.style.top = (a.top + a.height / 2) + 'px';
     document.body.appendChild(chip);
     var dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
-    var an = chip.animate([{ transform: 'translate(-50%, -50%) scale(1)' },
-      { transform: 'translate(calc(-50% + ' + (dx * 0.45) + 'px), calc(-50% + ' + (dy * 0.45 - 60) + 'px)) scale(1.12)', offset: 0.55 },
-      { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(.7)' }], { duration: dur, easing: 'cubic-bezier(.4, 0, .7, 1)', fill: 'both' });
+    var an = chip.animate([{ transform: 'translate(-50%, -50%) scale(1) rotate(-6deg)' },
+      { transform: 'translate(calc(-50% + ' + (dx * 0.45) + 'px), calc(-50% + ' + (dy * 0.45 - 60) + 'px)) scale(1.12) rotate(-6deg)', offset: 0.55 },
+      { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(.7) rotate(-6deg)' }], { duration: dur, easing: 'cubic-bezier(.4, 0, .7, 1)', fill: 'both' });
     an.onfinish = function () { chip.remove(); fin(); };
     setTimeout(function () { chip.remove(); fin(); }, dur + 400);
   }
-  // multin räknas upp med lagrets värde, MULTI pumpar och lagret tänds i panelen med en smäll i sin färg
-  function mtLand(plan, k, v) {
+  // lagrets multi läggs till i STARTMULTI-skylten ovanför bandspelaren (sumEl), som pumpar, och lagret tänds i panelen med en
+  // smäll i sin färg; MULTI får hela summan först när kassetten är klar (maniacTape)
+  function mtLand(plan, k, v, sumEl) {
     var fs = state.fs; if (!fs) return;
-    fs.mult += v; fs.layers = plan.layers0.slice(0, k); renderMeter();
-    if (el.fsMult) { fitNum(el.fsMult); el.fsMult.classList.remove('pump'); void el.fsMult.offsetWidth; el.fsMult.classList.add('pump'); }
+    fs.layers = plan.layers0.slice(0, k); renderMeter();
+    if (sumEl) {
+      sumEl.textContent = 'x' + ((parseInt(sumEl.textContent.slice(1), 10) || 0) + v);
+      if (sumEl.animate) sumEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.4) rotate(-5deg)', offset: 0.4 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.3, 1.8, .5, 1)' });
+      var sr = sumEl.getBoundingClientRect();
+      for (var s2 = 0; s2 < 8; s2++) emberPart(sr.left + sr.width * Math.random(), sr.top + sr.height * Math.random(), s2 % 3 ? MT_COL[mtLayerOf(v, mtMn(fs.maniac))] : '#fff6e0');
+    }
     if (!Sound.fx('multi_up', { rate: Sound.semi(k * 2) })) Sound.tone(520 * Sound.semi(k * 2), 0.12, { type: 'triangle', vol: 0.09 });
     var ly = el.meterFs && el.meterFs.querySelector('.fs-layers .l' + k);
     if (ly) {
@@ -11347,23 +11646,84 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       setTimeout(function () { ly.classList.remove('home-hit'); }, 750);
     }
   }
-  async function maniacTape(plan) {
+  // Mörkret runt bandspelaren: hela skärmen tonas ner utom brädet (där bandspelaren står) och MULTI-rutan, med mjuka
+  // kanter (två hål i en mask). Tänds när bandspelaren kommer fram och tonas bort när kassetten är klar.
+  function mtDim(br) {
+    var d = document.createElement('div'); d.className = 'mt-dim';
+    var holes = ['radial-gradient(ellipse ' + Math.round(br.width * 0.62) + 'px ' + Math.round(br.height * 0.62) + 'px at ' + Math.round(br.left + br.width / 2) + 'px ' + Math.round(br.top + br.height / 2) + 'px, transparent 72%, #000 100%)'];
+    var box = el.fsMult && (el.fsMult.closest('.fs-mult') || el.fsMult.parentNode), mr = box && box.getBoundingClientRect();
+    if (mr && mr.width) holes.push('radial-gradient(ellipse ' + Math.round(mr.width * 0.85) + 'px ' + Math.round(mr.height * 1.0) + 'px at ' + Math.round(mr.left + mr.width / 2) + 'px ' + Math.round(mr.top + mr.height / 2) + 'px, transparent 62%, #000 100%)');
+    d.style.webkitMaskImage = d.style.maskImage = holes.join(', ');
+    document.body.appendChild(d);
+    void d.offsetWidth; d.classList.add('on');
+    return d;
+  }
+  // Mörkret vid vinster (prototypen): bakgrunden tonas ner som när bandspelaren kommer fram. Det ligger inne i #game under
+  // maskinen (spelplanen med ramen, vinstfältet och knapparna), och sidopanelen lyfts över det medan det är tänt (win-dim-on:
+  // LAYERSPINS i grundspelet; frispinn, multi, total vinst och lagren i bonusen), så att allt som hör till vinsten syns.
+  var winDimEl = null;
+  function winDim() {
+    var d = document.createElement('div'); d.className = 'win-dim';
+    (document.getElementById('game') || document.body).appendChild(d);
+    document.documentElement.classList.add('win-dim-on');
+    void d.offsetWidth; d.classList.add('on');
+    return d;
+  }
+  function winDimOff(d) {
+    d.classList.remove('on');
+    setTimeout(function () { d.remove(); if (!winDimEl) document.documentElement.classList.remove('win-dim-on'); }, 400);
+  }
+  // en blixt i lagrets färg över mörkret när ett lager smäller in
+  function mtFlash(dim, col) {
+    if (!dim || !dim.animate) return;
+    var h = col.replace('#', ''), r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    dim.animate([{ backgroundColor: 'rgba(' + r + ', ' + g + ', ' + b + ', .38)' }, { backgroundColor: 'rgba(4, 2, 12, .72)' }], { duration: 420, easing: 'ease-out' });
+  }
+  // "Ett till?": efter varje lager varvar spolarna upp, bandspelaren darrar, räknaren blinkar och ett ljud stiger, lite
+  // längre och högre för varje lager. Kommer efter varje lager (även det sista), så den säger inget om vad som kommer.
+  // near: före sista möjliga lagret (längre, hjärtslag och mer skak); ghost: nästa lagers bricka, som skugga medan bandet tvekar
+  async function mtSuspense(host, i, tt, reels, near, ghost) {
+    var deck = host.querySelector('.cas-deck'), dur = tt((0.5 + 0.06 * i) * (near ? 1.7 : 1));
+    host.classList.add('mt-sus');
+    if (ghost) { ghost.classList.remove('void'); ghost.classList.add('ghost'); if (near) ghost.classList.add('near'); }
+    reels.forEach(function (e) { (e.getAnimations ? e.getAnimations() : []).forEach(function (an) { an.playbackRate = 6 + i * 1.6; }); });
+    if (Sound.ctx) {
+      var t = Sound.ctx.currentTime + 0.01, f0 = 220 * Math.pow(1.12, i);
+      Sound.tone(f0, dur, { type: 'sawtooth', to: f0 * 2, vol: 0.03, attack: dur * 0.8, at: t });
+      Sound.hiss(dur, { f: 800, to: 3600, q: 1, vol: 0.05, attack: dur * 0.9, at: t });
+      // hjärtslag (dunk-dunk) före sista möjliga lagret
+      if (near) for (var hb = 0; hb + 0.2 < dur; hb += 0.5) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb + 0.17 }); }
+    }
+    var sh = near ? 1.3 : 0.7;
+    if (deck.animate) deck.animate([{ transform: 'none' }, { transform: 'translateX(-' + sh + '%) rotate(-' + sh + 'deg)' }, { transform: 'translateX(' + sh + '%) rotate(' + sh + 'deg)' }, { transform: 'none' }],
+      { duration: 110, iterations: Math.max(2, Math.round(dur / 0.11)) });
+    await wait(dur, true);
+    host.classList.remove('mt-sus');
+  }
+  // mn: false = Bonusspelet (vanliga C&T MIXTAPE), annars Maniac (MANIAC MIXTAPE)
+  async function maniacTape(plan, mn) {
     var draws = plan.startDraws || [], n = draws.length, fs = state.fs;
     if (!fs || !n) return;
-    // sp: tempo (1,2 = 20 % långsammare än första versionen, så att man hinner se vad som händer; turbo snabbare)
-    var sp = state.turbo ? 0.55 : 1.2, tt = function (s) { return showTime(s * sp); };
+    // sp: tempo (1,32 = 20 % långsammare än första versionen och sedan 10 % till, användaren 2026-10-21, så att man hinner
+    // se vad som händer; turbo snabbare)
+    var sp = state.turbo ? 0.55 : 1.32, tt = function (s) { return showTime(s * sp); };
     var br = canvas.getBoundingClientRect(), host = document.createElement('div');
     host.className = 'cas-act mt-act';
     host.style.left = br.left + 'px'; host.style.top = br.top + 'px'; host.style.width = br.width + 'px'; host.style.height = br.height + 'px';
     var lays = '';
-    for (var k = 1; k <= n; k++) lays += '<i class="mt-ly" style="--c:' + MT_COL[k] + '"><span>LAYER</span><b>' + k + '</b><em>x' + draws[k - 1] + '</em></i>';
-    host.innerHTML = '<i class="cas-vhs"></i><div class="cas-deck">' + DECK_SVG + '</div><div class="cas">' + MT_CAS + '</div>' +
+    // varje kast: brickan visar lagret det landade på (nummer och färg) och lagrets multi
+    // seq: raden har plats för alla möjliga lager (maxL), och de som inte kom syns inte (void), så att raden står still
+    var maxL = mtLayersMax(mn), seq = mtSeq(mn), slots = seq ? Math.max(n, maxL) : n;
+    for (var k = 1; k <= slots; k++) { var v0 = k <= n ? draws[k - 1] : mtSD(mn).v[Math.min(k, mtSD(mn).v.length) - 1], lk0 = mtLayerOf(v0, mn); lays += '<i class="mt-ly' + (k > n ? ' void' : '') + '" style="--c:' + MT_COL[lk0] + '"><span>LAYER</span><b>' + lk0 + '</b><em>x' + v0 + '</em></i>'; }
+    host.innerHTML = '<i class="cas-vhs"></i><i class="mt-glow"></i><div class="cas-deck">' + DECK_SVG + '</div><div class="cas">' + (mtMn(mn) ? MT_CAS : CAS_SVG) + '</div>' +
       '<div class="mt-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>' +
       // "3 LAYERSPINS" (bara när antalet lager slumpas)
-      (M.TIME.maniacLayersDraw ? '<div class="mt-lsbig' + (n >= M.TIME.maniacDepth ? ' all' : '') + '"><b style="--c:' + MT_COL[n] + '">' + n + '</b>' + lsLockupHtml({ light: true }) + '</div>' : '') +
-      '<div class="mt-big' + (plan.startMult >= mtMegaMin() ? ' mega' : '') + '"><span>STARTMULTI</span><b>x' + plan.startMult + '</b></div>';
+      (mtLD(mn) ? '<div class="mt-lsbig' + (n >= mtDepth(mn) ? ' all' : '') + '"><b style="--c:' + MT_COL[n] + '">' + n + '</b>' + lsLockupHtml({ light: true }) + '</div>' : '') +
+      '<div class="mt-big"><span>STARTMULTI</span><b>x0</b></div>';
     // --u: en hundradel av brädets bredd (samma som kassetten i grundspelet)
     host.style.setProperty('--u', (br.width / 100).toFixed(2) + 'px');
+    // mörkret runt bandspelaren och MULTI (prototypen, 2026-10-21) ligger under bandspelaren
+    var dim = mtDim(br);
     document.body.appendChild(host);
     var deck = host.querySelector('.cas-deck'), cas = host.querySelector('.cas'), led = host.querySelector('.deck-led'), cnt = host.querySelector('.cas-count');
     // 1. bandspelaren glider upp och kassetten poppar fram, tar sats och hoppar med en volt ner i luckan
@@ -11386,7 +11746,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     await wait(tt(0.1), true);
     // 2. ◀◀: bandet spolar bakåt, och för varje steg kommer ett lager med sin startmulti
     var rewT = 0.3 + 0.32 * n;
-    host.classList.add('rew', 'count'); document.body.classList.add('cas-rew'); led.textContent = '◀◀ 0';
+    // STARTMULTI-skylten kommer fram ovanför bandspelaren på x0; lagrens multi samlas där
+    host.classList.add('rew', 'count', 'sum'); document.body.classList.add('cas-rew'); led.textContent = '◀◀ 0';
+    var sumB = host.querySelector('.mt-big > b');
     deckSound('rew', tt(rewT));
     var reels = Array.prototype.slice.call(host.querySelectorAll('.deck-tape .cas-reel'));
     [[0, 1.5], [0.35, 3], [0.7, 5.5]].forEach(function (p) {
@@ -11395,61 +11757,90 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     await wait(tt(0.15), true);
     var stickers = host.querySelectorAll('.mt-ly');
     for (var i = 1; i <= n; i++) {
-      var v = draws[i - 1], ly = stickers[i - 1], dr = door && door.getBoundingClientRect();
+      var v = draws[i - 1], lk = mtLayerOf(v, mn), ly = stickers[i - 1], dr = door && door.getBoundingClientRect();
       cnt.textContent = '◀◀ −' + i; led.textContent = '◀◀ ' + i;
       cnt.classList.remove('tick'); void cnt.offsetWidth; cnt.classList.add('tick');
-      ly.classList.add('on');
+      ly.classList.remove('void', 'ghost', 'near'); ly.classList.add('on');
       if (ly.animate && dr && dr.width) {
         var lr = ly.getBoundingClientRect(), tilt = i % 2 ? -3 : 3;
         ly.animate([
           { transform: 'translate(' + ((dr.left + dr.width / 2) - (lr.left + lr.width / 2)) + 'px, ' + ((dr.top + dr.height / 2) - (lr.top + lr.height / 2)) + 'px) scale(.3) rotate(' + (-tilt * 6) + 'deg)', opacity: 0 },
           { transform: 'translateY(-22%) scale(1.18) rotate(' + (-tilt) + 'deg)', opacity: 1, offset: 0.7 },
           { transform: 'rotate(' + tilt + 'deg)', opacity: 1 }
-        ], { duration: state.hurry ? 150 : 300 * sp, easing: 'cubic-bezier(.2, 1.3, .4, 1)', fill: 'both' });
+        ], { duration: state.hurry ? 150 : 420 * sp, easing: 'cubic-bezier(.2, 1.3, .4, 1)', fill: 'both' });
       }
       deckSound('tick', 0, i);
-      await wait(tt(0.16), true);
-      // lagrets multi smäller fram under brickan (de två högsta värdena hårdare, med gnistor) och flyger in i MULTI; nästa
-      // lager kommer först när multin har landat och räknats upp, så att man hinner se varje steg
-      var em = ly.querySelector('em'), hot = v >= mtHotMin(), top = v >= mtTopV();
+      // brickan står kvar en stund innan multin kommer (lugnt tempo, användaren 2026-10-21: man ska hinna förstå)
+      await wait(tt(0.35), true);
+      // lagrets multi smäller fram under brickan (de två högsta värdena hårdare, med gnistor) och flyger upp i STARTMULTI-
+      // skylten; nästa lager kommer först när multin har landat och lagts till, så att man hinner se varje steg
+      var em = ly.querySelector('em'), hot = v >= mtHotMin(mn), top = v >= mtTopV(mn);
       ly.classList.add('hit'); if (hot) ly.classList.add('hot');
+      // för varje lager: blixt i lagrets färg, skenet bakom bandspelaren växer och högtalarna pumpar hårdare
+      mtFlash(dim, MT_COL[lk]);
+      host.style.setProperty('--gc', MT_COL[lk]); host.style.setProperty('--ga', (0.3 + 0.14 * i).toFixed(2)); host.style.setProperty('--gs', (0.7 + 0.13 * i).toFixed(2));
+      host.style.setProperty('--pump', (1.09 + 0.035 * i).toFixed(3));
       if (hot) {
         deckSound('big', 0, i); shakeBoard(top ? 2.2 : 1.5);
         var er = em.getBoundingClientRect();
-        for (var e2 = 0; e2 < (top ? 16 : 10); e2++) emberPart(er.left + er.width * Math.random(), er.top + er.height * Math.random(), e2 % 3 ? MT_COL[i] : '#ffd21f');
+        for (var e2 = 0; e2 < (top ? 16 : 10); e2++) emberPart(er.left + er.width * Math.random(), er.top + er.height * Math.random(), e2 % 3 ? MT_COL[lk] : '#ffd21f');
       } else deckSound('pop');
       await new Promise(function (res) {
-        var k3 = i, v3 = v, from = em;
-        setTimeout(function () { mtFly(from, v3, k3, state.hurry ? 200 : 300 * sp, function () { mtLand(plan, k3, v3); res(); }); }, state.hurry ? 0 : (hot ? 180 : 80) * sp);
+        var k3 = i, l3 = lk, v3 = v, h3 = hot, from = em;
+        setTimeout(function () { mtFly(from, v3, l3, h3, state.hurry ? 200 : 420 * sp, function () { mtLand(plan, k3, v3, sumB); res(); }, sumB); }, state.hurry ? 0 : (hot ? 380 : 280) * sp);
       });
-      await wait(tt(0.08), true);
+      // multin har landat: summan hinner synas innan nästa steg
+      await wait(tt(0.15), true);
+      // "ett till?" innan nästa lager (eller STOPP), bara när det kan komma ett till; i seq syns nästa lager som skugga, och
+      // kommer det inte tonar skuggan bort
+      if (i < maxL) {
+        var nx = seq && !state.hurry ? stickers[i] : null;
+        await mtSuspense(host, i, tt, reels, i === maxL - 1, nx);
+        if (i === n && nx) { nx.classList.remove('ghost', 'near'); nx.classList.add('ghost-out'); }
+      }
     }
-    // 3. bandet stannar och "3 LAYERSPINS" smäller fram: så många lager gav kassetten (alla 5 extra stort, med guldsken)
+    // 3. bandet stannar, STARTMULTI-skylten växer och smäller (x20 eller mer extra stort), och sedan skjuts hela summan ut i
+    // MULTI (till vänster på datorn, högst upp på telefonen), där den landar med en smäll
     document.body.classList.remove('cas-rew'); host.classList.remove('rew');
     deckSound('stop');
-    state.fs.mult = plan.startMult; state.fs.layers = plan.layers0; renderMeter();
+    state.fs.layers = plan.layers0; renderMeter();
     await wait(tt(0.1), true);
-    if (M.TIME.maniacLayersDraw) {
-      var all = n >= M.TIME.maniacDepth;
+    var mega = plan.startMult >= mtMegaMin(mn), mb = host.querySelector('.mt-big');
+    sumB.textContent = 'x' + plan.startMult; if (mega) mb.classList.add('mega');
+    host.classList.add('big'); deckSound('big', 0, mega ? 7 : 5); shakeBoard(mega ? 3 : 2);
+    if (mega) setTimeout(function () { deckSound('big', 0, 9); }, 160);
+    var gr = sumB.getBoundingClientRect();
+    if (gr && gr.width) for (var e3 = 0; e3 < (mega ? 34 : 18); e3++) emberPart(gr.left + gr.width * Math.random(), gr.top + gr.height * Math.random(), e3 % 3 ? '#ffd21f' : '#fff6e0');
+    await wait(tt(mega ? 1.1 : 0.85), true);
+    await new Promise(function (res) {
+      mtFly(sumB, plan.startMult, mtLayerOf(draws[n - 1], mn), true, state.hurry ? 200 : 520 * sp, function () {
+        state.fs.mult = plan.startMult; renderMeter();
+        if (el.fsMult) {
+          fitNum(el.fsMult); el.fsMult.classList.remove('pump'); void el.fsMult.offsetWidth; el.fsMult.classList.add('pump');
+          var fr = el.fsMult.getBoundingClientRect();
+          for (var e5 = 0; e5 < (mega ? 24 : 14); e5++) emberPart(fr.left + fr.width * Math.random(), fr.top + fr.height * Math.random(), e5 % 3 ? '#ffd21f' : '#fff6e0');
+        }
+        deckSound('big', 0, mega ? 8 : 6);
+        res();
+      });
+      host.classList.add('big-out');
+    });
+    await wait(tt(0.3), true);
+    // 4. "3 LAYERSPINS" smäller fram: så många lager gav kassetten (alla 5 extra stort, med guldsken)
+    if (mtLD(mn)) {
+      var all = n >= mtDepth(mn);
       host.classList.add('mt-ls'); deckSound('big', 0, n); shakeBoard(all ? 3 : 2);
       if (all) setTimeout(function () { deckSound('big', 0, n + 3); }, 160);
       var lb = host.querySelector('.mt-lsbig > b'), lbr = lb && lb.getBoundingClientRect();
       if (lbr && lbr.width) for (var e4 = 0; e4 < (all ? 30 : 16); e4++) emberPart(lbr.left + lbr.width * Math.random(), lbr.top + lbr.height * Math.random(), e4 % 3 ? MT_COL[n] : '#fff6e0');
-      await wait(tt(all ? 1.05 : 0.85), true);
+      await wait(tt(all ? 1.35 : 1.1), true);
       host.classList.add('mt-ls-out');
       await wait(tt(0.18), true);
     }
-    // 4. hela startmultin smäller fram (x20 eller mer extra stort)
-    var mega = plan.startMult >= mtMegaMin();
-    host.classList.add('big'); deckSound('big', 0, mega ? 7 : 5); shakeBoard(mega ? 3 : 2);
-    if (mega) setTimeout(function () { deckSound('big', 0, 9); }, 160);
-    var bg = host.querySelector('.mt-big > b'), gr = bg && bg.getBoundingClientRect();
-    if (gr && gr.width) for (var e3 = 0; e3 < (mega ? 34 : 18); e3++) emberPart(gr.left + gr.width * Math.random(), gr.top + gr.height * Math.random(), e3 % 3 ? '#ffd21f' : '#fff6e0');
-    if (el.fsMult) { el.fsMult.classList.remove('pump'); void el.fsMult.offsetWidth; el.fsMult.classList.add('pump'); }
-    await wait(tt(mega ? 1.15 : 0.85), true);
     // 5. allt glider undan
-    host.classList.add('big-out', 'out');
-    setTimeout(function () { host.remove(); }, 350);
+    host.classList.add('out');
+    dim.classList.remove('on');
+    setTimeout(function () { host.remove(); dim.remove(); }, 450);
     await wait(tt(0.3), true);
   }
 
@@ -11536,7 +11927,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       }
       // Tidsvägar: hur stort steget är styr visningen (0 under insatsen: kort och tyst, 1: 1–5x, 2: 5x och mer), och
       // varje lavinsteg går cirka 15 % fortare än det förra (acc), så att en kedja bygger fart.
-      var stepX = amount / bet(), cls = !TIDS ? 1 : stepX < 1 ? 0 : stepX < 5 ? 1 : 2, acc = TIDS ? Math.max(0.6, Math.pow(0.85, winIdx)) : 1;
+      // prototypen: vinster under insatsen visas som de andra (samma takt, ljud och mörker); regelkraven tas senare
+      // (användaren 2026-10-21)
+      var stepX = amount / bet(), cls = !TIDS ? 1 : stepX < 1 ? (NEXT ? 1 : 0) : stepX < 5 ? 1 : 2, acc = TIDS ? Math.max(0.6, Math.pow(0.85, winIdx)) : 1;
+      // prototypen: vinster på minst insatsen visas cirka 15 % lugnare (lavinen, smällen, bubblan och lagren), och
+      // bakgrunden runt brädet mörknar medan vinsterna i snurret visas (snurren och vinster under insatsen som förut; i
+      // bonusen, där frispinnen inte kostar något, gäller det också lagervinster under insatsen)
+      var nxLay = fs && st.wins.some(function (w) { return w.timeAt >= 0 && !w.both; });
+      if (NEXT && TIDS && (cls > 0 || nxLay) && !state.turbo) { acc *= 1.15; if (!winDimEl) winDimEl = winDim(); }
       // varje vinst i lavinen lägger på ett lager i musiken, men bara när rundan är större än insatsen (vinster som inte
       // är större än insatsen firas inte)
       var overStake = state.roundWin + amount > bet();
@@ -11618,6 +12016,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       winIdx++;
       if (st.maxed) break;
     }
+    if (winDimEl) { var wdEl = winDimEl; winDimEl = null; winDimOff(wdEl); }
     if (busCast && !fs) await castOut();
     clearMarks();
     if (!fs) setBaseMeter(-1);
@@ -11644,7 +12043,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       depth: TIDS ? (maniac ? M.TIME.maniacDepth : M.TIME.fsDepth) : 0 };
     // Maniac med startmulti per lager (prototypen, M.TIME.maniacStartDraw): multin börjar på 0 och inga lager är tända,
     // kassetten fyller lagren och räknar upp multin (maniacTape) före första frispinnet
-    var tape = TIDS && maniac && plan && plan.startDraws;
+    var tape = TIDS && plan && plan.startDraws;
     if (tape) { state.fs.mult = 0; state.fs.layers = []; state.fs.m0 = plan.startMult; }
     var resuming = !!(plan && resume), si = resuming ? resume.si : 0;
     if (resuming) {
@@ -11666,10 +12065,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // Tidsvägar: reglerna i korta, stora rader (multin, hur långt bakåt vinsterna når, med lagerbrickorna, och bomberna),
       // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +5 frispinn i Bonusspelet och +3 i Maniac
       // (samma som playBonus i math.js).
-      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + (tape && !resuming && M.TIME.maniacLayersDraw ? '<p>Kassetten ger <b>' + mtLayersText() + ' LAYERSPINS</b>, varje lager <b>MULTI x' + mtStartText() + '</b></p>'
-        : '<p><b>MULTI x' + (tape && !resuming ? mtRange() : state.fs.mult) + '</b> nollställs aldrig</p>') +
+      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + (tape && !resuming && mtLD(!!maniac) ? '<p>Kassetten spolar fram <b>' + mtLayersText(!!maniac) + ' LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × ' + mtStep(!!maniac) + '</b> i MULTI, och allt läggs ihop</p>'
+        : '<p><b>MULTI x' + (tape && !resuming ? mtRange(!!maniac) : state.fs.mult) + '</b> nollställs aldrig</p>') +
         '<p>Vinster hämtar symboler <b>upp till ' + state.fs.depth + ' snurr bakåt</b></p></div>' : '') +
-      (state.fs.depth ? '<div class="cv-layers">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em></i>'; }).join('') + '</div>' : '') +
+      // prototypen (kassetten): under varje LAYER-bricka vad lagret ger i multi (LAYER 1 = x6, LAYER 2 = x12 … i Maniac)
+      (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + '</div>' : '') +
       (TIDS && !(maniac && coll) ? '<div class="cv-facts"><p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +' + (maniac ? 3 : M.FS_RETRIGGER) + ' frispinn</p></div>'
         : '<p class="ov-text">' + (maniac && coll ? 'Varje ruta som är med i en vinst blir ett kollage: först 2 symboler, sedan 4, från snurren bakåt. Alla symboler i ett kollage räknas, och kollagen ligger kvar hela bonusen.'
           : 'Multiplikatorn växer med +1 för varje lavin och nollställs aldrig under bonusen. 3 bonusstjärnor ger 5 frispinn till.') + '</p>') +
@@ -11680,7 +12080,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (!document.body.classList.contains('fs')) fsOn();
     // en kort paus när spelplanen har vecklats ut, sedan startar frispinnen
     if (TIDS) await wait(showTime(0.5));
-    if (tape && !resuming) await maniacTape(plan);
+    if (tape && !resuming) await maniacTape(plan, !!maniac);
     if (plan) roundProgress(si);
     while (plan ? si < plan.spins.length : state.fs.left > 0) {
       state.fs.left--; renderMeter(); hud(); clearChips();
@@ -11915,6 +12315,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var raw = base.x + (bonus ? bonus.x : 0), used = base.layersUsed || [];
     return { thr: null, base: base, bonus: bonus, rawX: raw, x: Math.min(raw, M.TIME.maxX), wallOut: [bonus ? bonus.finalGrid : base.finalGrid, used[0] || hist[0], used[1] || hist[1]] };
   }
+  // prototypen, TEST-fliken Nytt: nästa snurr blir ett slumpat spel som uppfyller nxPick (högst 80 000 försök, eller
+  // nxPick.tries för sällsynta snurr)
+  var nxPick = null;
+  function nxPickGame(hist) {
+    var p = nxPick, g = null; nxPick = null;
+    for (var i = 0, n = p.tries || 80000; i < n && !g; i++) { var t = M.playGame(rng, hist); if (p(t)) g = t; }
+    return g || M.playGame(rng, hist);
+  }
   function throwGame(thr, hist) {
     var g = forcedGame(M.throwRound(rng, hist, thr), hist);
     g.thr = thr;
@@ -11932,7 +12340,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (TIDS) {
       // hela omgången (lagerkast, grundsnurr, bonus och tak) avgörs av spelmotorn; spelet visar bara resultatet
       var hist = engineWall();
-      game = typeof forced === 'function' ? forcedGame(forced(meter, takeGhost()), hist) : forceThrow ? throwGame(forceThrow, hist) : M.playGame(rng, hist);
+      game = typeof forced === 'function' ? forcedGame(forced(meter, takeGhost()), hist) : forceThrow ? throwGame(forceThrow, hist) : NEXT && nxPick ? nxPickGame(hist) : M.playGame(rng, hist);
       forceThrow = null;
       res = game.base;
       saveRound({ v: M.ENGINE_VERSION, kind: 'spin', betIdx: state.betIdx, cost: bet(), game: game, si: -1 });
@@ -12073,7 +12481,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Ett köpt (eller i TEST startat) bonusspel: startbrädet, bomberna och bonusen. resume: avbruten omgång mitt i bonusen.
   async function playBuy(game, mn, bought, resume) {
     if (!resume) {
-      await spinReels(game.base, false);
+      await spinReels(game.base, false, true);
       await celebrateScatters();
       if (mn) await goldCheer(); else await bombCheer();
     }
@@ -12120,7 +12528,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var res;
     if (TIDS) ghostOff = false;
     do { res = M.playRound(rng, { fs: false, bus: false, ride: false }); } while (res.scatters !== 3 || res.steps.length);
-    await spinReels(res, false);
+    await spinReels(res, false, true);
     await celebrateScatters();
     await runFreeSpins(TIDS ? M.fsAwardTime(3) : 10, true);
     endRound(null);
@@ -12164,13 +12572,49 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   function closePopmenus() { el.autoMenu.hidden = true; el.betMenu.hidden = true; var vm = $('#volMenu'); if (vm) vm.hidden = true; }
 
+  // Varje exempel är ett bräde med 6 hjul och 3 rader (spelet har 6 rader): rutorna som vinner lyser, resten är dämpade, och
+  // under brädet står hjulens nummer. Exemplen: vinst på 3 hjul (vilken rad som helst), fler vägar (två K på samma hjul),
+  // wild, Layerspins (hörnet fyller luckan) och hur många vägar brädet har. Raderas om på telefonen: ett exempel per rad.
+  // board: symboler per hjul uppifrån; win: rutor [hjul, rad] som vinner; corner: { r, y, sym } ett rivet hörn som fyller luckan
+  function waysBoard(board, win, corner) {
+    var cells = '';
+    for (var y = 0; y < 3; y++) for (var r = 0; r < 6; r++) {
+      var lit = win.some(function (q) { return q[0] === r && q[1] === y; }), cn = corner && corner.r === r && corner.y === y;
+      cells += '<i class="wb-cell' + (lit ? ' lit' : '') + (cn ? ' cn' : '') + '"><img src="' + icon(board[r][y]) + '" alt="">' +
+        (cn ? '<b class="wb-corner"><img src="' + icon(corner.sym) + '" alt=""></b>' : '') + '</i>';
+    }
+    var nums = ''; for (var k = 1; k <= 6; k++) nums += '<span>' + k + '</span>';
+    return '<div class="wb-board">' + cells + '</div><div class="wb-nums">' + nums + '</div>';
+  }
+  function waysHtml() {
+    // P = Punkaren (betalar redan på 3 hjul), K, Q, J, A, B = Bergsprängaren, S = Sneaker, Y = Sprayburk
+    var P = 2, K = 9, Q = 10, J = 11, A = 8, B = 4, S = 5, Y = 6;
+    var ex = [
+      { t: 'Vinst på 3 hjul', x: 'Lika symboler på hjul i rad, från hjulet längst till vänster. Raden spelar ingen roll.',
+        b: [[P, J, A], [Q, A, P], [J, P, S], [A, Q, J], [S, B, Q], [J, Y, A]], w: [[0, 0], [1, 2], [2, 1]] },
+      { t: 'Fler vägar', x: 'Två K på samma hjul ger två vinstvägar: 1 × 2 × 1 × 1 = 2 vägar på 4 hjul.',
+        b: [[A, K, J], [K, Q, K], [J, K, B], [K, S, A], [Q, J, S], [B, A, Q]], w: [[0, 1], [1, 0], [1, 2], [2, 1], [3, 0]] },
+      { t: 'Wild', x: 'Wild finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.',
+        b: [[Q, K, A], [J, WILD, S], [K, A, Q], [B, J, K], [S, Q, J], [A, Y, B]], w: [[0, 1], [1, 1], [2, 0], [3, 2]] },
+      { t: 'Layerspins', x: 'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.',
+        b: [[K, A, J], [Q, K, S], [A, J, K], [J, Q, A], [K, S, Q], [B, A, J]], w: [[0, 0], [1, 1], [2, 2], [3, 1], [4, 0]], c: { r: 3, y: 1, sym: K } }
+    ];
+    var cards = ex.map(function (e) {
+      return '<div class="wb-card"><b class="wb-title">' + e.t + '</b>' + waysBoard(e.b, e.w, e.c) + '<p>' + e.x + '</p></div>';
+    }).join('');
+    // hur många vägar: 6 rader på vart och ett av de 6 hjulen
+    var cols = ''; for (var r = 0; r < 6; r++) { var d = ''; for (var y = 0; y < 6; y++) d += '<i></i>'; cols += '<span class="wb-col">' + d + '</span>' + (r < 5 ? '<em>×</em>' : ''); }
+    cards += '<div class="wb-card wb-count"><b class="wb-title">46 656 vinstvägar</b><div class="wb-cols">' + cols + '</div>' +
+      '<p>6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.</p></div>';
+    return '<div class="wb-grid">' + cards + '</div>';
+  }
   // ---------------------------------------------------------------- info
   function renderInfo() {
     var b = bet();
     var rows = '';
     for (var s = 2; s < M.PAYING; s++) {
       var label = s === 2 ? 'Punkaren' : s === 3 ? 'Graffitikillen' : SYM[s].name;
-      rows += '<tr><td><img src="' + icon(s) + '" alt=""> ' + escapeHtml(label) + '</td>';
+      rows += '<tr><td><img src="' + icon(s) + '" alt=""><span class="pt-name">' + escapeHtml(label) + '</span></td>';
       for (var len = 3; len <= 6; len++) { var pv = M.payFor(s, len); rows += '<td>' + (pv > 0 ? money(Math.round(pv * (TIDS ? M.TIME.scale : 1) * b)) : '–') + '</td>'; }
       rows += '</tr>';
     }
@@ -12184,6 +12628,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         ('<div class="fact fact-vol"><span>Volatilitet</span><div class="fv-row">' + volMeterHtml(VOL_LEVEL).replace('class="vm"', 'class="vm vm-go"') + '<b>' + VOL_NAMES[VOL_LEVEL] + ' ' + VOL_LEVEL + '/5</b></div></div>') +
         '<div class="fact"><span>Vinstvägar</span><b>46 656</b></div>' +
         '</div><p class="note" style="margin-top:8px">Siffrorna kommer från simuleringar av 100 miljoner spelomgångar och 1 miljon köp av varje bonus (spelmotor 1.1.0, preliminärt tills certifieringskörningen är gjord). Återbetalningen är ett teoretiskt snitt över väldigt många spelomgångar.</p></section>' +
+        // så vinner du: små bräden med spelets symboler (info-ways.js)
+        '<section><h3>Så vinner du</h3>' + waysHtml() + '</section>' +
         '<section><h3>Layerspins</h3><ul>' +
         '<li>Varje ny symbol är en affisch över förra snurrets symbol, som syns i ett rivet hörn.</li>' +
         '<li>Har en vinst gått minst två hjul och nästa hjul saknar symbolen, kan förra snurrets symbol i hörnet fylla luckan. Vinsten fortsätter sedan i förra snurret så länge symbolen finns där och byter tillbaka till brädet när den saknas, ända till hjul 6. Wilds räknas på båda ställena.</li>' +
@@ -12197,15 +12643,17 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         '<section><h3>Bonusspel</h3>' +
         '<div class="sym-rule"><img src="' + icon(SCAT) + '" alt=""><p><b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger ' + M.fsAwardTime(3) + ' frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger ' + M.FS_RETRIGGER + ' frispinn till.</p></div><ul style="margin-top:10px">' +
         '<li>Väggen har ' + M.TIME.fsDepth + ' lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).</li>' +
-        '<li>Multin börjar på x' + M.TIME.fsStart + ' och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.</li>' +
+        // prototypen: samma kassett som i Maniac (M.TIME.fsStartDraw)
+        (M.TIME.fsStartDraw && M.TIME.fsLayersDraw ? '<li>' + mtRuleText(false, 'Bonusspelet') + '</li>' +
+          '<li>Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.</li>'
+          : '<li>Multin börjar på x' + M.TIME.fsStart + ' och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.</li>') +
         '<li>I Bonusspelet är vinsterna vinsttabellen gånger ' + fmtScale(M.TIME.fsScale) + ', och sedan gånger multin.</li>' +
         '<li>Köp: ' + M.fsAwardTime(3) + ' frispinn direkt för ' + BUY_X + ' gånger insatsen. Köpt Bonusspel ger i snitt ' + BUY_RTP + ' % tillbaka.</li></ul></section>' +
         '<section><h3>Maniac-bonus</h3><ul>' +
         '<li>Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i ' + (M.TIME.goldP * 100).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' % av fallen. Guldbomben startar Maniac-bonusen med ' + M.TIME.maniacSpins + ' frispinn.</li>' +
         '<li>Djupare tid: väggen har ' + M.TIME.maniacDepth + ' lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till ' + M.TIME.maniacDepth + ' snurr (siffran vid hörnet visar hur långt bakåt).</li>' +
         // prototypen: alla lager fyllda från start och startmulti per lager (M.TIME.maniacStartDraw)
-        (M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>Kassetten: när Maniac startar spolar kassetten tillbaka ' + mtLayersList() + ' lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje sådant lager ger en startmulti på x' +
-          mtStartText() + '. Multin börjar på summan: x' + mtRange() + '. Lagren som inte fylls från start fylls på ett per frispinn.</li>' +
+        (M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>' + mtRuleText(true, 'Maniac') + '</li>' +
           '<li>Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>'
           : M.TIME.maniacStartDraw ? '<li>Alla ' + M.TIME.maniacDepth + ' lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x' +
           Math.min.apply(null, M.TIME.maniacStartDraw.v) + '–x' + Math.max.apply(null, M.TIME.maniacStartDraw.v) + ', och multin börjar på summan: x' + mtRange() + '.</li>' +
@@ -12221,7 +12669,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         '<li>Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.</li></ul></section>' +
         '<section><h3>Kontroller</h3><ul>' +
         '<li>Mellanslag eller den runda knappen snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt.</li>' +
-        '<li>Blixten slår på turbo.' + (MARKET.autoplay ? ' Pilarna startar autospel med 10, 25 eller 50 snurr. Du kan välja att autospelet stoppar när en bonus startar, när saldot har minskat med ett visst belopp eller när en vinst är minst ett visst belopp. Ett tryck på pilarna eller snurrknappen stoppar autospelet.' : '') + '</li>' +
+        '<li>Blixten slår på turbo.' + (MARKET.autoplay ? ' Pilarna startar autospel med ' + (function () { var a = AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }); return a.slice(0, -1).join(', ') + ' eller ' + a[a.length - 1]; })() + ' snurr. Du kan välja att autospelet stoppar när en bonus startar, när saldot har minskat med ett visst belopp eller när en vinst är minst ett visst belopp. Ett tryck på pilarna eller snurrknappen stoppar autospelet.' : '') + '</li>' +
         '<li>Tryck på insatsen för att välja belopp direkt.</li></ul></section>';
       return;
     }
@@ -12536,6 +12984,16 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     tease: function () { spin(forceRound(function (r) { return scattersIn(r.startGrid, 3) === 2 && r.scatters < 3; })); },
     bonus: function () { spin(forceRound(function (r) { return r.scatters >= 3; })); },
     refill: function () { state.balance = START_BALANCE; store.set('balance', state.balance); hud(); },
+    // fyller på saldot med 10 miljoner (saldot är i ören)
+    // prototypen, fliken Nytt (nxTestTab): snurr som visar de nya funktionerna
+    nBigBase: function () { nxTest(function (g) { return !g.bonus && g.base.steps.some(function (st) { if (st.type !== 'win' || !(st.x >= 1)) return false; var q = nxStepDeep(st); return q.d >= 2 || q.b >= 3; }); }); },
+    nAnt2: function () { nxTest(function (g) { for (var i = 1; i < REELS; i++) if (nxBombsBefore(g, i) === 2) return true; return false; }); },
+    nAntGold: function () { var p = function (g) { return nxBombsBefore(g, 3) >= 3; }; p.tries = 400000; nxTest(p); },
+    nGold: function () { var p = function (g) { return !!g.base.gold; }; p.tries = 500000; nxTest(p); },
+    nBs3: function () { nxTest(function (g) { return g.bonus && !g.bonus.maniac && g.bonus.startDraws && g.bonus.startDraws.length === 3; }); },
+    nMn5: function () { nxBuyTest(function (g) { return g.bonus && g.bonus.startDraws && g.bonus.startDraws.length === 5; }); },
+    nMn2: function () { nxBuyTest(function (g) { return g.bonus && g.bonus.startDraws && g.bonus.startDraws.length === 2; }); },
+    cash10m: function () { syncBalance(); state.balance += 1000000000; store.set('balance', state.balance); hud(); },
     ride: function () { spin(forceRound(function (r) { return r.rideCount > 0 && r.scatters < 3; }, { ride: true })); },
     tagWild: function () { tagTest('wild'); },
     tagMulti: function () { tagTest('multi'); },
@@ -13004,8 +13462,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       tbt('tendB', 'Bonusspel slut', 'En ny slumpad Bonusspel-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
       tbt('tendM', 'Maniac slut', 'En ny slumpad Maniac-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
       tbt('tmax', 'Maxvinst', 'En ny slumpad Maniac, två snurr före maxvinsten. Tv:n stängs av och vinstpresentationen slås på.'),
-      tbt('refill', 'Fyll på saldot', 'Sätter tillbaka saldot till startbeloppet.')
+      tbt('refill', 'Fyll på saldot', 'Sätter tillbaka saldot till startbeloppet.'),
+      tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
     ].join('');
+    // prototypen: fliken Nytt med de nya funktionerna, en knapp per funktion (användaren 2026-10-22)
+    if (window.CT_NEXT) nxTestTab(tbt);
   }
   // Varje ruta: { t: rubrik, x: text (HTML), demo(g, u) } där g ritar i GUIDE_W x GUIDE_H och u är sekunder sedan rutan
   // visades. Animationerna loopar. Layerspins visar mekaniken steg för steg: vinsten stannar, hörnet rivs upp, förra
@@ -13312,13 +13773,59 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     { t: 'Laviner', x: '6 hjul, 6 rader och 46 656 vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.', demo: demoCascade },
     { t: 'Layerspins', x: 'Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.', demo: demoTime },
     { t: 'Kassetten', x: 'Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.', demo: demoLayers },
-    { t: 'Bonusspel & Maniac', x: '3 bomber ger Bonusspelet: ' + M.fsAwardTime(3) + ' frispinn där multin växer och aldrig nollställs. ' + (M.TIME.maniacLayersDraw ? 'Guldbomben startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + mtLayersText() + ' lager med multi. ' : 'Blir en bomb guld startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + M.TIME.maniacDepth + ' lager bakåt. ') + 'Köp: Bonusspel ' + BUY_X + 'x, Maniac ' + M.TIME.maniacBuy + 'x.', demo: demoBonus }
+    { t: 'Bonusspel & Maniac', x: '3 bomber ger Bonusspelet: ' + M.fsAwardTime(3) + (M.TIME.fsLayersDraw ? ' frispinn och ' + mtLayersText(false) + ' lager med multi. ' : ' frispinn där multin växer och aldrig nollställs. ') + (M.TIME.maniacLayersDraw ? 'Guldbomben startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + mtLayersText() + ' lager med multi. ' : 'Blir en bomb guld startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + M.TIME.maniacDepth + ' lager bakåt. ') + 'Köp: Bonusspel ' + BUY_X + 'x, Maniac ' + M.TIME.maniacBuy + 'x.', demo: demoBonus }
   ] : [
     { t: 'Laviner', x: 'Vinster sprängs, nya symboler faller in och multin stiger till x5.', demo: gIconDemo(8) },
     { t: 'Maniac Mode', x: '3 bonusstjärnor ger 10–20 frispinn där multin växer utan tak.', demo: gIconDemo(1) },
     { t: 'Graffiti', x: 'Graffiti Blast sprejar fram wilds, multi och pengar. Wild Ride smäller upp wilds och Collector hämtar pengarna.', demo: gIconDemo(6) }
   ];
   var GUIDE_MAX = gThousands(TIDS ? M.TIME.maxX : 5000) + 'x';
+  // Varje knapp väljer ett slumpat snurr som visar funktionen (flow.js nxPick; köpt Maniac via buyGame). Bara i prototypen
+  // (mode-setup.js: nxTestTab när window.CT_NEXT). Nya funktioner läggs till här när de byggs.
+  // ett snurr bland slumpade spel som uppfyller pred (flow.js nxPick); trycks den mitt i en runda väntar den (högst 15 s)
+  function nxTest(pred, tries) {
+    if (state.busy) { if ((tries || 0) < 60) setTimeout(function () { nxTest(pred, (tries || 0) + 1); }, 250); return; }
+    nxPick = pred; spin();
+  }
+  // köpt Maniac (TESTS.maniac) bland slumpade köp som uppfyller pred
+  function nxBuyTest(pred) {
+    if (state.busy) return;
+    var o = M.buyGame;
+    M.buyGame = function (r, w, m) { M.buyGame = o; for (var i = 0; i < 20000; i++) { var g = o(r, w, m); if (pred(g)) return g; } return o(r, w, m); };
+    TESTS.maniac();
+  }
+  // antal bomber på hjulen före hjul n (spin-reels.js väntar när det är 2, guldväntan när det är minst 3)
+  function nxBombsBefore(g, n) { var c = 0; for (var r = 0; r < n; r++) g.base.startGrid[r].forEach(function (x) { if (x === SCAT) c++; }); return c; }
+  // hur djupt och hur många hjul bakåt ett vinststeg hämtar
+  function nxStepDeep(st) {
+    var d = 1, b = 0;
+    st.wins.forEach(function (w) { if (!(w.timeAt >= 0) || w.both) return; (w.depth || []).forEach(function (x) { if (x > d) d = x; }); b = Math.max(b, w.gcols.filter(function (r) { return r.length; }).length); });
+    return { d: d, b: b };
+  }
+  function nxTestTab(tbt) {
+    var list = $('#testList'); if (!list) return;
+    var game = list.innerHTML;
+    var news = [
+      tbt('nBigBase', 'Stort ögonblick: grundspelet', 'Bandspelaren kommer upp och spolar LAYER 1, 2 … innan lagret rivs in.'),
+      tbt('nAnt2', 'Väntan: 2 bomber', 'Två bomber har landat: nästa hjul snurrar längre, saktar in och kryper in mot den tredje.'),
+      tbt('nAntGold', 'Guldväntan', '3 bomber på hjul 1–3: hjul 4, 5 och 6 väntar i guld, längre för varje hjul. Oftast utan guld.'),
+      tbt('nGold', 'Guldbomben', 'Guldväntan som slutar med guldbomben och Maniac (kan ta några sekunder att hitta).'),
+      tbt('nBs3', 'Bonusspel: kassetten 3 lager', 'Bonusspelet där kassetten spolar alla 3 lager (x18).'),
+      tbt('nMn5', 'Maniac: kassetten 5 lager', 'Maniac där kassetten spolar alla 5 lager (x90).'),
+      tbt('nMn2', 'Maniac: kassetten stannar tidigt', 'Maniac där bandet stannar efter 2 lager (x18).'),
+      tbt('tstudio', 'Introt (CtP-loggan)', 'Studiointrot med den nya loggan.'),
+      tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
+    ].join('');
+    list.innerHTML = '<div class="tl-group" data-g="new">' + news + '</div><div class="tl-group" data-g="game" hidden>' + game + '</div>';
+    var tabs = document.createElement('div'); tabs.className = 'tl-tabs';
+    tabs.innerHTML = '<button type="button" class="on" data-g="new">Nytt</button><button type="button" data-g="game">Spelet</button>';
+    list.parentNode.insertBefore(tabs, list);
+    tabs.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-g]'); if (!b) return;
+      tabs.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      list.querySelectorAll('.tl-group').forEach(function (gp) { gp.hidden = gp.getAttribute('data-g') !== b.getAttribute('data-g'); });
+    });
+  }
   $('#btnTest').addEventListener('click', function () { Sound.init(); dlgTest.showModal(); });
   $('#testList').addEventListener('click', function (e) {
     var b = e.target.closest('[data-test]');
@@ -13587,15 +14094,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // färgklicken som flyger ut när symbolen klickar ihop: tio prickar i studions färger, i var sin riktning
       var dots = ''; for (var k = 0; k < 10; k++) dots += '<i style="--a:' + (k * 36 + 8) + 'deg;--c:' + ['#ffd21f', '#ff8629', '#1d47d1'][k % 3] + ';--d:' + (k % 2 ? 1 : 0.78) + '"></i>';
       return '<div class="sm-page"><i class="sm-flash"></i><div class="sm-logo"><i class="sm-disc"></i><i class="sm-ring"></i><div class="sm-burst">' + dots + '</div>' +
-        '<svg class="sm-mark" viewBox="0 0 220 200" aria-hidden="true">' +
+        // symbolen: C, ett orange t och ett blått P som hakar i varandra (användaren 2026-10-22: t:et ska synas, men allt ska
+        // hänga ihop): tvärslån går in i C:ets öppning, P:ets stav ligger tätt mot t:et över tvärslåns ände och t:ets krok, och
+        // flygningen in i spelet går genom hålet i P:ets båge
+        '<svg class="sm-mark" viewBox="0 0 240 200" aria-hidden="true">' +
         '<defs><mask id="smMask"><path d="M131 52A64 64 0 1 0 131 148" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round"/>' +
-        '<rect x="120" y="36" width="38" height="132" rx="12" fill="#fff"/><path d="M146 36h20a46 46 0 0 1 0 92h-20z" fill="#fff"/></mask>' +
+        '<rect x="96" y="30" width="92" height="138" rx="12" fill="#fff"/><path d="M176 36h12a44 44 0 0 1 0 88h-12z" fill="#fff"/></mask>' +
         '<linearGradient id="smShineG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>' +
         '<g class="sm-c"><path d="M131 52A64 64 0 1 0 131 148" class="sm-ink"/><path d="M131 52A64 64 0 1 0 131 148" class="sm-fill"/></g>' +
-        '<g class="sm-stem"><rect x="124" y="40" width="30" height="124" rx="9"/></g>' +
-        '<g class="sm-bowl"><path d="M150 40h16a42 42 0 0 1 0 84h-16z"/><circle cx="168" cy="82" r="12"/></g>' +
+        '<g class="sm-stem"><path d="M124 43a9 9 0 0 1 9-9h8a9 9 0 0 1 9 9v95a6 6 0 0 0 6 6h12a9 9 0 0 1 9 9v2a9 9 0 0 1-9 9h-25a19 19 0 0 1-19-19z"/>' +
+        '<rect x="100" y="60" width="72" height="24" rx="9"/><rect class="sm-join" x="127.5" y="63.5" width="19" height="17"/></g>' +
+        '<g class="sm-bowl"><rect x="160" y="40" width="25" height="124" rx="9"/><path d="M181 40h10a42 42 0 0 1 0 84h-10z"/><rect class="sm-join" x="175" y="43.5" width="13" height="77"/><circle cx="193" cy="82" r="12"/></g>' +
         '<g mask="url(#smMask)"><rect class="sm-shine" x="-70" y="-20" width="46" height="240" fill="url(#smShineG)"/></g>' +
-        '<g class="sm-spark"><path d="M196 30l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><circle cx="28" cy="36" r="6"/><circle cx="200" cy="168" r="5"/></g></svg>' +
+        '<g class="sm-spark"><path d="M224 16l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><circle cx="28" cy="36" r="6"/><circle cx="226" cy="172" r="5"/></g></svg>' +
         '<div class="sm-word">' + letters + '</div><div class="sm-name">' + nm + '</div></div><i class="sm-shade"></i></div>';
     }
     if (style === 'vhs') {
@@ -13631,20 +14142,36 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     function at(s, f) { timers.push(setTimeout(f, s * 1000)); }
     function clear() { timers.forEach(clearTimeout); timers = []; }
     // fade (det första introt, när spelets logga flyger vidare till rutorna): tyst, och kameran flyger in genom hålet i
-    // CP-symbolens båge (mono, se flyPage) eller papperet löses upp, i stället för att sidan vänds
+    // CP-symbolens båge (mono, se flyPrep och flyGo) eller papperet löses upp, i stället för att sidan vänds
     function cover(fade) {
       if (done) return;
       done = true; clear(); noiseOn = false;
       if (fade !== true) Sound.pageTurn();
       document.removeEventListener('keydown', skip, true);
-      var fly = fade === true && style === 'mono' && !calm && flyPage();
-      if (!fly) root.classList.add(fade === true ? 'si-fade' : 'si-out');
+      // flygningen: spelet (startskärmen bakom loggan) byggs och ritas klart först, och sidan läggs i ett eget lager, innan
+      // zoomen börjar; annars hackar zoomen till i början på telefoner (allt byggdes i samma ögonblick som zoomen startade)
+      if (fade === true && style === 'mono' && !calm) {
+        try { if (onCover) onCover(); } catch (e) { /* spelet startar ändå */ }
+        var prep = flyPrep(), went = false;
+        var goFly = function () {
+          if (went) return; went = true;
+          var fly = flyGo(prep);
+          if (!fly) root.classList.add('si-fade');
+          setTimeout(function () { root.remove(); }, fly ? 900 : t[1] * 1000 + 80);
+        };
+        requestAnimationFrame(function () { requestAnimationFrame(goFly); });
+        setTimeout(goFly, 300);
+        return;
+      }
+      root.classList.add(fade === true ? 'si-fade' : 'si-out');
       try { if (onCover) onCover(); } catch (e) { /* spelet startar ändå */ }
-      setTimeout(function () { root.remove(); }, fly ? 900 : t[1] * 1000 + 80);
+      setTimeout(function () { root.remove(); }, t[1] * 1000 + 80);
     }
     // Flyg genom loggan: hålet i P:ets båge blir ett fönster (en mask på sidan), och sidan zoomas in mot hålet allt
-    // snabbare tills hålet täcker skärmen och rutorna syns genom det. Svarar false om det inte går (då löses papperet upp).
-    function flyPage() {
+    // snabbare tills hålet täcker skärmen och rutorna syns genom det. flyPrep lägger masken och sidans eget lager några
+    // bildrutor innan zoomen (flyGo), så att första bildrutan i zoomen inte behöver ritas om. Svarar false om det inte går
+    // (då löses papperet upp).
+    function flyPrep() {
       var page = root.querySelector('.sm-page'), hole = root.querySelector('.sm-bowl circle');
       if (!page || !hole || !page.animate) return false;
       var r = hole.getBoundingClientRect(), pr = page.getBoundingClientRect();
@@ -13655,7 +14182,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       page.style.webkitMaskImage = m; page.style.maskImage = m;
       // utan suddigheten under zoomen (den blir tung när sidan är jättestor)
       page.style.webkitBackdropFilter = 'none'; page.style.backdropFilter = 'none';
-      page.style.transformOrigin = hx + 'px ' + hy + 'px';
+      page.style.transformOrigin = hx + 'px ' + hy + 'px'; page.style.willChange = 'transform';
+      return { page: page, big: big };
+    }
+    function flyGo(p) {
+      if (!p) return false;
+      var page = p.page, big = p.big;
       root.classList.add('si-fly');
       // en kort inandning, sedan in mot hålet (stegen ger en jämn, allt snabbare zoom)
       page.animate([
@@ -13817,21 +14349,33 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         return;
       }
       L.classList.add('ld-fly');
+      // båda loggorna i egna lager innan flygningen, så att telefonen inte behöver rita om texten mitt i rörelsen
+      lg.style.willChange = 'transform'; to.style.willChange = 'transform';
       // affischen med rutorna smälls upp på väggen (inSlap, 0,62 s): klisterstänk runt kanten och penseln sveper över
       setTimeout(function () { pasteSplash(intro0.querySelector('.guide-poster')); }, 820);
-      var dx =(tr.left + tr.width / 2) - (from.left + from.width / 2), dy = (tr.top + tr.height / 2) - (from.top + from.height / 2), k = tr.width / from.width;
+      // flygningen räknas i laddningsrutans mått: i ett lågt fönster är rutan krympt (fitBox), och då måste vägen delas med
+      // krympningen, annars kommer loggan bara en del av vägen och hoppar sedan upp till rubriken (iPhone, 665 px hög)
+      var bx0 = L.querySelector('.ld-box'), bs = bx0 && bx0.offsetWidth ? bx0.getBoundingClientRect().width / bx0.offsetWidth : 1;
+      if (!(bs > 0.2 && bs < 5)) bs = 1;
+      var dx = ((tr.left + tr.width / 2) - (from.left + from.width / 2)) / bs, dy = ((tr.top + tr.height / 2) - (from.top + from.height / 2)) / bs, k = tr.width / from.width;
       var fly = lg.animate([
         { transform: 'rotate(-2.5deg)' },
-        { transform: 'translate(' + (dx * 0.5) + 'px, ' + (dy * 0.5 - 30) + 'px) scale(' + ((1 + k) / 2 * 1.08) + ') rotate(-5deg)', offset: 0.55 },
+        { transform: 'translate(' + (dx * 0.5) + 'px, ' + (dy * 0.5 - 30 / bs) + 'px) scale(' + ((1 + k) / 2 * 1.08) + ') rotate(-5deg)', offset: 0.55 },
         { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + k + ') rotate(-2.5deg)' }
       ], { duration: 700, delay: 140, easing: 'cubic-bezier(.45, 0, .25, 1)', fill: 'both' });
       fly.finished.then(land, land);
       function land() {
         if (intro0) {
           intro0.classList.add('landed');
-          if (to.animate) to.animate([{ transform: 'rotate(-2.5deg) scale(1.08, .9)' }, { transform: 'rotate(-2.5deg) scale(.97, 1.04)', offset: 0.5 }, { transform: 'rotate(-2.5deg)' }], { duration: 320, easing: 'ease-out' });
+          // ingen studs när rubriken tar över: loggan flyter in med zoomen och ligger still (som på datorn; på telefonen såg
+          // studsen ut som ett ryck, användaren 2026-10-21)
+          setTimeout(function () { to.style.willChange = ''; }, 600);
         }
-        hideLoader();
+        // bytet: rubriken tänds under den flygande loggan (samma läge och storlek), den flygande ligger kvar ett ögonblick och
+        // tonas bort, och laddningssidan tas bort först efteråt; annars kunde telefonen visa en tom eller stillastående
+        // bildruta i bytet (hela sidan ritades om i samma ögonblick)
+        if (lg.animate) lg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 60, fill: 'forwards' });
+        setTimeout(hideLoader, 340);
       }
     }
     // klisterstänk runt affischens kant och en klisterpensel som sveper över (samma som när spelplanen klistras upp)
