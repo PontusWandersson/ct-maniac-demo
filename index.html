@@ -1442,22 +1442,7 @@ body.cas-rew #board { animation: casJitter .1s steps(2) infinite; }
 .cv-layers .ly .ly-x { position: absolute; left: 50%; top: 100%; translate: -50% 6px; padding: 3px 8px 1px; font: 400 20px/1 var(--display); color: var(--ink); -webkit-text-stroke: 0;
   background: #fff6e0; border: 2.5px solid var(--ink); border-radius: 8px; box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
 .portrait .cv-layers .ly .ly-x { font-size: 15px; padding: 2px 6px 1px; }
-/* stora ögonblick (prototypen, time-ways.js nxBuildUp): mörkare medan uppbyggnaden pågår, luckan lyser och darrar i lagrets
-   färg med lagrets siffra ovanför, MULTI pulserar i bonusen. */
 .win-dim { transition: opacity .35s ease, background-color .4s ease; }
-.win-dim.deep { background-color: rgba(4, 2, 12, .8); }
-.nx-build { position: fixed; inset: 0; z-index: 30; pointer-events: none; transition: opacity .25s ease; }
-.nx-build.out { opacity: 0; }
-.nx-gap { position: fixed; box-sizing: border-box; border: 6px solid var(--c); border-radius: 16%;
-  box-shadow: 0 0 34px 12px var(--c), inset 0 0 26px 8px var(--c); animation: nxShiver .1s steps(2) infinite, nxGlow .45s ease-in-out infinite alternate; }
-@keyframes nxShiver { 50% { translate: 2px -1px; } }
-@keyframes nxGlow { from { opacity: .5; } to { opacity: 1; } }
-.nx-num { position: fixed; translate: -50% -50%; font: 400 104px/1 var(--display); color: var(--c); -webkit-text-stroke: 4px #fff; paint-order: stroke fill;
-  text-shadow: 0 0 26px var(--c), 0 0 60px var(--c); animation: nxNum .45s ease-in-out infinite alternate; }
-@keyframes nxNum { from { scale: .9; } to { scale: 1.28; } }
-.portrait .nx-num { font-size: 44px; -webkit-text-stroke-width: 2px; }
-.portrait .nx-gap { border-width: 3px; box-shadow: 0 0 14px 5px var(--c), inset 0 0 12px 4px var(--c); }
-@media (prefers-reduced-motion: reduce) { .nx-gap, .nx-num { animation: none; } }
 .win-dim-on .g-left > .meter { position: relative; z-index: 3; }
 .mt-glow { position: absolute; left: 50%; bottom: 4%; width: 96%; aspect-ratio: 1.7; translate: -50% 18%; pointer-events: none; border-radius: 50%;
   background: radial-gradient(closest-side, var(--gc, #ffd21f), transparent); opacity: var(--ga, 0); scale: var(--gs, .6); mix-blend-mode: screen;
@@ -4855,6 +4840,15 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       this.apply();
       this.load();
     },
+    // Ljudmotorn byggs om: en ny AudioContext med samma kedja. Används när ljudet inte kommer tillbaka efter att sidan legat
+    // i bakgrunden (iPhone: fastnat i 'interrupted', eller 'running' fast inget hörs). Anropas i ett tryck, annars startar
+    // den nya inte. Avkodade ljudfiler följer med; musiken som spelade startas om (events-2.js).
+    rebuild: function () {
+      var old = this.ctx; if (!old) return;
+      try { old.onstatechange = null; old.close(); } catch (e) { /* redan stängd */ }
+      this.ctx = null;
+      this.init();
+    },
     // ---------------------------------------------------------------- riktiga ljudfiler
     // buffers[id]: avkodad ljudfil audio/<id>.wav (eller .mp3). audio/index.json listar filerna (skrivs av bygget).
     buffers: {}, loaded: false,
@@ -5870,7 +5864,6 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 
     if (TIDS) drawGhosts(g, highlight);
     if (TIDS && rewindFx) drawRewind(g);
-    if (TIDS && nxBuildFx) drawNxBuild(g);
     if (TIDS && tedFx && ghostView && ghostView.peel == null) {
       drawBoardGlow(g, Math.min(1, (clock - tedFx.t0) / 0.3) * (0.75 + 0.25 * Math.sin(clock * 4)));
       // smällen: vit blixt och fartstreck som drar över spelplanen från Teds håll
@@ -6288,7 +6281,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // går också i lugnare takt (i grundspelet; i bonusen går stegen ändå ett hjul i taget).
     if (!state.fs && ((w.hops || 0) >= 2 || w.len >= 5) && tier < 1) tier = 1;
     // prototypen: en jämn takt för alla lagervinster på minst insatsen (samma tempo oavsett storlek, lager och lavinsteg),
-    // så att spelaren lär sig rytmen; bara de stora ögonblicken (nxBigMoment) går lugnast och får en uppbyggnad före lagret
+    // så att spelaren lär sig rytmen; bara de stora ögonblicken (nxBigMoment) går lugnast
     var nxBig = NEXT && !tiny && nxBigMoment(tw, winX);
     if (NEXT && !tiny) { tier = nxBig ? 2 : 1; acc = 1; }
     // [paus innan, efter spolningen, första hjulet från väggen, varje hjul efter]. Även små tidsvägar har en egen takt:
@@ -6308,8 +6301,6 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       Sound.timeStep(0);
       await wait(showTime(pace[0]), true);
     }
-    // prototypen: uppbyggnaden före lagret i ett stort ögonblick (inte i turbo)
-    if (nxBig && !state.turbo && !state.hurry) await nxBuildUp(w, tw, part);
     // 2. brädet spolar bakåt till förra snurret (rewindShow), 3. förra snurrets symboler hoppar in, ett hjul i taget,
     // var och en med en smäll (under insatsen utan skakning och duns)
     await rewindShow(tw, tier, tiny, acc, part);
@@ -6352,85 +6343,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }
     return tier;
   }
-  // Prototypen: ett stort ögonblick? Bara i grundspelet (inte i bonusarna, användaren 2026-10-22): vinsten hämtar från
-  // LAYER 2–3 eller minst 3 hjul bakåt (cirka var 77:e snurr; bara vinster på minst insatsen, en uppbyggnad före en liten
-  // vinst blir ett antiklimax). Regeln gäller varje gång (aldrig en uppbyggnad som inte följs av lagret).
+  // Prototypen: ett stort ögonblick, som går i den lugnaste takten? Bara i grundspelet: vinsten hämtar från LAYER 2–3 eller
+  // minst 3 hjul bakåt och är minst insatsen (cirka var 77:e snurr). Ingen uppbyggnad före lagret (bandspelaren togs bort,
+  // användaren 2026-10-22).
   function nxBigMoment(tw, winX) {
     if (state.fs) return false;
     var deep = 1, back = 0;
     tw.forEach(function (w) { (w.depth || []).forEach(function (d) { if (d > deep) deep = d; }); back = Math.max(back, w.gcols.filter(function (r) { return r.length; }).length); });
     return winX >= 1 && (deep >= 2 || back >= 3);
-  }
-  // Uppbyggnaden (som bandspelaren när den kastar ut lager): allt stannar, spelplanen mörknar runt vinsten (bara vinstrutorna
-  // och luckan lyser) och bakgrunden mörknar mer. Bandspelaren kommer upp och spolar bakåt, och brickorna LAYER 1, LAYER 2 …
-  // kommer en i taget (casCount2 i cassette.js) fram till lagret vinsten hämtar från; den brickan hoppar in i luckan, som
-  // lyser i lagrets färg, och sedan rivs lagret in som vanligt. keep: vinstrutorna som redan lyser.
-  var nxBuildFx = null;
-  function drawNxBuild(g) {
-    var f = nxBuildFx, a = f.end ? Math.max(0, 1 - (clock - f.end) / 0.25) : Math.min(1, (clock - f.t0) / 0.25);
-    if (f.end && a <= 0) { nxBuildFx = null; return; }
-    g.save(); g.beginPath(); g.rect(0, 0, boardPx, boardPx);
-    for (var r = 0; r < REELS; r++) for (var y = 0; y < ROWS; y++) if (f.keep[r][y]) g.rect(r * cell, y * cell, cell, cell);
-    g.clip('evenodd'); g.fillStyle = 'rgba(4, 2, 12, ' + (0.62 * a).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
-    g.restore();
-  }
-  async function nxBuildUp(w, tw, keep) {
-    var deep = 1; tw.forEach(function (x) { (x.depth || []).forEach(function (d) { if (d > deep) deep = d; }); });
-    deep = Math.min(deep, DEPTH_COL.length - 1);
-    var col = DEPTH_COL[deep], br = canvas.getBoundingClientRect(), k = br.width / boardPx, c = w.timeAt, rows = w.gcols[c] || [], sz = cell * k;
-    nxBuildFx = { t0: clock, keep: st2keep(keep, c, rows), end: 0 };
-    // luckan lyser och darrar i lagrets färg
-    var glow = document.createElement('div'); glow.className = 'nx-build'; glow.style.setProperty('--c', col);
-    rows.forEach(function (y) {
-      var q = document.createElement('i'); q.className = 'nx-gap';
-      q.style.left = (br.left + c * sz) + 'px'; q.style.top = (br.top + y * sz) + 'px'; q.style.width = q.style.height = sz + 'px';
-      glow.appendChild(q);
-    });
-    document.body.appendChild(glow);
-    if (winDimEl) winDimEl.classList.add('deep');
-    // spolningen: bandspelaren kommer upp (kassetten är en av grundspelets funktioner) och räknar som kassetten (casCount2)
-    var host = document.createElement('div'); host.className = 'cas-act nx-cas';
-    host.style.left = br.left + 'px'; host.style.top = br.top + 'px'; host.style.width = br.width + 'px'; host.style.height = br.height + 'px';
-    host.style.setProperty('--u', (br.width / 100).toFixed(2) + 'px');
-    var lays = '';
-    for (var q = 1; q <= deep; q++) lays += '<i class="cas-ly" style="--c:' + CAS_COL[q] + '">LAYER<b>' + q + '</b></i>';
-    host.innerHTML = '<i class="cas-vhs"></i><div class="cas-deck">' + DECK_SVG + '</div><div class="cas-lays">' + lays + '</div><div class="cas-count">◀◀ 0</div>';
-    document.body.appendChild(host);
-    var deck = host.querySelector('.cas-deck'), led = host.querySelector('.deck-led');
-    host.classList.add('deck'); deckSound('up');
-    await wait(casT(0.32), true);
-    deck.classList.add('loaded');
-    var rewT = 0.35 + 0.5 * deep;
-    host.classList.add('rew'); document.body.classList.add('cas-rew'); if (led) led.textContent = '◀◀ 0';
-    deckSound('rew', casT(rewT));
-    var reels2 = Array.prototype.slice.call(host.querySelectorAll('.deck-tape .cas-reel'));
-    [[0, 1.5], [0.35, 3], [0.7, 5.5]].forEach(function (p) {
-      setTimeout(function () { reels2.forEach(function (e) { (e.getAnimations ? e.getAnimations() : []).forEach(function (an) { an.playbackRate = p[1]; }); }); }, casT(rewT) * p[0] * 1000);
-    });
-    await casCount2(host, deep);
-    document.body.classList.remove('cas-rew'); host.classList.remove('rew');
-    deckSound('stop'); deckSound('big', 0, deep);
-    // lagrets bricka hoppar in i luckan
-    var ly = host.querySelectorAll('.cas-ly')[deep - 1], lr = ly && ly.getBoundingClientRect();
-    if (ly && lr && lr.width && rows.length && ly.animate && !state.hurry) {
-      var tx = br.left + (c + 0.5) * sz, ty = br.top + (rows[0] + 0.5) * sz;
-      var dx = tx - (lr.left + lr.width / 2), dy = ty - (lr.top + lr.height / 2), sc = Math.max(0.4, sz * 0.8 / lr.width);
-      var an = ly.animate([{ transform: 'none' }, { transform: 'translate(' + dx * 0.5 + 'px, ' + (dy * 0.5 - 40) + 'px) scale(' + (1 + sc) / 2 * 1.15 + ') rotate(-8deg)', offset: 0.55 },
-        { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + sc + ')', opacity: 0.2 }], { duration: casT(0.5) * 1000, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
-      await animDone(an, casT(0.5) * 1000 + 200);
-      for (var e = 0; e < 16; e++) emberPart(tx + (Math.random() - 0.5) * sz, ty + (Math.random() - 0.5) * sz, e % 3 ? col : '#fff6e0');
-    }
-    host.classList.add('out'); setTimeout(function () { host.remove(); }, 350);
-    glow.classList.add('out'); setTimeout(function () { glow.remove(); }, 300);
-    if (nxBuildFx) nxBuildFx.end = clock;
-    if (winDimEl) winDimEl.classList.remove('deep');
-  }
-  // rutorna som lyser under uppbyggnaden: vinstrutorna före luckan och luckan (hjul c, raderna rows)
-  function st2keep(keep, c, rows) {
-    var k = (keep || []).map(function (col) { return col.slice(); });
-    for (var r = 0; r < REELS; r++) { k[r] = k[r] || []; for (var y = 0; y < ROWS; y++) k[r][y] = !!k[r][y]; }
-    rows.forEach(function (y) { k[c][y] = true; });
-    return k;
   }
   // Bonusen: när vinsten är visad flyger varje hjul som kom från väggens lager in i multin som "+n" (n = snurr bakåt), ett
   // i taget, från alla vinster i steget. Multin börjar på den multi vinsten betalades med och räknas upp med exakt det som
@@ -12986,7 +12906,6 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     refill: function () { state.balance = START_BALANCE; store.set('balance', state.balance); hud(); },
     // fyller på saldot med 10 miljoner (saldot är i ören)
     // prototypen, fliken Nytt (nxTestTab): snurr som visar de nya funktionerna
-    nBigBase: function () { nxTest(function (g) { return !g.bonus && g.base.steps.some(function (st) { if (st.type !== 'win' || !(st.x >= 1)) return false; var q = nxStepDeep(st); return q.d >= 2 || q.b >= 3; }); }); },
     nAnt2: function () { nxTest(function (g) { for (var i = 1; i < REELS; i++) if (nxBombsBefore(g, i) === 2) return true; return false; }); },
     nAntGold: function () { var p = function (g) { return nxBombsBefore(g, 3) >= 3; }; p.tries = 400000; nxTest(p); },
     nGold: function () { var p = function (g) { return !!g.base.gold; }; p.tries = 500000; nxTest(p); },
@@ -13796,17 +13715,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   // antal bomber på hjulen före hjul n (spin-reels.js väntar när det är 2, guldväntan när det är minst 3)
   function nxBombsBefore(g, n) { var c = 0; for (var r = 0; r < n; r++) g.base.startGrid[r].forEach(function (x) { if (x === SCAT) c++; }); return c; }
-  // hur djupt och hur många hjul bakåt ett vinststeg hämtar
-  function nxStepDeep(st) {
-    var d = 1, b = 0;
-    st.wins.forEach(function (w) { if (!(w.timeAt >= 0) || w.both) return; (w.depth || []).forEach(function (x) { if (x > d) d = x; }); b = Math.max(b, w.gcols.filter(function (r) { return r.length; }).length); });
-    return { d: d, b: b };
-  }
   function nxTestTab(tbt) {
     var list = $('#testList'); if (!list) return;
     var game = list.innerHTML;
     var news = [
-      tbt('nBigBase', 'Stort ögonblick: grundspelet', 'Bandspelaren kommer upp och spolar LAYER 1, 2 … innan lagret rivs in.'),
       tbt('nAnt2', 'Väntan: 2 bomber', 'Två bomber har landat: nästa hjul snurrar längre, saktar in och kryper in mot den tredje.'),
       tbt('nAntGold', 'Guldväntan', '3 bomber på hjul 1–3: hjul 4, 5 och 6 väntar i guld, längre för varje hjul. Oftast utan guld.'),
       tbt('nGold', 'Guldbomben', 'Guldväntan som slutar med guldbomben och Maniac (kan ta några sekunder att hitta).'),
@@ -13875,12 +13787,18 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // ljudet (armUnlock). Det görs vid starten, och igen om telefonen har pausat ljudet medan sidan syns eller när man kommer
   // tillbaka (skärmen släcktes under autospelet, ett samtal, en annan app tog ljudet): då startar ljudet vid nästa tryck.
   // På startskärmen (förklaringen) spelar loungemusiken (sound-lounge.js); vid SPELA tar introt och spelets musik över.
-  var unlockArmed = false, UNLOCK_EVENTS = ['pointerup', 'touchend', 'keydown'];
+  // soundStale: ljudet kom inte tillbaka (se backToPage), så nästa tryck bygger om ljudmotorn i stället för att bara starta den
+  var unlockArmed = false, soundStale = false, UNLOCK_EVENTS = ['pointerup', 'touchend', 'keydown'];
   function unlockTouch() {
     if (!unlockArmed) return;
     unlockArmed = false;
     UNLOCK_EVENTS.forEach(function (ev) { document.removeEventListener(ev, unlockTouch, true); });
-    if (Sound.on) Sound.unlock();
+    if (Sound.on) {
+      if (soundStale && Sound.ctx) { soundStale = false; Sound.rebuild(); soundRestart(); }
+      Sound.unlock();
+      // kom ljudet ändå inte igång byggs ljudmotorn om vid nästa tryck
+      soundCheck(400);
+    }
     if (Lounge.want && !introEl.hidden) Lounge.start();
   }
   function armUnlock() {
@@ -13981,15 +13899,40 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (e.code === 'Space' && !e.repeat && !(state.auto > 0 && !state.busy)) spin();
   });
 
-  // sidan döljs: ljudet pausas; tillbaka: ljudet startas direkt, och går det inte (telefonen kräver ett tryck) startar
-  // det vid nästa tryck
+  // sidan döljs (bytt flik eller app): ljudet pausas. Tillbaka: ljudet startas direkt. Kommer det inte igång (telefonen
+  // kräver ett tryck, eller ljudet har fastnat eller är tyst fast det säger att det spelar, som på iPhone efter ett
+  // appbyte) byggs ljudmotorn om vid nästa tryck, så att ljudet aldrig försvinner för gott (användaren 2026-10-22).
+  function backToPage() {
+    if (!Sound.ctx || document.hidden) return;
+    var p; try { p = Sound.ctx.resume(); } catch (e) { /* ignorera */ }
+    if (p && p.then) p.then(null, armUnlock);
+    soundCheck(500);
+  }
+  // efter ms: går ljudmotorn och tiden i den framåt? Annars väntar vi på ett tryck, och det trycket bygger om ljudmotorn
+  // (fastnat, 'interrupted', eller 'running' fast tiden står still), så att ett tryck alltid räcker
+  function soundCheck(ms) {
+    var c = Sound.ctx; if (!c) return;
+    var t0 = c.currentTime;
+    setTimeout(function () {
+      if (Sound.ctx !== c || document.hidden || !Sound.on) return;
+      var still = c.currentTime - t0 < ms / 4000;
+      if (c.state === 'running' && !still) return;
+      soundStale = true;
+      armUnlock();
+    }, ms);
+  }
+  // musiken som spelade startas om i den nya ljudmotorn (startskärmens loungemusik eller spelets musik)
+  function soundRestart() {
+    try { if (Lounge.timer) { Lounge.stop(0); Lounge.start(); } } catch (e) { /* ignorera */ }
+    try { if (Music.timer) { Music.stop(); Music.start(); if (!introEl.hidden) Music.muffle(true, 0); } } catch (e) { /* ignorera */ }
+  }
   document.addEventListener('visibilitychange', function () {
     if (!Sound.ctx) return;
-    if (document.hidden) { Sound.ctx.suspend(); return; }
-    var p = Sound.ctx.resume();
-    if (p && p.then) p.then(null, armUnlock);
-    setTimeout(function () { if (Sound.ctx && Sound.ctx.state !== 'running' && !document.hidden) armUnlock(); }, 400);
+    if (document.hidden) { try { Sound.ctx.suspend(); } catch (e) { /* ignorera */ } return; }
+    backToPage();
   });
+  // tillbaka från webbläsarens historik (sidan sparad i minnet): samma sak
+  window.addEventListener('pageshow', function (e) { if (e.persisted) backToPage(); });
 
   // På mobilen fälls adressfältet upp och ner när man rör vid skärmen. Det ändrar höjden lite och
   // ska inte rita om hela spelet, annars hoppar allt. Bara riktiga ändringar (bredd, vridning) räknas.
