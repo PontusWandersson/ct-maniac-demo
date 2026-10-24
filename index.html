@@ -1490,8 +1490,9 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .portrait body.fs .g-top .ibtn.langbtn { display: none; }
 /* insatsen i knappraden (hud-1.js): talet och en osynlig kopia av den högsta insatsen i samma ruta, så att rutan alltid är
    lika bred och knappraden står still när insatsen ändras. Telefonen har en fast bredd och krymper i stället långa belopp. */
-#bet { display: inline-grid; justify-items: center; }
-#bet > span { grid-area: 1 / 1; }
+#bet { display: inline-grid; justify-items: start; }
+/* talet ser ut som saldot (Bangers, helvitt), inte som etiketten INSATS (.stat span gäller annars alla span i knappen) */
+#bet > span { grid-area: 1 / 1; font: inherit; letter-spacing: inherit; text-transform: none; color: inherit; opacity: 1; }
 #bet > .bet-w { visibility: hidden; }
 .portrait #bet > .bet-w { display: none; }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
@@ -2858,18 +2859,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     'Köp: Maniac för {x} gånger insatsen. Köpt Maniac ger i snitt {p} tillbaka.': 'Buy: Maniac for {x} times the bet. A bought Maniac returns {p} on average.',
     'Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.':
       'The multi applies to the whole win step. After the step it grows for every corner in the wins: +1 for one spin back, +2 for two and +3 for three. It never resets during the bonus.',
-    'Multin börjar på x{m} och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.':
-      'The multi starts at x{m} and applies to the whole win step. After the step it grows for every corner in the wins: +1 for one spin back, +2 for two and +3 for three. It never resets during the bonus.',
     'Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.': 'After every win step the multi grows by as much as the corners lie back, from +1 to +{d}. The multi never resets.',
-    'Alla {d} lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x{a}–x{b}, och multin börjar på summan: x{r}.': 'All {d} layers are filled from the start, with new boards from the base game reels. Each layer gives a start multi of x{a}–x{b}, and the multi starts at the sum: x{r}.',
-    'Multin börjar på x{m} och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.': 'The multi starts at x{m} and grows after every win step by as much as the corners lie back, from +1 to +{d}. The multi never resets.',
     ' eller ': ' or ',
     ' och ': ' and ',
     '{n} lager x{x}': '{n} layers x{x}',
-    'Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn.':
-      'Cassette: when {name} starts, the cassette rewinds one layer at a time, {list} layers (random). Those layers are filled with new boards from the base game reels, and each layer gives its number × {s} in start multi ({vals}). The multi starts at the sum: {sums}. Layers that are not filled at the start are filled one per free spin.',
-    'Kassetten: när {name} startar spolar kassetten tillbaka {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och för varje sådant lager kastar kassetten ett LAYER: {layers} (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × {s} i startmulti (LAYER 1 = x{s}, LAYER {top} = x{topx}). Multin börjar på summan: x{range}. Lagren som inte fylls från start fylls på ett per frispinn.':
-      'Cassette: when {name} starts, the cassette rewinds {list} layers (random). Those layers are filled with new boards from the base game reels, and for each such layer the cassette throws a LAYER: {layers} (random, the same LAYER can come several times), which gives its number × {s} in start multi (LAYER 1 = x{s}, LAYER {top} = x{topx}). The multi starts at the sum: x{range}. Layers that are not filled at the start are filled one per free spin.',
+    'Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). LAYER 1 är brädet där bonusen startade. Övriga lager som spolas fram fylls med helt nya, slumpade bräden från grundspelets hjul; inget kommer från tidigare spel. Varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn, med frispinnens bräden.':
+      'Cassette: when {name} starts, the cassette rewinds one layer at a time, {list} layers (random). LAYER 1 is the board the bonus started on. The other layers rewound are filled with brand-new random boards from the base game reels; nothing comes from earlier games. Each layer gives its number × {s} in start multi ({vals}). The multi starts at the sum: {sums}. Layers that are not filled at the start are filled one per free spin, with the free spins\' boards.',
     'Lavin och multiplikator': 'Cascades and multiplier',
     'Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.': 'Winning symbols explode and new ones fall in. This continues as long as there are new wins.',
     'I grundspelet finns ingen multi: varje vinst betalar som i vinsttabellen. Multin finns i Bonusspelet.': 'There is no multi in the base game: every win pays as in the paytable. The multi is in the Bonus Game.',
@@ -7975,7 +7970,6 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function mtStep(mn) { return Math.min.apply(null, mtSD(mn).v); }
   function mtLayerOf(v, mn) { return Math.max(1, Math.round(v / mtStep(mn))); }
   function mtTopLayer(mn) { return mtLayerOf(Math.max.apply(null, mtSD(mn).v), mn); }
-  function mtLayerList(mn) { var t = mtTopLayer(mn), a = []; for (var q = 1; q < t; q++) a.push(q); return a.join(', ') + txl(' eller ') + t; }
   // seq: kassetten spolar ett lager i taget och LAYER k ger v[k - 1] (inget slumpas utom hur många lager); summan för n lager
   function mtSeq(mn) { return !!mtSD(mn).seq; }
   function mtSumTo(n, mn) { var v = mtSD(mn).v, t = 0; for (var q = 0; q < n; q++) t += v[Math.min(q, v.length - 1)]; return t; }
@@ -7985,15 +7979,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function mtRuleText(mn) {
     var and = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + txl(' och ') + a[a.length - 1]; };
     var name = mtMn(mn) ? 'Maniac' : txl('Bonusspelet');
-    if (mtSeq(mn)) {
-      var vals = [], sums = [];
-      for (var q = 1; q <= mtTopLayer(mn); q++) vals.push('LAYER ' + q + ' = x' + mtSD(mn).v[q - 1]);
-      mtLD(mn).v.forEach(function (n) { sums.push(txl('{n} lager x{x}', { n: n, x: mtSumTo(n, mn) })); });
-      return txl('Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn.',
-        { name: name, list: mtLayersList(mn), s: mtStep(mn), vals: and(vals), sums: and(sums) });
-    }
-    return txl('Kassetten: när {name} startar spolar kassetten tillbaka {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och för varje sådant lager kastar kassetten ett LAYER: {layers} (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × {s} i startmulti (LAYER 1 = x{s}, LAYER {top} = x{topx}). Multin börjar på summan: x{range}. Lagren som inte fylls från start fylls på ett per frispinn.',
-      { name: name, list: mtLayersList(mn), layers: mtLayerList(mn), s: mtStep(mn), top: mtTopLayer(mn), topx: mtTopLayer(mn) * mtStep(mn), range: mtRange(mn) });
+    var vals = [], sums = [];
+    for (var q = 1; q <= mtTopLayer(mn); q++) vals.push('LAYER ' + q + ' = x' + mtSD(mn).v[q - 1]);
+    mtLD(mn).v.forEach(function (n) { sums.push(txl('{n} lager x{x}', { n: n, x: mtSumTo(n, mn) })); });
+    return txl('Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). LAYER 1 är brädet där bonusen startade. Övriga lager som spolas fram fylls med helt nya, slumpade bräden från grundspelets hjul; inget kommer från tidigare spel. Varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn, med frispinnens bräden.',
+      { name: name, list: mtLayersList(mn), s: mtStep(mn), vals: and(vals), sums: and(sums) });
   }
   // trösklarna följer startmultins värden: de två högsta värdena per lager smäller hårdare, det högsta hårdast, och
   // STARTMULTI smäller extra stort från två tredjedelar av högsta möjliga (Maniac x50 av x75, Bonusspelet x20 av x30)
@@ -8872,13 +8862,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }
     // texterna skrivs på svenska; engelskan står i lang-en.js (txl)
     var autoList = (function () { var a = AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }); return a.slice(0, -1).join(', ') + txl(' eller ') + a[a.length - 1]; })();
-    var fsRule = M.TIME.fsStartDraw && M.TIME.fsLayersDraw ? '<li>' + mtRuleText(false) + '</li>' +
-        '<li>' + txl('Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.') + '</li>'
-      : '<li>' + txl('Multin börjar på x{m} och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.', { m: M.TIME.fsStart }) + '</li>';
+    var fsRule = '<li>' + mtRuleText(false) + '</li>' +
+      '<li>' + txl('Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.') + '</li>';
     var mnGrow = '<li>' + txl('Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.', { d: M.TIME.maniacDepth }) + '</li>';
-    var mnRule = M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>' + mtRuleText(true) + '</li>' + mnGrow
-      : M.TIME.maniacStartDraw ? '<li>' + txl('Alla {d} lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x{a}–x{b}, och multin börjar på summan: x{r}.', { d: M.TIME.maniacDepth, a: Math.min.apply(null, M.TIME.maniacStartDraw.v), b: Math.max.apply(null, M.TIME.maniacStartDraw.v), r: mtRange() }) + '</li>' + mnGrow
-      : '<li>' + txl('Multin börjar på x{m} och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.', { m: M.TIME.maniacStart, d: M.TIME.maniacDepth }) + '</li>';
+    var mnRule = '<li>' + mtRuleText(true) + '</li>' + mnGrow;
     $('#infoBody').innerHTML =
       '<section><h3>' + txl('Fakta om spelet') + '</h3><div class="facts">' +
       '<div class="fact"><span>' + txl('Återbetalning (RTP)') + '</span><b>' + percent(96.0) + '</b></div>' +
