@@ -570,7 +570,8 @@ body.tids .time-cap.at-bottom { bottom: -20px; }
 .spin:hover svg { transform: rotate(70deg); }
 .spin:active { transform: translate(3px, 4px) scale(.97); box-shadow: inset 0 0 0 4px #ffe680, inset 0 -9px 0 4px rgba(21, 17, 31, .14), 1px 1px 0 var(--ink); }
 .spin.busy { filter: saturate(.6) brightness(.92); }
-.spinwrap.spinning .spin:not(.stop) svg { animation: rays .6s linear infinite; }
+/* pilen snurrar medan hjulen snurrar: vinkeln sätts av spin-ico.js (mjukt upp och ner, inget hopp mellan snurren) */
+.spin svg { rotate: var(--spin-a, 0deg); }
 .spin.stop { background: var(--pop); color: var(--paper); box-shadow: inset 0 0 0 4px #ff8080, inset 0 -9px 0 4px rgba(21, 17, 31, .2), 4px 5px 0 var(--ink); }
 .spin .count { font: 400 40px/1 var(--display); }
 .spin .sub { position: absolute; bottom: 13px; left: 0; right: 0; font: 700 9.5px/1 var(--ui); letter-spacing: .12em; }
@@ -1950,6 +1951,30 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .mitem:disabled { opacity: .45; cursor: default; }
 .testbtn { width: auto !important; padding: 0 11px !important; font: 400 17px/1 var(--display); letter-spacing: .08em; }
 
+.mitem.mlang { cursor: default; flex-wrap: wrap; }
+.mitem.mlang:hover { background: #fff; }
+.lang-pick { display: inline-flex; gap: 6px; }
+.lang-pick button { font: 700 14px/1 var(--ui); color: var(--ink); background: #fff; border: 2.5px solid var(--ink); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+.lang-pick button.on { background: var(--sun); box-shadow: 2px 2px 0 var(--ink); }
+.lang-pick button:disabled { opacity: .45; cursor: default; }
+/* språkknappen ute på spelet (lang.js): SV | EN, det valda språket gult. Den ligger ovanpå (position absolute), så att
+   toppraden och allt annat står kvar där det stod. Datorn: bredvid info-knappen. Telefonen: till höger om LAYERSPINS-raden. */
+/* datorn: i raden efter info-knappen; den negativa marginalen tar bort knappens bredd ur raden, så att kolumnen inte växer */
+.ibtn.langbtn { width: 74px; margin-right: -82px; gap: 5px; display: inline-flex; align-items: center; justify-content: center; font: 800 13px/1 var(--ui); letter-spacing: .04em; }
+.langbtn b { opacity: .55; font-weight: 800; }
+.langbtn b.on { opacity: 1; color: var(--sun); }
+.langbtn i { width: 1.5px; height: 14px; background: rgba(255, 246, 224, .5); }
+.ibtn.langbtn:disabled { opacity: .45; cursor: default; }
+/* telefonen: ingen plats i toppraden, så den ligger till höger om LAYERSPINS-raden, ovanpå (räknas från toppraden) */
+.portrait .g-top .ibtn.langbtn { position: absolute; right: 6px; top: calc(100% + 16px); width: 64px; height: 34px; margin: 0; font-size: 12px; z-index: 40; }
+/* telefonen i bonusen: raden med frispinn, multi och total vinst ligger där, och språket byts ändå inte mitt i en omgång */
+.portrait body.fs .g-top .ibtn.langbtn { display: none; }
+/* insatsen i knappraden (hud-1.js): talet och en osynlig kopia av den högsta insatsen i samma ruta, så att rutan alltid är
+   lika bred och knappraden står still när insatsen ändras. Telefonen har en fast bredd och krymper i stället långa belopp. */
+#bet { display: inline-grid; justify-items: center; }
+#bet > span { grid-area: 1 / 1; }
+#bet > .bet-w { visibility: hidden; }
+.portrait #bet > .bet-w { display: none; }
 /* Graffiti Meter: ett färgstreck som målas runt ramen, ett steg per lavin */
 .busring { position: absolute; left: -6px; top: -6px; pointer-events: none; overflow: visible; z-index: 2; }
 .busring .track { fill: none; stroke: rgba(21, 17, 31, .28); stroke-width: 7; }
@@ -2520,6 +2545,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       <button class="ibtn" id="btnInfo" type="button" aria-label="Regler och vinsttabell">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.3" r=".7" fill="currentColor"/></svg>
       </button>
+      <button class="ibtn langbtn" id="btnLang" type="button" aria-label="Byt språk · Change language"><b data-lang="sv">SV</b><i aria-hidden="true"></i><b data-lang="en">EN</b></button>
     </div>
     <h1 class="logo" aria-label="C&amp;T Maniac"><span class="l-c">C</span><span class="l-amp">&amp;</span><span class="l-t">T</span><span class="l-m">MANIAC</span></h1>
     <div class="top-r">
@@ -2648,6 +2674,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         <label class="mitem">Ljudeffekter <input type="checkbox" id="optSfx"></label>
         <label class="mitem">Musik <input type="checkbox" id="optMusic"></label>
         <label class="mitem">Turbo <input type="checkbox" id="optTurbo"></label>
+        <div class="mitem mlang"><span>Språk · Language</span><span class="lang-pick" role="group" aria-label="Språk · Language"><button type="button" data-lang="sv">Svenska · kr</button><button type="button" data-lang="en">English · €</button></span></div>
         <button class="mitem" type="button" id="mReset">Börja om med 10 000 mynt <span aria-hidden="true">›</span></button>
       </div>
       <p class="note">Mellanslag snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt. Familjespel för skojs skull: mynten är låtsaspengar.</p>
@@ -3611,14 +3638,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   var $ = function (s) { return document.querySelector(s); };
 
   // ---------------------------------------------------------------- lagring
+  // Pengarna sparas per valuta (saldo, insats, väggarna per insats, sparade omgångar och autospelets gränser), så att kronor
+  // och euro aldrig blandas. Kronorna har kvar sina gamla nycklar.
+  var CUR_KEYS = /^(balance|bet|meters|walls|wallInit|wallVoid|round|autoStop)\b/;
+  function curKey(k) { return CUR && CUR !== 'SEK' && CUR_KEYS.test(k) ? CUR + '.' + k : k; }
   var store = {
-    get: function (k, def) { try { var v = localStorage.getItem('ctm.' + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } },
-    set: function (k, v) { try { localStorage.setItem('ctm.' + k, JSON.stringify(v)); } catch (e) { /* lagring blockerad */ } },
-    del: function (k) { try { localStorage.removeItem('ctm.' + k); } catch (e) { /* lagring blockerad */ } },
+    get: function (k, def) { try { var v = localStorage.getItem('ctm.' + curKey(k)); return v == null ? def : JSON.parse(v); } catch (e) { return def; } },
+    set: function (k, v) { try { localStorage.setItem('ctm.' + curKey(k), JSON.stringify(v)); } catch (e) { /* lagring blockerad */ } },
+    del: function (k) { try { localStorage.removeItem('ctm.' + curKey(k)); } catch (e) { /* lagring blockerad */ } },
     // alla nycklar som börjar med prefix (utan "ctm.")
     keys: function (prefix) {
       var out = [];
-      try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('ctm.' + prefix) === 0) out.push(k.slice(4)); } } catch (e) { /* lagring blockerad */ }
+      var full = 'ctm.' + curKey(prefix);
+      try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf(full) === 0) out.push(prefix + k.slice(full.length)); } } catch (e) { /* lagring blockerad */ }
       return out;
     }
   };
@@ -3626,13 +3658,26 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // inte skrivs över.
   function syncBalance() { var b = store.get('balance', null); if (typeof b === 'number' && isFinite(b)) state.balance = b; }
 
-  // ---------------------------------------------------------------- pengar (i ören)
-  var BETS = TIDS ? [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000] : [100, 200, 500, 1000, 2000, 5000, 10000];
-  var START_BALANCE = TIDS ? 10000000 : 1000000;
+  // ---------------------------------------------------------------- språk och valuta
+  // Testarna väljer i menyn (lang.js): svenska med kronor eller engelska med euro. ?lang=sv eller ?lang=en i länken går före.
+  // LOC: hur tal skrivs (decimalkomma eller decimalpunkt).
+  var LANG = (function () { var q = /[?&]lang=(sv|en)\b/.exec(location.search); return q ? q[1] : store.get('lang', 'sv') === 'en' ? 'en' : 'sv'; })();
+  var LOC = LANG === 'en' ? 'en-GB' : 'sv-SE', CUR = LANG === 'en' ? 'EUR' : 'SEK';
+  // ---------------------------------------------------------------- pengar (i ören eller cent)
+  // euro: en tiondel av kronorna (insatser 0,10–100 €, startsaldo 10 000 €)
+  var BETS = (TIDS ? [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000] : [100, 200, 500, 1000, 2000, 5000, 10000]).map(function (b) { return CUR === 'EUR' ? b / 10 : b; });
+  var START_BALANCE = (TIDS ? 10000000 : 1000000) / (CUR === 'EUR' ? 10 : 1);
   // köpens återbetalning, uppmätt med tools/sim-cert.js (se reports/ct-maniac-par.html)
-  var BUY_X = TIDS ? M.TIME.fsBuy : 35, BUY_RTP = TIDS ? '96,0' : '96,1', BUY_RTP_MN = '96,0';
-  var nf = new Intl.NumberFormat('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var BUY_X = TIDS ? M.TIME.fsBuy : 35, BUY_RTP = percent(TIDS ? 96.0 : 96.1), BUY_RTP_MN = percent(96.0);
+  var nf = new Intl.NumberFormat(LOC, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // belopp som tal på spelarens språk ("10,00" eller "10.00"); vinsterna, priserna och menyerna visar bara talet
   function money(c) { return nf.format(c / 100); }
+  // belopp med valuta, bara vid saldo och vinst i knappraden (där syns valutan, användaren 2026-10-23): "10,00 kr" eller "€10.00"
+  function moneyCur(c) { var s = money(c); return CUR === 'EUR' ? '€' + s : s + '\u00a0kr'; }
+  // kort belopp för insatsvalet: hela belopp utan decimaler ("10"), annars som money ("0.10")
+  function moneyShort(c) { return c % 100 ? money(c) : money(c).replace(LANG === 'en' ? '.00' : ',00', ''); }
+  // procent på spelarens språk: "96,0 %" eller "96.0%" (d: antal decimaler, standard 1)
+  function percent(x, d) { var s = x.toLocaleString(LOC, { minimumFractionDigits: d == null ? 1 : d, maximumFractionDigits: d == null ? 1 : d }); return LANG === 'en' ? s + '%' : s + '\u00a0%'; }
 
   var state = {
     balance: START_BALANCE, betIdx: 3, busy: false, phase: 'idle', meters: {},
@@ -3640,6 +3685,309 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   };
   function bet() { return BETS[state.betIdx]; }
 
+  // {namn} byts mot ett värde (ett tal, ett belopp). Saknas en text här visas den svenska. Nya texter läggs till här när de
+  // skrivs i koden med txl('…'). Regeltexterna bör granskas av någon med engelska som modersmål före lansering.
+  var EN = {
+    // ---- sidans fasta texter (lang.js translatePage)
+    'Spelet laddas': 'The game is loading',
+    'presenterar': 'presents',
+    'LADDAR': 'LOADING',
+    'Testknapp': 'Test button',
+    'Regler och vinsttabell': 'Rules and paytable',
+    'Meny': 'Menu',
+    'Ljud av eller på. Håll in för volym.': 'Sound on or off. Hold for volume.',
+    'Volym': 'Volume',
+    'Helskärm': 'Full screen',
+    'Frispinn kvar': 'Free spins left',
+    'Bonusvinst': 'Bonus win',
+    'Köp bonus: 10 frispinn i Maniac Mode': 'Buy bonus: 10 free spins in Maniac Mode',
+    'Köp bonus: {n} frispinn i Bonusspelet': 'Buy bonus: {n} free spins in the Bonus Game',
+    'KÖP BONUS': 'BUY BONUS',
+    '10 frispinn direkt': '10 free spins now',
+    'Spelplan med 6 hjul och 6 rader': 'Game board with 6 reels and 6 rows',
+    '6×6 · 46 656 VÄGAR': '6×6 · 46,656 WAYS',
+    'Saldo': 'Balance',
+    'Vinst': 'Win',
+    'Välj insats': 'Choose bet',
+    'Sänk insats': 'Lower bet',
+    'Höj insats': 'Raise bet',
+    'Autospel': 'Autoplay',
+    'Stäng': 'Close',
+    'Så funkar spelet': 'How the game works',
+    'Ljudeffekter': 'Sound effects',
+    'Musik': 'Music',
+    'Börja om med {b}': 'Start over with {b}',
+    'Mellanslag snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt. Familjespel för skojs skull: mynten är låtsaspengar.': 'Space spins. Press again while the reels spin to stop at once. Just for fun: the coins are play money.',
+    'Starta en funktion direkt och se hur den känns. Testsnurr dras från låtsassaldot som vanliga snurr.': 'Start a feature directly and see how it feels. Test spins are taken from the play balance like normal spins.',
+    'Så funkar det': 'How it works',
+    'MAXVINST': 'MAX WIN',
+    'Föregående ruta': 'Previous slide',
+    'Nästa ruta': 'Next slide',
+    'SPELA': 'PLAY',
+    'Demo med spelpengar. Mynten kan inte tas ut eller köpas.': 'Demo with play money. The coins cannot be cashed out or bought.',
+
+    // ---- knappar, autospel och mätare
+    'Stoppa hjulen': 'Stop the reels',
+    'Snurra': 'Spin',
+    'Ingen gräns': 'No limit',
+    'Antal snurr': 'Number of spins',
+    'Stoppa autospelet': 'Stop autoplay',
+    'när en bonus startar': 'when a bonus starts',
+    'om saldot minskar med': 'if the balance drops by',
+    'om en vinst är minst': 'if a win is at least',
+    'Låg': 'Low',
+    'Låg–medel': 'Low–medium',
+    'Medel': 'Medium',
+    'Hög': 'High',
+    'Extrem': 'Extreme',
+    'VOLATILITET': 'VOLATILITY',
+    'Volatilitet {n} av 5: {name}': 'Volatility {n} of 5: {name}',
+    '{x} × insatsen': '{x} × bet',
+    'Total vinst': 'Total win',
+
+    // ---- symbolerna
+    'Punkaren': 'The Punk',
+    'Graffitikillen': 'The Graffiti Kid',
+    'Bergsprängare': 'Boombox',
+    'Sprayburk': 'Spray can',
+    'Kassett': 'Cassette',
+    'Guldbomb': 'Gold bomb',
+    'Guldburk': 'Gold can',
+
+    // ---- vinster
+    'STORVINST!': 'BIG WIN!',
+    'MEGAVINST!': 'MEGA WIN!',
+    'GRYMT!': 'SICK!',
+    'MAXVINST!': 'MAX WIN!',
+    'Klicka var som helst för att fortsätta': 'Click anywhere to continue',
+    'Tryck för att fortsätta': 'Tap to continue',
+    'FORTSÄTT': 'CONTINUE',
+    '{n} hjul': '{n} reels',
+    ' väg': ' way',
+    ' vägar': ' ways',
+    'tidsväg': 'time way',
+    'Grymt!': 'Awesome!',
+    'Snyggt!': 'Nice!',
+    'Bra kämpat!': 'Good effort!',
+    'Nära!': 'Close!',
+    'MANIAC-<br>VINST!': 'MANIAC<br>WIN!',
+    'MEGA-<br>VINST!': 'MEGA<br>WIN!',
+    'STOR<br>VINST!': 'BIG<br>WIN!',
+
+    // ---- bonusarna
+    'Bonusen fortsätter': 'The bonus continues',
+    'Köpt bonus': 'Bought bonus',
+    'MANIACBONUS': 'MANIAC BONUS',
+    'BONUSSPEL': 'BONUS GAME',
+    'Bonusspel': 'Bonus Game',
+    'BONUS<br>SPEL': 'BONUS<br>GAME',
+    'Bonusspelet': 'the Bonus Game',
+    'Maniacbonus': 'Maniac Bonus',
+    '{n} frispinn kvar': '{n} free spins left',
+    '{n} frispinn': '{n} free spins',
+    '<p>Kassetten spolar fram <b>{n} LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × {x}</b> i MULTI, och allt läggs ihop</p>':
+      '<p>The cassette rewinds <b>{n} LAYERS</b>. Each LAYER gives <b class="nw">its LAYER number × {x}</b> in MULTI, and it all adds up</p>',
+    '<p><b>MULTI x{m}</b> nollställs aldrig</p>': '<p><b>MULTI x{m}</b> never resets</p>',
+    '<p>Vinster hämtar symboler <b>upp till {d} snurr bakåt</b></p>': '<p>Wins pull symbols <b>from up to {d} spins back</b></p>',
+    '<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>':
+      '<p>A win from a layer raises the multi by the layer number: <b>LAYER 3 = +3</b></p><p><b>3 BOMBS</b> = +{n} free spins</p>',
+    'Startar automatiskt': 'Starts automatically',
+    '+{n} FRISPINN!': '+{n} FREE SPINS!',
+    'Maxvinsten är nådd, så bonusen avslutades med {n} frispinn kvar.': 'Max win reached, so the bonus ended with {n} free spins left.',
+    'Maxvinsten är nådd.': 'Max win reached.',
+    'Maniac klart': 'Maniac complete',
+    'Bonusspel klart': 'Bonus Game complete',
+    'Bonusen gav {x} gånger insatsen.': 'The bonus paid {x} times the bet.',
+    'Ingen vinst den här gången.': 'No win this time.',
+    'bakåt': 'back',
+    'frispinn': 'free spins',
+    'högsta multi': 'top multi',
+    'bästa snurr': 'best spin',
+    'Pågående omgång': 'Round in progress',
+    'Välkommen tillbaka!': 'Welcome back!',
+    'Du lämnade spelet mitt i en omgång. Den spelas klart nu, med samma utfall. Insatsen är redan dragen och vinsten betalas ut när omgången är klar.':
+      'You left the game in the middle of a round. It will now be played to the end with the same outcome. The bet has already been taken, and the win is paid when the round is complete.',
+
+    // ---- köp bonus
+    '{n} FRISPINN': '{n} FREE SPINS',
+    '{x}x insatsen': '{x}x the bet',
+    'KÖP': 'BUY',
+    'Köp bonus': 'Buy bonus',
+    'Välj bonus': 'Choose bonus',
+    'Insats': 'Bet',
+    'Sänk insatsen': 'Lower the bet',
+    'Höj insatsen': 'Raise the bet',
+    'STÄNG': 'CLOSE',
+    'Är du säker?': 'Are you sure?',
+    'JA, KÖP': 'YES, BUY',
+    'AVBRYT': 'CANCEL',
+    '{n} frispinn direkt, för {x} gånger insatsen {b}. Köpt bonus ger i snitt {p} tillbaka.': '{n} free spins now, for {x} times the bet {b}. A bought bonus returns {p} on average.',
+    'Saldo {b}': 'Balance {b}',
+    'Slut på mynt!': 'Out of coins!',
+    'Mynten är låtsaspengar. Fyll på och kör vidare.': 'The coins are play money. Top up and keep playing.',
+    'FYLL PÅ': 'TOP UP',
+    'FÖRLUSTGRÄNSEN NÅDD': 'LOSS LIMIT REACHED',
+    'VINSTGRÄNSEN NÅDD': 'WIN LIMIT REACHED',
+    'AUTOSPEL STOPP': 'AUTOPLAY STOPPED',
+
+    // ---- så vinner du (info-ways.js)
+    'Vinst på 3 hjul': 'Win on 3 reels',
+    'Lika symboler på hjul i rad, från hjulet längst till vänster. Raden spelar ingen roll.': 'Matching symbols on adjacent reels, starting from the leftmost reel. The row does not matter.',
+    'Fler vägar': 'More ways',
+    'Två K på samma hjul ger två vinstvägar: 1 × 2 × 1 × 1 = 2 vägar på 4 hjul.': 'Two K on the same reel give two ways to win: 1 × 2 × 1 × 1 = 2 ways on 4 reels.',
+    'Wild finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.': 'Wild appears on reels 2–6 and substitutes for all symbols except the bonus bomb.',
+    'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.': 'If the symbol is missing on the next reel, the previous spin\'s symbol in the torn corner can fill the gap, and the win continues.',
+    '46 656 vinstvägar': '46,656 ways to win',
+    '6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.': '6 rows on each of the 6 reels: 6 × 6 × 6 × 6 × 6 × 6 = 46,656 ways. All ways count on every spin.',
+
+    // ---- reglerna (info.js)
+    'Fakta om spelet': 'Game facts',
+    'Återbetalning (RTP)': 'Return to player (RTP)',
+    'RTP köpt Bonusspel': 'RTP bought Bonus Game',
+    'RTP köpt Maniac': 'RTP bought Maniac',
+    'Maxvinst': 'Max win',
+    'Volatilitet': 'Volatility',
+    'Vinstvägar': 'Ways to win',
+    'Siffrorna kommer från simuleringar av 100 miljoner spelomgångar och 1 miljon köp av varje bonus (spelmotor 1.1.0, preliminärt tills certifieringskörningen är gjord). Återbetalningen är ett teoretiskt snitt över väldigt många spelomgångar.':
+      'The figures come from simulations of 100 million game rounds and 1 million buys of each bonus (game engine 1.1.0, preliminary until the certification run is done). The return is a theoretical average over a very large number of game rounds.',
+    'Så vinner du': 'How you win',
+    'Varje ny symbol är en affisch över förra snurrets symbol, som syns i ett rivet hörn.': 'Every new symbol is a poster pasted over the previous spin\'s symbol, which shows in a torn corner.',
+    'Har en vinst gått minst två hjul och nästa hjul saknar symbolen, kan förra snurrets symbol i hörnet fylla luckan. Vinsten fortsätter sedan i förra snurret så länge symbolen finns där och byter tillbaka till brädet när den saknas, ända till hjul 6. Wilds räknas på båda ställena.':
+      'If a win has covered at least two reels and the next reel is missing the symbol, the previous spin\'s symbol in the corner can fill the gap. The win then continues in the previous spin as long as the symbol is there, and switches back to the board when it is missing, all the way to reel 6. Wilds count in both places.',
+    'I förra snurret räknas en ruta per hjul: den med symbolen som ligger närmast raden innan, annars närmaste wild.': 'In the previous spin, one position per reel counts: the one with the symbol closest to the row before, otherwise the closest wild.',
+    'En symbol från förra snurret som har använts i en vinst försvinner och kan inte användas igen. Resten finns kvar i alla laviner i samma snurr.': 'A symbol from the previous spin that has been used in a win disappears and cannot be used again. The rest remain for all cascades in the same spin.',
+    'Kassetten: före snurret spolar kassetten ibland tillbaka 2 snurr, och då kan symboler från upp till två snurr bakåt fylla luckor. Ibland spolar den 3 snurr: upp till tre snurr bakåt. På varje hjul används brädet först och sedan närmaste lager bakåt som har symbolen. Ingen multi i grundspelet.':
+      'Cassette: before the spin, the cassette sometimes rewinds 2 spins, and then symbols from up to two spins back can fill gaps. Sometimes it rewinds 3 spins: up to three spins back. On each reel the board is used first, then the nearest layer back that has the symbol. No multi in the base game.',
+    'Väggen med de tre senaste brädena sparas mellan snurren och finns kvar när du kommer tillbaka. Byter du insats ligger brädet kvar, men väggen börjar om: nästa snurr har inget förra snurr att hämta symboler från.':
+      'The wall with the three latest boards is saved between spins and is still there when you come back. If you change the bet, the board stays, but the wall starts over: the next spin has no previous spin to take symbols from.',
+    'Vinsttabell': 'Paytable',
+    'Belopp per vinstväg vid insatsen {b}. Lika symboler räknas från hjulet längst till vänster, på hjul i rad, på vilken rad som helst.': 'Amount per way at the bet {b}. Matching symbols count from the leftmost reel, on adjacent reels, on any row.',
+    'Symbol': 'Symbol',
+    '<b>Wild</b> finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.': '<b>Wild</b> appears on reels 2–6 and substitutes for all symbols except the bonus bomb.',
+    '<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.':
+      '<b>The bonus bomb</b>: 3 or more bombs anywhere on the board when the cascades are over give {n} free spins. If one of the bombs turns gold, the Maniac Bonus starts instead. 3 or more bombs in a free spin give {r} more free spins.',
+    'Väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).': 'The wall has {d} layers back. If the symbol is missing on the board, it is taken from the nearest layer back that has it (the number at the corner shows how far back).',
+    'I Bonusspelet är vinsterna vinsttabellen gånger {s}, och sedan gånger multin.': 'In the Bonus Game, wins are the paytable times {s}, then times the multi.',
+    'Köp: {n} frispinn direkt för {x} gånger insatsen. Köpt Bonusspel ger i snitt {p} tillbaka.': 'Buy: {n} free spins now for {x} times the bet. A bought Bonus Game returns {p} on average.',
+    'Maniac-bonus': 'Maniac Bonus',
+    'Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Maniac-bonusen med {n} frispinn.':
+      'The gold bomb: if 5 or more bombs land when the reels stop, the last bomb turns gold. If exactly 4 land, the last one turns gold in {p} of cases. The gold bomb starts the Maniac Bonus with {n} free spins.',
+    'Djupare tid: väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till {d} snurr (siffran vid hörnet visar hur långt bakåt).':
+      'Deeper time: the wall has {d} layers back. If the symbol is missing on the board, it is taken from the nearest layer back that has it, up to {d} spins (the number at the corner shows how far back).',
+    'I Maniac är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.': 'In Maniac, wins are the paytable times {s}, then times the multi. 3 or more bombs give 3 more free spins.',
+    'Köp: Maniac för {x} gånger insatsen. Köpt Maniac ger i snitt {p} tillbaka.': 'Buy: Maniac for {x} times the bet. A bought Maniac returns {p} on average.',
+    'Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.':
+      'The multi applies to the whole win step. After the step it grows for every corner in the wins: +1 for one spin back, +2 for two and +3 for three. It never resets during the bonus.',
+    'Multin börjar på x{m} och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.':
+      'The multi starts at x{m} and applies to the whole win step. After the step it grows for every corner in the wins: +1 for one spin back, +2 for two and +3 for three. It never resets during the bonus.',
+    'Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.': 'After every win step the multi grows by as much as the corners lie back, from +1 to +{d}. The multi never resets.',
+    'Alla {d} lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x{a}–x{b}, och multin börjar på summan: x{r}.': 'All {d} layers are filled from the start, with new boards from the base game reels. Each layer gives a start multi of x{a}–x{b}, and the multi starts at the sum: x{r}.',
+    'Multin börjar på x{m} och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.': 'The multi starts at x{m} and grows after every win step by as much as the corners lie back, from +1 to +{d}. The multi never resets.',
+    ' eller ': ' or ',
+    ' och ': ' and ',
+    '{n} lager x{x}': '{n} layers x{x}',
+    'Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn.':
+      'Cassette: when {name} starts, the cassette rewinds one layer at a time, {list} layers (random). Those layers are filled with new boards from the base game reels, and each layer gives its number × {s} in start multi ({vals}). The multi starts at the sum: {sums}. Layers that are not filled at the start are filled one per free spin.',
+    'Kassetten: när {name} startar spolar kassetten tillbaka {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och för varje sådant lager kastar kassetten ett LAYER: {layers} (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × {s} i startmulti (LAYER 1 = x{s}, LAYER {top} = x{topx}). Multin börjar på summan: x{range}. Lagren som inte fylls från start fylls på ett per frispinn.':
+      'Cassette: when {name} starts, the cassette rewinds {list} layers (random). Those layers are filled with new boards from the base game reels, and for each such layer the cassette throws a LAYER: {layers} (random, the same LAYER can come several times), which gives its number × {s} in start multi (LAYER 1 = x{s}, LAYER {top} = x{topx}). The multi starts at the sum: x{range}. Layers that are not filled at the start are filled one per free spin.',
+    'Lavin och multiplikator': 'Cascades and multiplier',
+    'Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.': 'Winning symbols explode and new ones fall in. This continues as long as there are new wins.',
+    'I grundspelet finns ingen multi: varje vinst betalar som i vinsttabellen. Multin finns i Bonusspelet.': 'There is no multi in the base game: every win pays as in the paytable. The multi is in the Bonus Game.',
+    'Total vinst per spelomgång (grundsnurr och bonus) är högst {x} gånger insatsen. När den nås avslutas bonusen direkt.': 'The total win per game round (base spin and bonus) is at most {x} times the bet. When it is reached, the bonus ends at once.',
+    'Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.': 'The win is calculated in times the bet and rounded to whole cents once per game round.',
+    'Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.':
+      'Interrupted game: if you leave the game in the middle of a round, it is played to the end with the same outcome the next time you start the game. The bet is not taken again, and the win is paid when the round is complete.',
+    'Kontroller': 'Controls',
+    'Mellanslag eller den runda knappen snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt.': 'Space or the round button spins. Press again while the reels spin to stop at once.',
+    'Blixten slår på turbo.': 'The lightning bolt turns on turbo.',
+    'Pilarna startar autospel med {list} snurr. Du kan välja att autospelet stoppar när en bonus startar, när saldot har minskat med ett visst belopp eller när en vinst är minst ett visst belopp. Ett tryck på pilarna eller snurrknappen stoppar autospelet.':
+      'The arrows start autoplay with {list} spins. You can choose to stop autoplay when a bonus starts, when the balance has dropped by a set amount or when a win is at least a set amount. A tap on the arrows or the spin button stops autoplay.',
+    'Tryck på insatsen för att välja belopp direkt.': 'Tap the bet to choose an amount directly.',
+
+    // ---- guiden (guide-slides.js, guide.js)
+    ' BAKÅT': ' BACK',
+    ' SNURR BAKÅT': ' SPINS BACK',
+    'Laviner': 'Cascades',
+    '6 hjul, 6 rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.':
+      '6 reels, 6 rows and {w} ways to win. Matching symbols on adjacent reels from the left win. Winning symbols explode and new ones fall in, as long as there are new wins.',
+    'Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.':
+      'Under every symbol, the previous spin\'s symbol shows in a torn corner. If the symbol is missing on the next reel, the corner can fill the gap, and the win continues.',
+    'Kassetten': 'The cassette',
+    'Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.': 'Sometimes the cassette rewinds before the spin, 2 or 3 spins back. Then wins can take symbols from the layers back.',
+    'Bonusspel & Maniac': 'Bonus Game & Maniac',
+    '3 bomber ger Bonusspelet: {n} frispinn och {l} lager med multi.': '3 bombs give the Bonus Game: {n} free spins and {l} layers with multi.',
+    '3 bomber ger Bonusspelet: {n} frispinn där multin växer och aldrig nollställs.': '3 bombs give the Bonus Game: {n} free spins where the multi grows and never resets.',
+    'Guldbomben startar Maniac med {n} frispinn och {l} lager med multi.': 'The gold bomb starts Maniac with {n} free spins and {l} layers with multi.',
+    'Blir en bomb guld startar Maniac med {n} frispinn och {d} lager bakåt.': 'If a bomb turns gold, Maniac starts with {n} free spins and {d} layers back.',
+    'Köp: Bonusspel {a}x, Maniac {b}x.': 'Buy: Bonus Game {a}x, Maniac {b}x.',
+    'ruta': 'slide',
+    '{i} av {n}: {t}': '{i} of {n}: {t}',
+    'Ruta {i}: {t}': 'Slide {i}: {t}',
+
+    // ---- studiointrot
+    'TRYCK FÖR ATT STARTA': 'TAP TO START',
+    'Med ljud': 'With sound',
+
+    // ---- affischerna och graffitin i bakgrunden
+    'IKVÄLL · BAKGÅRDEN': 'TONIGHT · BACKYARD',
+    'FRI ENTRÉ 22:00': 'FREE ENTRY 10 PM',
+    'NYTT MIXTAPE': 'NEW MIXTAPE',
+    'UTE NU': 'OUT NOW',
+    'SPOLA TILLBAKA': 'PRESS REWIND',
+    'HELA SOMMAREN': 'ALL SUMMER',
+    'LÖRDAG 10:00': 'SATURDAY 10 AM',
+    'BERGSPRÄNGAREN': 'THE BOOMBOX',
+    'HELA NATTEN': 'ALL NIGHT',
+    'BAKGÅRDEN': 'THE BACKYARD',
+    'SLUTSÅLT': 'SOLD OUT',
+    'LIVE IKVÄLL': 'LIVE TONIGHT',
+    'GRYMT': 'SICK',
+    'KAOS': 'CHAOS'
+  };
+  // Texterna skrivs på svenska i koden; engelskan står i EN (lang-en.js), med den svenska texten som nyckel. {namn} i texten
+  // byts mot vars.namn. Saknas en översättning visas den svenska texten. LANG, LOC och CUR sätts i state.js.
+  function txl(s, vars) {
+    var out = LANG === 'en' && EN[s] != null ? EN[s] : s;
+    if (vars) out = out.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
+    return out;
+  }
+  // ett tal på spelarens språk (decimalkomma eller decimalpunkt, mellanslag eller komma mellan tusental)
+  function num(x, o) { return Number(x).toLocaleString(LOC, o); }
+  // sidans fasta texter och etiketter (knappar, menyer, rubriker) översätts en gång när spelet startar
+  function translatePage(root) {
+    if (LANG === 'sv') return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) {
+      var s = n.nodeValue, k = s.trim();
+      if (k && EN[k] != null) n.nodeValue = s.replace(k, EN[k]);
+    }
+    root.querySelectorAll('[aria-label], [title], [alt], [placeholder]').forEach(function (e) {
+      ['aria-label', 'title', 'alt', 'placeholder'].forEach(function (a) { var v = e.getAttribute(a); if (v && EN[v] != null) e.setAttribute(a, EN[v]); });
+    });
+  }
+  document.documentElement.lang = LANG;
+  translatePage(document.body);
+  // menyns "Börja om": startsaldot i spelarens valuta
+  (function () { var mr = document.getElementById('mReset'); if (mr && mr.firstChild) mr.firstChild.nodeValue = txl('Börja om med {b}', { b: moneyCur(START_BALANCE) }) + ' '; })();
+  // Språkvalet (för testare): svenska med kronor eller engelska med euro, i menyn och på språkknappen ute på spelet (SV | EN,
+  // ett tryck byter). Spelet laddas om på det nya språket; pengarna sparas per valuta (state.js). Går inte mitt i en omgång.
+  function setLang(l) {
+    if (l === LANG || state.busy || state.auto > 0) return;
+    store.set('lang', l);
+    // ?lang= i länken skulle annars gå före valet
+    var u = location.href.replace(/([?&])lang=(sv|en)(&|$)/, function (m, a, x, c) { return c ? a : ''; });
+    if (u === location.href) location.reload(); else location.replace(u);
+  }
+  document.querySelectorAll('.lang-pick [data-lang]').forEach(function (b) {
+    b.classList.toggle('on', b.getAttribute('data-lang') === LANG);
+    b.setAttribute('aria-pressed', b.getAttribute('data-lang') === LANG ? 'true' : 'false');
+    b.addEventListener('click', function () { setLang(b.getAttribute('data-lang')); });
+  });
+  (function () {
+    var lb = document.getElementById('btnLang'); if (!lb) return;
+    lb.querySelectorAll('[data-lang]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-lang') === LANG); });
+    lb.addEventListener('click', function () { setLang(LANG === 'en' ? 'sv' : 'en'); });
+  })();
   // ---------------------------------------------------------------- symboler
   var INK = '#15111f', PAPER = '#fff6e0';
   var DISPLAY = 'Bangers, Impact, "Arial Black", sans-serif';
@@ -6981,12 +7329,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   var wallPosters = [], wallTears = [], POSTER_BG = TIDS ? ['#ff903b', '#ffd84a', '#7a5cff', '#4fd6e8', '#ff9447', '#e8202e'] : ['#ffd84a', '#f3ead6', '#b9a3ff', '#4fd6e8'];
   // Tidsvägar: konsertaffischer. bg = färg, dk = mörk ton för prickar och skugga.
   var GIG = [
-    { bg: '#ff903b', dk: '#743c11', top: 'IKVÄLL · BAKGÅRDEN', t1: 'C&T', t2: 'LIVE', info: 'FRI ENTRÉ 22:00', icon: 'heroes' },
-    { bg: '#ffd84a', dk: '#a87400', top: 'NYTT MIXTAPE', t1: 'SIDE', t2: 'B', info: 'UTE NU', icon: 'cassette' },
-    { bg: '#7a5cff', dk: '#2e1a7a', top: 'SPOLA TILLBAKA', t1: 'REWIND', t2: 'TOUR', info: 'HELA SOMMAREN', icon: 'rewind' },
-    { bg: '#4fd6e8', dk: '#0f4c63', top: 'FRESH KICKS', t1: 'DROP', t2: '', info: 'LÖRDAG 10:00', icon: 'sneaker' },
-    { bg: '#ff9447', dk: '#7a2c06', top: 'BERGSPRÄNGAREN', t1: 'BLOCK', t2: 'PARTY', info: 'HELA NATTEN', icon: 'boombox' },
-    { bg: '#e8202e', dk: '#5c0a10', top: 'BOMB SQUAD', t1: 'BOOM', t2: '', info: 'BAKGÅRDEN', icon: 'bomb', sold: true }
+    { bg: '#ff903b', dk: '#743c11', top: txl('IKVÄLL · BAKGÅRDEN'), t1: 'C&T', t2: 'LIVE', info: txl('FRI ENTRÉ 22:00'), icon: 'heroes' },
+    { bg: '#ffd84a', dk: '#a87400', top: txl('NYTT MIXTAPE'), t1: 'SIDE', t2: 'B', info: txl('UTE NU'), icon: 'cassette' },
+    { bg: '#7a5cff', dk: '#2e1a7a', top: txl('SPOLA TILLBAKA'), t1: 'REWIND', t2: 'TOUR', info: txl('HELA SOMMAREN'), icon: 'rewind' },
+    { bg: '#4fd6e8', dk: '#0f4c63', top: 'FRESH KICKS', t1: 'DROP', t2: '', info: txl('LÖRDAG 10:00'), icon: 'sneaker' },
+    { bg: '#ff9447', dk: '#7a2c06', top: txl('BERGSPRÄNGAREN'), t1: 'BLOCK', t2: 'PARTY', info: txl('HELA NATTEN'), icon: 'boombox' },
+    { bg: '#e8202e', dk: '#5c0a10', top: 'BOMB SQUAD', t1: 'BOOM', t2: '', info: txl('BAKGÅRDEN'), icon: 'bomb', sold: true }
   ];
   // Rasterprickar som mönster: en ruta med prickarna (varannan rad förskjuten) som fyller en hel yta i ett anrop.
   // sc är upplösningen (pixlar per punkt), så att prickarna blir skarpa.
@@ -7067,7 +7415,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       o.save(); o.translate(pw * 0.78, ph * 0.38); o.rotate(-0.5);
       o.fillStyle = '#15111f'; o.fillRect(-pw * 0.36, -pw * 0.07, pw * 0.72, pw * 0.14);
       o.fillStyle = '#ffd84a'; o.fillRect(-pw * 0.36, -pw * 0.055, pw * 0.72, pw * 0.11);
-      o.fillStyle = '#15111f'; o.font = Math.round(pw * 0.085) + 'px ' + DISPLAY; o.fillText('SLUTSÅLT', 0, pw * 0.005);
+      o.fillStyle = '#15111f'; o.font = Math.round(pw * 0.085) + 'px ' + DISPLAY; o.fillText(txl('SLUTSÅLT'), 0, pw * 0.005);
       o.restore();
     }
     // veck i papperet
@@ -7091,8 +7439,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var o = c.getContext('2d'); o.scale(d, d);
     var P = [
       { band: '#ff8629', title: 'MIXTAPE', sub: 'VOL. 3', ink: '#15111f', icon: 'cassette' },
-      { band: '#e8202e', title: 'C&T', sub: 'LIVE IKVÄLL', ink: '#e8202e', icon: 'boombox' },
-      { band: '#2e105c', title: 'REWIND', sub: 'SPOLA TILLBAKA', ink: '#2e105c', icon: 'rewind' },
+      { band: '#e8202e', title: 'C&T', sub: txl('LIVE IKVÄLL'), ink: '#e8202e', icon: 'boombox' },
+      { band: '#2e105c', title: 'REWIND', sub: txl('SPOLA TILLBAKA'), ink: '#2e105c', icon: 'rewind' },
       { band: '#15111f', title: 'DROP', sub: 'FRESH KICKS', ink: '#15111f', icon: 'sneaker' }
     ][kind];
     o.fillStyle = POSTER_BG[kind]; o.fillRect(0, 0, pw, ph);
@@ -7513,7 +7861,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         { fill: '#ff9447', shade: '#6e2c08' }, { fill: '#a9e85c', shade: '#335a12' }, { fill: '#b9a3ff', shade: '#3d2c85' },
         { fill: '#d9d5cc', shade: '#55514b' }
       ];
-      var WORDS = ['WILD', 'BOOM', 'CREW', 'BLAST', 'FRESH', 'POW', 'YO!', 'GRYMT', 'WOW', 'KAOS'];
+      var WORDS = ['WILD', 'BOOM', 'CREW', 'BLAST', 'FRESH', 'POW', 'YO!', txl('GRYMT'), 'WOW', txl('KAOS')];
       var ci = 0, wi = 0;
       function piece(word, cx, cy, size, rot, col, noDrips) {
         var p = bubbleWord(word, size, col, noDrips);
@@ -7666,8 +8014,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       }
       if (fr.width) {
         ci = 2;
-        region(12, fr.left - 16, wallTop + 16, ground - 10, 'C&T', ['WILD', 'BOOM', 'KAOS', 'FRESH', 'WOW'], COLS[0]);
-        region(fr.right + 16, w - 12, wallTop + 16, ground - 10, 'MANIAC', ['POW', 'YO!', 'BLAST', 'GRYMT', 'HYPE'], COLS[1]);
+        region(12, fr.left - 16, wallTop + 16, ground - 10, 'C&T', ['WILD', 'BOOM', txl('KAOS'), 'FRESH', 'WOW'], COLS[0]);
+        region(fr.right + 16, w - 12, wallTop + 16, ground - 10, 'MANIAC', ['POW', 'YO!', 'BLAST', txl('GRYMT'), 'HYPE'], COLS[1]);
       }
     })();
     if (TIDS) tidsWall();
@@ -7953,8 +8301,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   };
   var shownWin = 0, winAnim = null;
   function hud() {
-    el.balance.textContent = money(state.balance);
-    el.bet.textContent = money(bet());
+    el.balance.textContent = moneyCur(state.balance);
+    // datorn: en osynlig kopia av den högsta insatsen ligger i samma ruta, så att insatsen alltid tar lika stor plats och
+    // knappraden inte flyttar sig när insatsen ändras (användaren 2026-10-23); telefonen döljer kopian (lang.css)
+    el.bet.innerHTML = '<span>' + money(bet()) + '</span><span class="bet-w" aria-hidden="true">' + money(BETS[BETS.length - 1]) + '</span>';
     el.betDown.disabled = state.busy || state.betIdx === 0;
     el.betUp.disabled = state.busy || state.betIdx === BETS.length - 1;
     el.betVal.disabled = state.busy;
@@ -7963,6 +8313,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // hög för saldot: insatsen för köpet väljs i köpmenyn, och där går KÖP bara att trycka på när saldot räcker (användaren
     // 2026-10-21)
     el.buy.disabled = state.busy || state.auto > 0 || (!TIDS && state.balance < bet() * BUY_X);
+    // språkknappen (lang.js) byter inte mitt i en omgång
+    var lb = document.getElementById('btnLang'); if (lb) lb.disabled = state.busy || state.auto > 0;
     // bomben bredvid knappraden på telefonen (events-1.js)
     if (el.buyBar) {
       if (!el.buyBarIcon.getAttribute('src')) el.buyBarIcon.src = icon(SCAT);
@@ -7982,7 +8334,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     el.icoStop.hidden = !(spinning && !state.fs);
     el.spinCount.hidden = true;
     el.spinSub.textContent = !state.fs && state.auto > 0 ? 'AUTO' : '';
-    el.spin.setAttribute('aria-label', spinning ? 'Stoppa hjulen' : 'Snurra');
+    el.spin.setAttribute('aria-label', spinning ? txl('Stoppa hjulen') : txl('Snurra'));
     el.auto.setAttribute('aria-pressed', state.auto > 0 ? 'true' : 'false');
     el.autoBadge.hidden = !(state.auto > 0);
     el.autoBadge.textContent = state.auto;
@@ -7993,8 +8345,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (animate && state.winHold != null) return;
     if (winAnim) { cancelAnimationFrame(winAnim); winAnim = null; }
     function paint(v) {
-      el.win.textContent = money(v);
-      el.winX.textContent = v > 0 ? (v / bet()).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' × insatsen' : '';
+      el.win.textContent = moneyCur(v);
+      el.winX.textContent = v > 0 ? txl('{x} × insatsen', { x: num(v / bet(), { maximumFractionDigits: 1 }) }) : '';
     }
     if (!animate) { shownWin = c; paint(c); return; }
     var from = shownWin, start = performance.now(), dur = 450;
@@ -8005,6 +8357,31 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       if (k < 1) winAnim = requestAnimationFrame(step); else winAnim = null;
     })(start);
   }
+  // Vinkeln räknas fram varje bildruta. Förut var det en CSS-animation som började om från noll varje snurr och hackade i
+  // bonusen, där snurren kommer tätt. Medan hjulen snurrar ökar farten mjukt till ett varv på 0,6 s; när de stannar bromsar
+  // pilen jämnt och landar på nästa hela varv, så att den står rätt igen. Snurrar det igen innan den har stannat fortsätter
+  // den bara. Pilen vrids med rotate (inte transform), så att lutningen när man håller över knappen ligger kvar ovanpå
+  // (användaren 2026-10-23).
+  (function () {
+    var ico = el.icoSpin; if (!ico || !window.requestAnimationFrame) return;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var FULL = 600, ang = 0, v = 0, last = 0, stopAt = null, dec = 0, shown = null;
+    function frame(ts) {
+      var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0; last = ts;
+      var on = !calm && el.spinWrap.classList.contains('spinning') && !el.spin.classList.contains('stop');
+      if (on) { stopAt = null; v += (FULL - v) * Math.min(1, dt * 6); ang = (ang + v * dt) % 360; }
+      else if (v > 0) {
+        // bromsa jämnt så att pilen landar på nästa hela varv
+        if (stopAt === null) { stopAt = Math.ceil((ang + v * 0.35) / 360) * 360; dec = v * v / (2 * Math.max(1, stopAt - ang)); }
+        v = Math.max(0, v - dec * dt); ang = Math.min(stopAt, ang + v * dt);
+        if (v <= 0 || ang >= stopAt - 0.05) { v = 0; ang = 0; stopAt = null; }
+      }
+      var a = Math.round((ang % 360) * 10) / 10;
+      if (a !== shown) { shown = a; ico.style.setProperty('--spin-a', a + 'deg'); }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
   // Marknaden väljs med ?market=se|dk|mt|uk|on|de|nl (eller TEST: Marknad) och sparas i ctm.market. I drift skickar
   // operatören/servern marknaden. autoplay: om autospel finns alls, autoMax: högsta antal snurr. Sverige har ett förslag
   // om tak på 60 omgångar (remiss juni 2026), därför högst 50 överallt. Storbritannien, Ontario, Tyskland och
@@ -8040,14 +8417,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var m = el.autoMenu; if (!m) return;
     el.auto.hidden = !MARKET.autoplay;
     if (!MARKET.autoplay) { m.hidden = true; return; }
-    var opt = function (list, cur) { return list.map(function (x) { return '<option value="' + x + '"' + (x === cur ? ' selected' : '') + '>' + (x ? money(x * bet()) : 'Ingen gräns') + '</option>'; }).join(''); };
+    var opt = function (list, cur) { return list.map(function (x) { return '<option value="' + x + '"' + (x === cur ? ' selected' : '') + '>' + (x ? money(x * bet()) : txl('Ingen gräns')) + '</option>'; }).join(''); };
     m.classList.toggle('many', AUTO_COUNTS.length > 4);
-    m.innerHTML = '<span class="ttl">Antal snurr</span>' +
+    m.innerHTML = ('<span class="ttl">' + txl('Antal snurr') + '</span>') +
       AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }).map(function (n) { return '<button type="button" data-n="' + n + '">' + n + '</button>'; }).join('') +
-      '<span class="ttl">Stoppa autospelet</span>' +
-      '<label class="ao"><input type="checkbox" data-o="bonus"' + (autoStop.bonus ? ' checked' : '') + '><span>när en bonus startar</span></label>' +
-      '<label class="ao"><span>om saldot minskar med</span><select data-o="loss">' + opt(AUTO_LOSS, autoStop.loss) + '</select></label>' +
-      '<label class="ao"><span>om en vinst är minst</span><select data-o="win">' + opt(AUTO_WIN, autoStop.win) + '</select></label>';
+      ('<span class="ttl">' + txl('Stoppa autospelet') + '</span>') +
+      '<label class="ao"><input type="checkbox" data-o="bonus"' + (autoStop.bonus ? ' checked' : '') + ('><span>' + txl('när en bonus startar') + '</span></label>') +
+      ('<label class="ao"><span>' + txl('om saldot minskar med') + '</span><select data-o="loss">') + opt(AUTO_LOSS, autoStop.loss) + '</select></label>' +
+      ('<label class="ao"><span>' + txl('om en vinst är minst') + '</span><select data-o="win">') + opt(AUTO_WIN, autoStop.win) + '</select></label>';
   }
   function setAutoStop(k, v) { autoStop[k] = v; store.set('autoStop', autoStop); }
   // Slås på med window.CT_PROTO (egen fil, det vanliga spelet påverkas inte, och matten är densamma).
@@ -8179,12 +8556,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Nivån räknas fram ur matten: spridningen (standardavvikelsen) för vad ett snurr ger, i gånger insatsen. En kort
   // simulering med 100 miljoner snurr (spelmotor 1.4.0, 2026-10-20) gav 9,33 i hela spelet (grundspelet ensamt 3,6). Gränserna: under 2 låg (1), 2–5 (2),
   // 5–9 medel (3), 9–15 hög (4), över 15 extrem (5). Räkna om nivån när matten ändras (certifieringskörningen).
-  var VOL_LEVEL = 4, VOL_NAMES = [null, 'Låg', 'Låg–medel', 'Medel', 'Hög', 'Extrem'];
+  var VOL_LEVEL = 4, VOL_NAMES = [null, txl('Låg'), txl('Låg–medel'), txl('Medel'), txl('Hög'), txl('Extrem')];
   var VOL_COLS = ['#3ccf6e', '#9be03c', '#ffd21f', '#ff8629', '#ff2d4f'];
   // fem staplar som växer i höjd (stapel k har k lysdioder); de första `level` lyser i sin färg, resten är släckta. När
   // mätaren visas studsar staplarna som till musik och stannar på nivån (vol-meter.css).
   function volMeterHtml(level) {
-    var h = '<i class="vm" role="img" aria-label="Volatilitet ' + level + ' av 5: ' + VOL_NAMES[level] + '">';
+    var h = '<i class="vm" role="img" aria-label="' + txl('Volatilitet {n} av 5: {name}', { n: level, name: VOL_NAMES[level] }) + '">';
     for (var k = 1; k <= 5; k++) {
       h += '<i class="vm-col' + (k <= level ? ' on' : '') + '" style="--c:' + VOL_COLS[k - 1] + ';--k:' + k + '">';
       for (var s = 0; s < k; s++) h += '<i></i>';
@@ -8203,7 +8580,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (!TIDS) return;
     var gp = $('.guide-poster'), ig = $('#intro');
     if (!gp) return;
-    gp.insertAdjacentHTML('afterend', '<div class="g-vol"><small>VOLATILITET</small>' + volMeterHtml(VOL_LEVEL) +
+    gp.insertAdjacentHTML('afterend', '<div class="g-vol"><small>' + txl('VOLATILITET') + '</small>' + volMeterHtml(VOL_LEVEL) +
       '<b>' + VOL_NAMES[VOL_LEVEL].toUpperCase() + '</b><em>' + VOL_LEVEL + '/5</em></div>');
     var box = gp.nextElementSibling;
     if (ig && window.MutationObserver) {
@@ -8630,7 +9007,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     res.steps.forEach(function (st) { (st.wins || []).forEach(function (w) { if (w.sym === 2) cs += w.x; if (w.sym === 3) ts += w.x; }); });
     sayTurn = sayTurn === 'C' ? 'T' : 'C';
     var who = cs > ts ? 'C' : ts > cs ? 'T' : sayTurn;
-    var word = shout || (TIDS ? 'STORVINST!' : x >= 150 ? 'MANIAC!' : x >= 50 ? 'MEGAVINST!' : x >= 25 ? 'STORVINST!' : 'GRYMT!');
+    var word = shout || (TIDS ? txl('STORVINST!') : x >= 150 ? 'MANIAC!' : x >= 50 ? txl('MEGAVINST!') : x >= 25 ? txl('STORVINST!') : txl('GRYMT!'));
     el.winbar.dataset.who = who;
     el.winbar.style.minWidth = '';
     el.winbar.innerHTML = '<span class="cl-word">' + word + '</span><span class="cl-amt">' + money(amount) + '</span>';
@@ -8683,7 +9060,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       '<div class="ws-meter"><div class="ws-bar"><i class="ws-fill"></i></div></div>' +
       // maxvinsten: raden har sin plats från början (ws-wait, så att inget hoppar när den kommer) och ingen knapp; i stället
       // tonar "Klicka var som helst för att fortsätta" in under rutan (ws-tap, se nedan)
-      (opts.max ? '<div class="ws-maxline ws-wait">MAXVINST · ' + Math.round(capFor() / b).toLocaleString('sv-SE') + '× INSATSEN</div>' : '') +
+      (opts.max ? '<div class="ws-maxline ws-wait">MAXVINST · ' + Math.round(capFor() / b).toLocaleString(LOC) + '× INSATSEN</div>' : '') +
       '</div><div class="ws-flash"></div>';
     gameEl.appendChild(o);
     document.body.classList.add('ws-on');
@@ -8764,7 +9141,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     skip = false; tap = false; state.hurry = false;
     var t1 = clock, boom = clock, maxLine = o.querySelector('.ws-maxline'), hint = null;
     // texten ligger i ett eget lager över fyrverkeriets mynt (#fx), så att inget skymmer den
-    if (opts.max) { hint = document.createElement('div'); hint.className = 'ws-tap'; hint.innerHTML = '<span class="tap-go">Klicka var som helst för att fortsätta</span>'; document.body.appendChild(hint); }
+    if (opts.max) { hint = document.createElement('div'); hint.className = 'ws-tap'; hint.innerHTML = ('<span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span>'); document.body.appendChild(hint); }
     if (maxLine) maxLine.classList.remove('ws-wait');
     var anyTap = function (e) { tap = true; e.stopPropagation(); e.preventDefault(); };
     // texten läggs direkt under rutan (räknas ut när rutan har landat, så att inget hoppar) och tonar in
@@ -8853,10 +9230,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       }
       var chip = document.createElement('span');
       chip.className = 'chip';
-      var img = new Image(); img.src = icon(w.sym); img.alt = SYM[w.sym].name;
+      var img = new Image(); img.src = icon(w.sym); img.alt = txl(SYM[w.sym].name);
       chip.appendChild(img);
       var txt = document.createElement('span');
-      txt.textContent = w.len + ' hjul · ' + w.ways + (w.ways === 1 ? ' väg' : ' vägar') + (w.boost > 1 ? ' · wild x' + w.boost : '') + (step.mult > 1 ? ' · x' + step.mult : '') + (TIDS && w.timeAt >= 0 ? ' · tidsväg' + (w.tmult > 1 ? ' x' + w.tmult : '') : '');
+      txt.textContent = txl('{n} hjul', { n: w.len }) + ' · ' + w.ways + (w.ways === 1 ? txl(' väg') : txl(' vägar')) + (w.boost > 1 ? ' · wild x' + w.boost : '') + (step.mult > 1 ? ' · x' + step.mult : '') + (TIDS && w.timeAt >= 0 ? ' · ' + txl('tidsväg') + (w.tmult > 1 ? ' x' + w.tmult : '') : '');
       chip.appendChild(txt);
       var b = document.createElement('b'); b.textContent = money(amounts[i]);
       chip.appendChild(b);
@@ -9287,7 +9664,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var FLIP = RIP_V === 'flip', SLOW = FLIP ? 6.6 : RIP_SLOW, BRAKE = FLIP ? 4 : RIP_BRAKE;
     o.className = 'rip-show' + (FLIP ? ' flip' : '');
     o.innerHTML = '<canvas class="rp-shreds"></canvas><div class="rp-stack"></div>' +
-      '<div class="rp-sfx">RIIIP!</div><div class="rp-hint" hidden>Tryck för att fortsätta</div>' + (opts.max ? '<button class="ov-go ws-go" type="button" hidden>FORTSÄTT</button>' : '');
+      ('<div class="rp-sfx">RIIIP!</div><div class="rp-hint" hidden>' + txl('Tryck för att fortsätta') + '</div>') + (opts.max ? ('<button class="ov-go ws-go" type="button" hidden>' + txl('FORTSÄTT') + '</button>') : '');
     gameEl.appendChild(o);
     document.body.classList.add('ws-on');
     var stack = o.querySelector('.rp-stack'), sfx = o.querySelector('.rp-sfx'), hint = o.querySelector('.rp-hint');
@@ -11496,7 +11873,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function mtLayersMax(mn) { var L = mtLD(mn); return L ? Math.max.apply(null, L.v) : mtDepth(mn); }
   // "2–5" (eller "5" när det alltid är alla), och "2, 3, 4 eller 5"
   function mtLayersText(mn) { return mtLayersMin(mn) === mtLayersMax(mn) ? String(mtLayersMax(mn)) : mtLayersMin(mn) + '–' + mtLayersMax(mn); }
-  function mtLayersList(mn) { var L = mtLD(mn), v = L ? L.v : [mtDepth(mn)]; return v.length < 2 ? String(v[0]) : v.slice(0, -1).join(', ') + ' eller ' + v[v.length - 1]; }
+  function mtLayersList(mn) { var L = mtLD(mn), v = L ? L.v : [mtDepth(mn)]; return v.length < 2 ? String(v[0]) : v.slice(0, -1).join(', ') + txl(' eller ') + v[v.length - 1]; }
   // ett lagers startmulti, t.ex. "3–x15" (efter "x"), och hela startmultins spann, t.ex. "6–x75" (efter "MULTI x")
   function mtStartText(mn) { var v = mtSD(mn).v; return Math.min.apply(null, v) + '–x' + Math.max.apply(null, v); }
   // varje kast landar på ett LAYER och ger lagrets nummer × steget (Maniac 3, Bonusspelet 2): mtStep, lagret för ett värde,
@@ -11504,25 +11881,25 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function mtStep(mn) { return Math.min.apply(null, mtSD(mn).v); }
   function mtLayerOf(v, mn) { return Math.max(1, Math.round(v / mtStep(mn))); }
   function mtTopLayer(mn) { return mtLayerOf(Math.max.apply(null, mtSD(mn).v), mn); }
-  function mtLayerList(mn) { var t = mtTopLayer(mn), a = []; for (var q = 1; q < t; q++) a.push(q); return a.join(', ') + ' eller ' + t; }
+  function mtLayerList(mn) { var t = mtTopLayer(mn), a = []; for (var q = 1; q < t; q++) a.push(q); return a.join(', ') + txl(' eller ') + t; }
   // seq: kassetten spolar ett lager i taget och LAYER k ger v[k - 1] (inget slumpas utom hur många lager); summan för n lager
   function mtSeq(mn) { return !!mtSD(mn).seq; }
   function mtSumTo(n, mn) { var v = mtSD(mn).v, t = 0; for (var q = 0; q < n; q++) t += v[Math.min(q, v.length - 1)]; return t; }
   function mtMaxStart(mn) { return mtSeq(mn) ? mtSumTo(mtLayersMax(mn), mn) : mtLayersMax(mn) * Math.max.apply(null, mtSD(mn).v); }
   function mtRange(mn) { return (mtSeq(mn) ? mtSumTo(mtLayersMin(mn), mn) : mtLayersMin(mn) * Math.min.apply(null, mtSD(mn).v)) + '–x' + mtMaxStart(mn); }
-  // regeltexten om kassetten (reglerna): name 'Bonusspelet' eller 'Maniac'
-  function mtRuleText(mn, name) {
-    var and = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' och ' + a[a.length - 1]; };
-    var head = 'Kassetten: när ' + name + ' startar spolar kassetten tillbaka ', fill = 'De lagren fylls med nya bräden från grundspelets hjul, och ';
-    var tail = ' Lagren som inte fylls från start fylls på ett per frispinn.';
+  // regeltexten om kassetten (reglerna), för Bonusspelet (mn false) eller Maniac
+  function mtRuleText(mn) {
+    var and = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + txl(' och ') + a[a.length - 1]; };
+    var name = mtMn(mn) ? 'Maniac' : txl('Bonusspelet');
     if (mtSeq(mn)) {
       var vals = [], sums = [];
       for (var q = 1; q <= mtTopLayer(mn); q++) vals.push('LAYER ' + q + ' = x' + mtSD(mn).v[q - 1]);
-      mtLD(mn).v.forEach(function (n) { sums.push(n + ' lager x' + mtSumTo(n, mn)); });
-      return head + 'ett lager i taget, ' + mtLayersList(mn) + ' lager (slumpas). ' + fill + 'varje lager ger sitt nummer × ' + mtStep(mn) + ' i startmulti (' + and(vals) + '). Multin börjar på summan: ' + and(sums) + '.' + tail;
+      mtLD(mn).v.forEach(function (n) { sums.push(txl('{n} lager x{x}', { n: n, x: mtSumTo(n, mn) })); });
+      return txl('Kassetten: när {name} startar spolar kassetten tillbaka ett lager i taget, {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och varje lager ger sitt nummer × {s} i startmulti ({vals}). Multin börjar på summan: {sums}. Lagren som inte fylls från start fylls på ett per frispinn.',
+        { name: name, list: mtLayersList(mn), s: mtStep(mn), vals: and(vals), sums: and(sums) });
     }
-    return head + mtLayersList(mn) + ' lager (slumpas). ' + fill + 'för varje sådant lager kastar kassetten ett LAYER: ' + mtLayerList(mn) + ' (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × ' + mtStep(mn) +
-      ' i startmulti (LAYER 1 = x' + mtStep(mn) + ', LAYER ' + mtTopLayer(mn) + ' = x' + mtTopLayer(mn) * mtStep(mn) + '). Multin börjar på summan: x' + mtRange(mn) + '.' + tail;
+    return txl('Kassetten: när {name} startar spolar kassetten tillbaka {list} lager (slumpas). De lagren fylls med nya bräden från grundspelets hjul, och för varje sådant lager kastar kassetten ett LAYER: {layers} (slumpas, samma LAYER kan komma flera gånger), som ger sitt nummer × {s} i startmulti (LAYER 1 = x{s}, LAYER {top} = x{topx}). Multin börjar på summan: x{range}. Lagren som inte fylls från start fylls på ett per frispinn.',
+      { name: name, list: mtLayersList(mn), layers: mtLayerList(mn), s: mtStep(mn), top: mtTopLayer(mn), topx: mtTopLayer(mn) * mtStep(mn), range: mtRange(mn) });
   }
   // trösklarna följer startmultins värden: de två högsta värdena per lager smäller hårdare, det högsta hårdast, och
   // STARTMULTI smäller extra stort från två tredjedelar av högsta möjliga (Maniac x50 av x75, Bonusspelet x20 av x30)
@@ -11882,7 +12259,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // nästa smäll efter lavinen på förra vinstens belopp och ser ut som samma vinst en gång till. Totalen står i
       // vinstfältet (och i bonusen i panelen).
       if (TIDS) roundShown = 0;
-      if (bigLvl < 0 && (amount > 0 || !TIDS)) popCount(st, roundShown + amount, spot.x, spot.y, st.maxed ? 'MAXVINST!' : !TIDS && timeFx ? (topTm > 1 ? 'TIDSVÄG x' + topTm + '!' : 'TIDSVÄG!') : null, TIDS ? [0.35, 0.6, 1.0][cls] : 0, TIDS && cls === 0);
+      if (bigLvl < 0 && (amount > 0 || !TIDS)) popCount(st, roundShown + amount, spot.x, spot.y, st.maxed ? txl('MAXVINST!') : !TIDS && timeFx ? (topTm > 1 ? 'TIDSVÄG x' + topTm + '!' : 'TIDSVÄG!') : null, TIDS ? [0.35, 0.6, 1.0][cls] : 0, TIDS && cls === 0);
       if (TIDS) ballStart(st, cls, path, acc, fs);
       if (bigLvl >= 0) await bigHit(bigLvl, st.removed);
       if (!fs && !TIDS && st.mult > 1) multStamp(st.mult, popSpot(keep, spot.x, spot.y, 1.5, 1.25, { x: spot.x / cell, y: spot.y / cell, w: 2.9, h: 2 }));
@@ -11980,21 +12357,21 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (plan && !resuming) roundProgress(0);
     Sound.fx(maniac ? 'maniac_intro' : 'bonus_intro');
     await overlay(
-      '<span class="ov-kicker">' + (resuming ? 'Bonusen fortsätter' : bought ? 'Köpt bonus' : 'Bonus') + '</span><h2 class="ov-title">' + (maniac ? 'MANIACBONUS' : TIDS ? 'BONUSSPEL' : 'Maniac Mode!') + '</h2>' +
-      '<div class="ov-big">' + (resuming ? state.fs.left + ' frispinn kvar' : count + ' frispinn') + '</div>' +
+      '<span class="ov-kicker">' + (resuming ? txl('Bonusen fortsätter') : bought ? txl('Köpt bonus') : 'Bonus') + '</span><h2 class="ov-title">' + (maniac ? txl('MANIACBONUS') : TIDS ? txl('BONUSSPEL') : 'Maniac Mode!') + '</h2>' +
+      '<div class="ov-big">' + (resuming ? txl('{n} frispinn kvar', { n: state.fs.left }) : txl('{n} frispinn', { n: count })) + '</div>' +
       // Tidsvägar: reglerna i korta, stora rader (multin, hur långt bakåt vinsterna når, med lagerbrickorna, och bomberna),
       // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +5 frispinn i Bonusspelet och +3 i Maniac
       // (samma som playBonus i math.js).
-      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + (tape && !resuming && mtLD(!!maniac) ? '<p>Kassetten spolar fram <b>' + mtLayersText(!!maniac) + ' LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × ' + mtStep(!!maniac) + '</b> i MULTI, och allt läggs ihop</p>'
-        : '<p><b>MULTI x' + (tape && !resuming ? mtRange(!!maniac) : state.fs.mult) + '</b> nollställs aldrig</p>') +
-        '<p>Vinster hämtar symboler <b>upp till ' + state.fs.depth + ' snurr bakåt</b></p></div>' : '') +
+      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + (tape && !resuming && mtLD(!!maniac) ? txl('<p>Kassetten spolar fram <b>{n} LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × {x}</b> i MULTI, och allt läggs ihop</p>', { n: mtLayersText(!!maniac), x: mtStep(!!maniac) })
+        : txl('<p><b>MULTI x{m}</b> nollställs aldrig</p>', { m: tape && !resuming ? mtRange(!!maniac) : state.fs.mult })) +
+        txl('<p>Vinster hämtar symboler <b>upp till {d} snurr bakåt</b></p>', { d: state.fs.depth }) + '</div>' : '') +
       // prototypen (kassetten): under varje LAYER-bricka vad lagret ger i multi (LAYER 1 = x6, LAYER 2 = x12 … i Maniac)
       (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + '</div>' : '') +
-      (TIDS && !(maniac && coll) ? '<div class="cv-facts"><p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +' + (maniac ? 3 : M.FS_RETRIGGER) + ' frispinn</p></div>'
+      (TIDS && !(maniac && coll) ? '<div class="cv-facts">' + txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: maniac ? 3 : M.FS_RETRIGGER }) + '</div>'
         : '<p class="ov-text">' + (maniac && coll ? 'Varje ruta som är med i en vinst blir ett kollage: först 2 symboler, sedan 4, från snurren bakåt. Alla symboler i ett kollage räknas, och kollagen ligger kvar hela bonusen.'
           : 'Multiplikatorn växer med +1 för varje lavin och nollställs aldrig under bonusen. 3 bonusstjärnor ger 5 frispinn till.') + '</p>') +
       // ingen knapp, samma text som överallt (ett klick var som helst startar bonusen, cover-overlay.js)
-      '<p class="ov-tap"><span class="tap-go">Klicka var som helst för att fortsätta</span></p>' + (state.auto > 0 ? '<span class="ov-auto">Startar automatiskt</span>' : ''),
+      ('<p class="ov-tap"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>') + (state.auto > 0 ? ('<span class="ov-auto">' + txl('Startar automatiskt') + '</span>') : ''),
       { autoMs: state.auto > 0 ? 3000 : 0, hero: true, cover: true, bomb: !resuming && !state.turbo, maniac: !!maniac, under: fsOn, foldCols: maniac ? ['#ffd21f', '#e8202e', '#b45cff', '#fff6e0'] : ['#ff750c', '#b45cff', '#4fd6e8', '#fff6e0'] }
     );
     if (!document.body.classList.contains('fs')) fsOn();
@@ -12024,20 +12401,20 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         await celebrateScatters();
         var more = plan ? res.retrigger : M.FS_RETRIGGER;
         state.fs.left += more; renderMeter(); hud();
-        banner('+' + more + ' FRISPINN!'); Sound.fx('retrigger');
+        banner(txl('+{n} FRISPINN!', { n: more })); Sound.fx('retrigger');
         await wait(1.2);
       }
       // avbruten omgång: så här många frispinn är visade
       if (plan) roundProgress(si);
-      if (state.roundWin >= capFor()) { if (TIDS) await wait(1.0); else { banner('MAXVINST!'); await wait(1.5); } break; }
+      if (state.roundWin >= capFor()) { if (TIDS) await wait(1.0); else { banner(txl('MAXVINST!')); await wait(1.5); } break; }
       await wait(showTime(T().fsGap), true);
     }
     var total = state.fs.total, wasManiac = TIDS && state.fs.maniac, maxed = TIDS && state.maxShown;
     var leftOver = state.fs.left;
-    var endTitle = TIDS && state.roundWin >= capFor() ? 'MAXVINST!' : summaryTitle(total / bet());
+    var endTitle = TIDS && state.roundWin >= capFor() ? txl('MAXVINST!') : summaryTitle(total / bet());
     // maxvinsten har redan firats i sin egen ruta: inga gnistor eller storvinst-ruta till, men summeringen kommer ändå
     // (med rubriken MAXVINST! och en rad om att bonusen avslutades), så att spelaren ser vad som hände
-    var note = maxed ? 'Maxvinsten är nådd' + (leftOver > 0 ? ', så bonusen avslutades med ' + leftOver + ' frispinn kvar.' : '.') : '';
+    var note = maxed ? (leftOver > 0 ? txl('Maxvinsten är nådd, så bonusen avslutades med {n} frispinn kvar.', { n: leftOver }) : txl('Maxvinsten är nådd.')) : '';
     // Bonusen är klar: pengarna samlas in (bonus-collect.js; samma för Bonusspel och Maniac), och sedan kommer
     // vinstpresentationen direkt för alla bonusvinster, innan affischen (Bonusspel klart / Maniac klart)
     if (TIDS && !maxed) await bonusCollect(total);
@@ -12046,12 +12423,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (!shown && !maxed) { if (!TIDS) Sound.fanfare(); confetti(180); }
     // Tidsvägar: summeringen (bonus-summary.js) berättar vad bonusen gav: belopp, gånger insatsen, frispinn, högsta multi,
     // bästa snurr och hörnen per lager. Delarna smälls upp en i taget medan affischen väntar på FORTSÄTT.
-    var kick = state.fs.maniac ? 'Maniac klart' : TIDS ? 'Bonusspel klart' : 'Maniac Mode klart';
+    var kick = state.fs.maniac ? txl('Maniac klart') : TIDS ? txl('Bonusspel klart') : 'Maniac Mode klart';
     var endHtml = TIDS && plan ? bonusSummaryHtml({ kicker: kick, title: endTitle, total: total, counted: shown || maxed, stats: bonusStats(plan, state.fs.depth || 0, si), note: note })
       : '<span class="ov-kicker">' + kick + '</span><h2 class="ov-title">' + endTitle + '</h2>' +
       '<div class="ov-big">' + money(total) + '</div>' +
-      '<p class="ov-text">' + (total > 0 ? 'Bonusen gav ' + (total / bet()).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' gånger insatsen.' : 'Ingen vinst den här gången.') + '</p>' +
-      '<div class="ov-btns"><button class="ov-go" type="button">FORTSÄTT</button></div>';
+      '<p class="ov-text">' + (total > 0 ? txl('Bonusen gav {x} gånger insatsen.', { x: num(total / bet(), { maximumFractionDigits: 1 }) }) : txl('Ingen vinst den här gången.')) + '</p>' +
+      ('<div class="ov-btns"><button class="ov-go" type="button">' + txl('FORTSÄTT') + '</button></div>');
     var endOv = overlay(endHtml,
       { autoMs: state.auto > 0 ? (TIDS && plan ? 6500 : 3500) : 0, hero: true, cover: true, calm: !wasManiac, maniac: wasManiac, under: fsOff,
         foldCols: wasManiac ? ['#ffd21f', '#e8202e', '#b45cff', '#fff6e0'] : ['#7a5cff', '#ff903b', '#4fd6e8', '#fff6e0'] }
@@ -12064,17 +12441,17 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
 
   function summaryTitle(x) {
-    return x >= 50 ? 'Grymt!' : x >= 15 ? 'Snyggt!' : x > 0 ? 'Bra kämpat!' : 'Nära!';
+    return x >= 50 ? txl('Grymt!') : x >= 15 ? txl('Snyggt!') : x > 0 ? txl('Bra kämpat!') : txl('Nära!');
   }
 
   function bigWin(amount) {
     var x = amount / bet();
-    var title = x >= 150 ? 'MANIAC-<br>VINST!' : x >= 50 ? 'MEGA-<br>VINST!' : 'STOR<br>VINST!';
+    var title = x >= 150 ? txl('MANIAC-<br>VINST!') : x >= 50 ? txl('MEGA-<br>VINST!') : txl('STOR<br>VINST!');
     var dur = x >= 150 ? 5200 : x >= 50 ? 4000 : 2800;
     return new Promise(function (resolve) {
       var o = document.createElement('div');
       o.className = 'bigwin';
-      o.innerHTML = '<div class="bw-title">' + title + '</div><div class="bw-amt">0,00</div><div class="bw-hint">Tryck för att fortsätta</div>';
+      o.innerHTML = '<div class="bw-title">' + title + '</div><div class="bw-amt">' + money(0) + '</div><div class="bw-hint">' + txl('Tryck för att fortsätta') + '</div>';
       addHeroPops(o, 'dance');
       gameEl.appendChild(o);
       var amt = o.querySelector('.bw-amt');
@@ -12206,9 +12583,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (rec.betIdx >= 0 && rec.betIdx < BETS.length) { state.betIdx = rec.betIdx; store.set('bet', state.betIdx); }
     roundRec = rec; roundStored = true;
     state.busy = true; hud();
-    await overlay('<span class="ov-kicker">Pågående omgång</span><h2 class="ov-title">Välkommen tillbaka!</h2>' +
-      '<p class="ov-text">Du lämnade spelet mitt i en omgång. Den spelas klart nu, med samma utfall. Insatsen är redan dragen och vinsten betalas ut när omgången är klar.</p>' +
-      '<p class="ov-tap"><span class="tap-go">Klicka var som helst för att fortsätta</span></p>');
+    await overlay(('<span class="ov-kicker">' + txl('Pågående omgång') + '</span><h2 class="ov-title">' + txl('Välkommen tillbaka!') + '</h2>') +
+      ('<p class="ov-text">' + txl('Du lämnade spelet mitt i en omgång. Den spelas klart nu, med samma utfall. Insatsen är redan dragen och vinsten betalas ut när omgången är klar.') + '</p>') +
+      ('<p class="ov-tap"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>'));
     Sound.init(); Music.start();
     state.slam = false; state.hurry = false; state.roundWin = 0; state.roundX = 0; state.maxShown = false; state.winHold = null;
     setWin(0); clearChips(); hud();
@@ -12322,19 +12699,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     return s;
   }
   function bonusSummaryHtml(o) {
-    var x = o.total / bet(), xs = x >= 10 ? Math.round(x).toLocaleString('sv-SE') : x.toLocaleString('sv-SE', { maximumFractionDigits: 1 });
+    var x = o.total / bet(), xs = x >= 10 ? num(Math.round(x)) : num(x, { maximumFractionDigits: 1 });
     var st = o.stats, lay = '';
-    for (var d = 1; d < st.layers.length; d++) lay += '<i class="ly l' + d + (st.layers[d] ? '' : ' none') + '"><em>' + d + '</em><span>bakåt</span><b>×' + st.layers[d] + '</b></i>';
+    for (var d = 1; d < st.layers.length; d++) lay += '<i class="ly l' + d + (st.layers[d] ? '' : ' none') + '"><em>' + d + '</em><span>' + txl('bakåt') + '</span><b>×' + st.layers[d] + '</b></i>';
     return '<span class="ov-kicker bs-in">' + o.kicker + '</span><h2 class="ov-title bs-in">' + o.title + '</h2>' +
       '<div class="bs-hero"><div class="ov-big bs-amt bs-in">' + money(o.counted ? o.total : 0) + '</div><i class="bs-x">x' + xs + '</i></div>' +
       '<div class="bs-stats">' +
-      '<i class="bs-st"><b>' + (st.extra ? (st.spins - st.extra) + '+' + st.extra : st.spins) + '</b><span>frispinn</span></i>' +
-      '<i class="bs-st"><b>x' + st.mult + '</b><span>högsta multi</span></i>' +
-      '<i class="bs-st"><b>' + money(st.best) + '</b><span>bästa snurr</span></i></div>' +
+      '<i class="bs-st"><b>' + (st.extra ? (st.spins - st.extra) + '+' + st.extra : st.spins) + '</b><span>' + txl('frispinn') + '</span></i>' +
+      '<i class="bs-st"><b>x' + st.mult + ('</b><span>' + txl('högsta multi') + '</span></i>') +
+      '<i class="bs-st"><b>' + money(st.best) + ('</b><span>' + txl('bästa snurr') + '</span></i></div>') +
       (lay ? '<div class="cv-layers bs-lay">' + lay + '</div>' : '') +
       (o.note ? '<p class="ov-text bs-note">' + o.note + '</p>' : '') +
       // ingen knapp, bara texten (ett klick var som helst går vidare, cover-overlay.js)
-      '<p class="ov-tap bs-btns"><span class="tap-go">Klicka var som helst för att fortsätta</span></p>';
+      ('<p class="ov-tap bs-btns"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>');
   }
   // Smäller upp delarna i affischen (p) en i taget, i riktig tid (spelet står och väntar på ett klick under tiden).
   function bonusSummaryPlay(p, o) {
@@ -12376,15 +12753,15 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function buyMenuHtml() {
     function card(id, cls, title, spins, x) {
       return '<div class="bm-poster ' + cls + '"><i class="bm-tape l"></i><i class="bm-tape r"></i>' +
-        '<img class="bm-ico" alt="" src="' + icon(id === 'b2' ? GOLD_BOMB : SCAT) + '"><div class="bm-title">' + title + '</div><div class="bm-spins">' + spins + ' FRISPINN</div>' +
-        '<div class="bm-x">' + x + 'x insatsen</div><div class="bm-price" data-x="' + x + '">' + money(bet() * x) + '</div>' +
-        '<button class="ov-go" type="button" data-v="' + id + '" data-x="' + x + '">KÖP</button></div>';
+        '<img class="bm-ico" alt="" src="' + icon(id === 'b2' ? GOLD_BOMB : SCAT) + '"><div class="bm-title">' + title + '</div><div class="bm-spins">' + txl('{n} FRISPINN', { n: spins }) + '</div>' +
+        '<div class="bm-x">' + txl('{x}x insatsen', { x: x }) + '</div><div class="bm-price" data-x="' + x + '">' + money(bet() * x) + '</div>' +
+        '<button class="ov-go" type="button" data-v="' + id + '" data-x="' + x + ('">' + txl('KÖP') + '</button></div>');
     }
-    return '<span class="ov-kicker">Köp bonus</span><h2 class="ov-title">Välj bonus</h2><div class="bm-row">' +
-      card('b1', '', 'Bonusspel', M.fsAwardTime(3), BUY_X) +
+    return ('<span class="ov-kicker">' + txl('Köp bonus') + '</span><h2 class="ov-title">' + txl('Välj bonus') + '</h2><div class="bm-row">') +
+      card('b1', '', txl('Bonusspel'), M.fsAwardTime(3), BUY_X) +
       card('b2', 'mn', 'MANIAC<small>BONUS</small>', M.TIME.maniacSpins, M.TIME.maniacBuy) +
-      '</div><div class="bm-bet"><span>Insats</span><button type="button" class="bm-down" aria-label="Sänk insatsen">−</button><b class="bm-bv">' + money(bet()) + '</b><button type="button" class="bm-up" aria-label="Höj insatsen">+</button></div>' +
-      '<div class="ov-btns"><button class="ov-go alt" type="button" data-v="no">STÄNG</button></div>';
+      '</div><div class="bm-bet"><span>' + txl('Insats') + ('</span><button type="button" class="bm-down" aria-label="' + txl('Sänk insatsen') + '">−</button><b class="bm-bv">') + money(bet()) + ('</b><button type="button" class="bm-up" aria-label="' + txl('Höj insatsen') + '">+</button></div>') +
+      ('<div class="ov-btns"><button class="ov-go alt" type="button" data-v="no">' + txl('STÄNG') + '</button></div>');
   }
   function wireBuyMenu(o) {
     if (!o) return;
@@ -12421,10 +12798,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       if (state.balance < cost) return;
       // säkerhetsfrågan: köpet görs först när man har bekräftat
       var sure = await overlay(
-        '<span class="ov-kicker">Är du säker?</span><h2 class="ov-title">' + (mn ? 'Maniacbonus' : 'Bonusspel') + '</h2>' +
+        ('<span class="ov-kicker">' + txl('Är du säker?') + '</span><h2 class="ov-title">') + (mn ? txl('Maniacbonus') : txl('Bonusspel')) + '</h2>' +
         '<div class="ov-big">' + money(cost) + '</div>' +
-        '<div class="bm-x">' + (mn ? M.TIME.maniacBuy : BUY_X) + 'x insatsen</div>' +
-        '<div class="ov-btns"><button class="ov-go" type="button" data-v="yes">JA, KÖP</button><button class="ov-go alt" type="button" data-v="no">AVBRYT</button></div>'
+        '<div class="bm-x">' + txl('{x}x insatsen', { x: mn ? M.TIME.maniacBuy : BUY_X }) + '</div>' +
+        ('<div class="ov-btns"><button class="ov-go" type="button" data-v="yes">' + txl('JA, KÖP') + '</button><button class="ov-go alt" type="button" data-v="no">' + txl('AVBRYT') + '</button></div>')
       );
       if (sure !== 'yes' || state.busy || state.balance < cost) return;
       beginRound(cost);
@@ -12437,10 +12814,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var price = bet() * BUY_X;
     if (state.balance < price) return;
     var ans = await overlay(
-      '<span class="ov-kicker">Köp bonus</span><h2 class="ov-title">' + (TIDS ? 'Bonusspel' : 'Maniac Mode') + '</h2>' +
+      ('<span class="ov-kicker">' + txl('Köp bonus') + '</span><h2 class="ov-title">') + (TIDS ? txl('Bonusspel') : 'Maniac Mode') + '</h2>' +
       '<div class="ov-big">' + money(price) + '</div>' +
-      '<p class="ov-text">' + (TIDS ? M.fsAwardTime(3) : 10) + ' frispinn direkt, för ' + BUY_X + ' gånger insatsen ' + money(bet()) + '. Köpt bonus ger i snitt ' + BUY_RTP + ' % tillbaka.</p>' +
-      '<div class="ov-btns"><button class="ov-go" type="button" data-v="yes">KÖP</button><button class="ov-go alt" type="button" data-v="no">AVBRYT</button></div>'
+      '<p class="ov-text">' + txl('{n} frispinn direkt, för {x} gånger insatsen {b}. Köpt bonus ger i snitt {p} tillbaka.', { n: TIDS ? M.fsAwardTime(3) : 10, x: BUY_X, b: money(bet()), p: BUY_RTP }) + '</p>' +
+      ('<div class="ov-btns"><button class="ov-go" type="button" data-v="yes">' + txl('KÖP') + '</button><button class="ov-go alt" type="button" data-v="no">' + txl('AVBRYT') + '</button></div>')
     );
     if (ans !== 'yes' || state.busy) return;
     beginRound(price);
@@ -12456,9 +12833,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 
   async function outOfCoins() {
     await overlay(
-      '<span class="ov-kicker">Saldo ' + money(state.balance) + '</span><h2 class="ov-title">Slut på mynt!</h2>' +
-      '<p class="ov-text">Mynten är låtsaspengar. Fyll på och kör vidare.</p>' +
-      '<div class="ov-btns"><button class="ov-go" type="button">FYLL PÅ ' + money(START_BALANCE) + '</button></div>'
+      '<span class="ov-kicker">' + txl('Saldo {b}', { b: money(state.balance) }) + ('</span><h2 class="ov-title">' + txl('Slut på mynt!') + '</h2>') +
+      ('<p class="ov-text">' + txl('Mynten är låtsaspengar. Fyll på och kör vidare.') + '</p>') +
+      ('<div class="ov-btns"><button class="ov-go" type="button">' + txl('FYLL PÅ') + ' ') + money(START_BALANCE) + '</button></div>'
     );
     state.balance = START_BALANCE;
     store.set('balance', state.balance);
@@ -12478,15 +12855,15 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     while (state.auto > 0) {
       if (state.balance < bet()) break;
       // förlustgränsen: nästa insats får inte ta förlusten över gränsen
-      if (lossAt && start - state.balance + bet() > lossAt) { why = 'FÖRLUSTGRÄNSEN NÅDD'; break; }
+      if (lossAt && start - state.balance + bet() > lossAt) { why = txl('FÖRLUSTGRÄNSEN NÅDD'); break; }
       state.auto--;
       hud();
       await spin();
       if (state.auto <= 0) break;
-      if (winAt && state.roundWin >= winAt) { why = 'VINSTGRÄNSEN NÅDD'; break; }
+      if (winAt && state.roundWin >= winAt) { why = txl('VINSTGRÄNSEN NÅDD'); break; }
       await wait(state.turbo ? 0.15 : 0.35);
     }
-    if (why && state.auto > 0) banner('AUTOSPEL STOPP · ' + why);
+    if (why && state.auto > 0) banner((txl('AUTOSPEL STOPP') + ' · ') + why);
     state.auto = 0; hud();
     if (lock) { try { lock.release(); } catch (e) { /* redan släppt */ } }
   }
@@ -12510,13 +12887,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // P = Punkaren (betalar redan på 3 hjul), K, Q, J, A, B = Bergsprängaren, S = Sneaker, Y = Sprayburk
     var P = 2, K = 9, Q = 10, J = 11, A = 8, B = 4, S = 5, Y = 6;
     var ex = [
-      { t: 'Vinst på 3 hjul', x: 'Lika symboler på hjul i rad, från hjulet längst till vänster. Raden spelar ingen roll.',
+      { t: txl('Vinst på 3 hjul'), x: txl('Lika symboler på hjul i rad, från hjulet längst till vänster. Raden spelar ingen roll.'),
         b: [[P, J, A], [Q, A, P], [J, P, S], [A, Q, J], [S, B, Q], [J, Y, A]], w: [[0, 0], [1, 2], [2, 1]] },
-      { t: 'Fler vägar', x: 'Två K på samma hjul ger två vinstvägar: 1 × 2 × 1 × 1 = 2 vägar på 4 hjul.',
+      { t: txl('Fler vägar'), x: txl('Två K på samma hjul ger två vinstvägar: 1 × 2 × 1 × 1 = 2 vägar på 4 hjul.'),
         b: [[A, K, J], [K, Q, K], [J, K, B], [K, S, A], [Q, J, S], [B, A, Q]], w: [[0, 1], [1, 0], [1, 2], [2, 1], [3, 0]] },
-      { t: 'Wild', x: 'Wild finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.',
+      { t: 'Wild', x: txl('Wild finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.'),
         b: [[Q, K, A], [J, WILD, S], [K, A, Q], [B, J, K], [S, Q, J], [A, Y, B]], w: [[0, 1], [1, 1], [2, 0], [3, 2]] },
-      { t: 'Layerspins', x: 'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.',
+      { t: 'Layerspins', x: txl('Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.'),
         b: [[K, A, J], [Q, K, S], [A, J, K], [J, Q, A], [K, S, Q], [B, A, J]], w: [[0, 0], [1, 1], [2, 2], [3, 1], [4, 0]], c: { r: 3, y: 1, sym: K } }
     ];
     var cards = ex.map(function (e) {
@@ -12524,8 +12901,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }).join('');
     // hur många vägar: 6 rader på vart och ett av de 6 hjulen
     var cols = ''; for (var r = 0; r < 6; r++) { var d = ''; for (var y = 0; y < 6; y++) d += '<i></i>'; cols += '<span class="wb-col">' + d + '</span>' + (r < 5 ? '<em>×</em>' : ''); }
-    cards += '<div class="wb-card wb-count"><b class="wb-title">46 656 vinstvägar</b><div class="wb-cols">' + cols + '</div>' +
-      '<p>6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.</p></div>';
+    cards += ('<div class="wb-card wb-count"><b class="wb-title">' + txl('46 656 vinstvägar') + '</b><div class="wb-cols">') + cols + '</div>' +
+      ('<p>' + txl('6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.') + '</p></div>');
     return '<div class="wb-grid">' + cards + '</div>';
   }
   // ---------------------------------------------------------------- info
@@ -12533,64 +12910,66 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var b = bet();
     var rows = '';
     for (var s = 2; s < M.PAYING; s++) {
-      var label = s === 2 ? 'Punkaren' : s === 3 ? 'Graffitikillen' : SYM[s].name;
+      var label = s === 2 ? txl('Punkaren') : s === 3 ? txl('Graffitikillen') : txl(SYM[s].name);
       rows += '<tr><td><img src="' + icon(s) + '" alt=""><span class="pt-name">' + escapeHtml(label) + '</span></td>';
       for (var len = 3; len <= 6; len++) { var pv = M.payFor(s, len); rows += '<td>' + (pv > 0 ? money(Math.round(pv * (TIDS ? M.TIME.scale : 1) * b)) : '–') + '</td>'; }
       rows += '</tr>';
     }
     if (TIDS) {
+      // texterna skrivs på svenska; engelskan står i lang-en.js (txl)
+      var autoList = (function () { var a = AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }); return a.slice(0, -1).join(', ') + txl(' eller ') + a[a.length - 1]; })();
+      var fsRule = M.TIME.fsStartDraw && M.TIME.fsLayersDraw ? '<li>' + mtRuleText(false) + '</li>' +
+          '<li>' + txl('Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.') + '</li>'
+        : '<li>' + txl('Multin börjar på x{m} och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.', { m: M.TIME.fsStart }) + '</li>';
+      var mnGrow = '<li>' + txl('Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.', { d: M.TIME.maniacDepth }) + '</li>';
+      var mnRule = M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>' + mtRuleText(true) + '</li>' + mnGrow
+        : M.TIME.maniacStartDraw ? '<li>' + txl('Alla {d} lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x{a}–x{b}, och multin börjar på summan: x{r}.', { d: M.TIME.maniacDepth, a: Math.min.apply(null, M.TIME.maniacStartDraw.v), b: Math.max.apply(null, M.TIME.maniacStartDraw.v), r: mtRange() }) + '</li>' + mnGrow
+        : '<li>' + txl('Multin börjar på x{m} och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.', { m: M.TIME.maniacStart, d: M.TIME.maniacDepth }) + '</li>';
       $('#infoBody').innerHTML =
-        '<section><h3>Fakta om spelet</h3><div class="facts">' +
-        '<div class="fact"><span>Återbetalning (RTP)</span><b>96,0 %</b></div>' +
-        '<div class="fact"><span>RTP köpt Bonusspel</span><b>' + BUY_RTP + ' %</b></div>' +
-        '<div class="fact"><span>RTP köpt Maniac</span><b>96,0 %</b></div>' +
-        '<div class="fact"><span>Maxvinst</span><b>' + fmtX(M.TIME.maxX) + 'x</b></div>' +
-        ('<div class="fact fact-vol"><span>Volatilitet</span><div class="fv-row">' + volMeterHtml(VOL_LEVEL).replace('class="vm"', 'class="vm vm-go"') + '<b>' + VOL_NAMES[VOL_LEVEL] + ' ' + VOL_LEVEL + '/5</b></div></div>') +
-        '<div class="fact"><span>Vinstvägar</span><b>46 656</b></div>' +
-        '</div><p class="note" style="margin-top:8px">Siffrorna kommer från simuleringar av 100 miljoner spelomgångar och 1 miljon köp av varje bonus (spelmotor 1.1.0, preliminärt tills certifieringskörningen är gjord). Återbetalningen är ett teoretiskt snitt över väldigt många spelomgångar.</p></section>' +
+        '<section><h3>' + txl('Fakta om spelet') + '</h3><div class="facts">' +
+        '<div class="fact"><span>' + txl('Återbetalning (RTP)') + '</span><b>' + percent(96.0) + '</b></div>' +
+        '<div class="fact"><span>' + txl('RTP köpt Bonusspel') + '</span><b>' + BUY_RTP + '</b></div>' +
+        '<div class="fact"><span>' + txl('RTP köpt Maniac') + '</span><b>' + BUY_RTP_MN + '</b></div>' +
+        '<div class="fact"><span>' + txl('Maxvinst') + '</span><b>' + fmtX(M.TIME.maxX) + 'x</b></div>' +
+        ('<div class="fact fact-vol"><span>' + txl('Volatilitet') + '</span><div class="fv-row">' + volMeterHtml(VOL_LEVEL).replace('class="vm"', 'class="vm vm-go"') + '<b>' + VOL_NAMES[VOL_LEVEL] + ' ' + VOL_LEVEL + '/5</b></div></div>') +
+        '<div class="fact"><span>' + txl('Vinstvägar') + '</span><b>' + num(46656) + '</b></div>' +
+        '</div><p class="note" style="margin-top:8px">' + txl('Siffrorna kommer från simuleringar av 100 miljoner spelomgångar och 1 miljon köp av varje bonus (spelmotor 1.1.0, preliminärt tills certifieringskörningen är gjord). Återbetalningen är ett teoretiskt snitt över väldigt många spelomgångar.') + '</p></section>' +
         // så vinner du: små bräden med spelets symboler (info-ways.js)
-        '<section><h3>Så vinner du</h3>' + waysHtml() + '</section>' +
+        '<section><h3>' + txl('Så vinner du') + '</h3>' + waysHtml() + '</section>' +
         '<section><h3>Layerspins</h3><ul>' +
-        '<li>Varje ny symbol är en affisch över förra snurrets symbol, som syns i ett rivet hörn.</li>' +
-        '<li>Har en vinst gått minst två hjul och nästa hjul saknar symbolen, kan förra snurrets symbol i hörnet fylla luckan. Vinsten fortsätter sedan i förra snurret så länge symbolen finns där och byter tillbaka till brädet när den saknas, ända till hjul 6. Wilds räknas på båda ställena.</li>' +
-        '<li>I förra snurret räknas en ruta per hjul: den med symbolen som ligger närmast raden innan, annars närmaste wild.</li>' +
-        '<li>En symbol från förra snurret som har använts i en vinst försvinner och kan inte användas igen. Resten finns kvar i alla laviner i samma snurr.</li>' +
-        '<li>Kassetten: före snurret spolar kassetten ibland tillbaka 2 snurr, och då kan symboler från upp till två snurr bakåt fylla luckor. Ibland spolar den 3 snurr: upp till tre snurr bakåt. På varje hjul används brädet först och sedan närmaste lager bakåt som har symbolen. Ingen multi i grundspelet.</li>' +
-        '<li>Väggen med de tre senaste brädena sparas mellan snurren och finns kvar när du kommer tillbaka. Byter du insats ligger brädet kvar, men väggen börjar om: nästa snurr har inget förra snurr att hämta symboler från.</li></ul></section>' +
-        '<section><h3>Vinsttabell</h3><p>Belopp per vinstväg vid insatsen ' + money(b) + '. Lika symboler räknas från hjulet längst till vänster, på hjul i rad, på vilken rad som helst.</p>' +
-        '<div class="paytable-wrap"><table class="paytable"><thead><tr><th>Symbol</th><th>3 hjul</th><th>4 hjul</th><th>5 hjul</th><th>6 hjul</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
-        '<section><h3>Wild</h3><div class="sym-rule"><img src="' + icon(WILD) + '" alt=""><p><b>Wild</b> finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.</p></div></section>' +
-        '<section><h3>Bonusspel</h3>' +
-        '<div class="sym-rule"><img src="' + icon(SCAT) + '" alt=""><p><b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger ' + M.fsAwardTime(3) + ' frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger ' + M.FS_RETRIGGER + ' frispinn till.</p></div><ul style="margin-top:10px">' +
-        '<li>Väggen har ' + M.TIME.fsDepth + ' lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).</li>' +
+        '<li>' + txl('Varje ny symbol är en affisch över förra snurrets symbol, som syns i ett rivet hörn.') + '</li>' +
+        '<li>' + txl('Har en vinst gått minst två hjul och nästa hjul saknar symbolen, kan förra snurrets symbol i hörnet fylla luckan. Vinsten fortsätter sedan i förra snurret så länge symbolen finns där och byter tillbaka till brädet när den saknas, ända till hjul 6. Wilds räknas på båda ställena.') + '</li>' +
+        '<li>' + txl('I förra snurret räknas en ruta per hjul: den med symbolen som ligger närmast raden innan, annars närmaste wild.') + '</li>' +
+        '<li>' + txl('En symbol från förra snurret som har använts i en vinst försvinner och kan inte användas igen. Resten finns kvar i alla laviner i samma snurr.') + '</li>' +
+        '<li>' + txl('Kassetten: före snurret spolar kassetten ibland tillbaka 2 snurr, och då kan symboler från upp till två snurr bakåt fylla luckor. Ibland spolar den 3 snurr: upp till tre snurr bakåt. På varje hjul används brädet först och sedan närmaste lager bakåt som har symbolen. Ingen multi i grundspelet.') + '</li>' +
+        '<li>' + txl('Väggen med de tre senaste brädena sparas mellan snurren och finns kvar när du kommer tillbaka. Byter du insats ligger brädet kvar, men väggen börjar om: nästa snurr har inget förra snurr att hämta symboler från.') + '</li></ul></section>' +
+        '<section><h3>' + txl('Vinsttabell') + '</h3><p>' + txl('Belopp per vinstväg vid insatsen {b}. Lika symboler räknas från hjulet längst till vänster, på hjul i rad, på vilken rad som helst.', { b: money(b) }) + '</p>' +
+        '<div class="paytable-wrap"><table class="paytable"><thead><tr><th>' + txl('Symbol') + '</th><th>' + txl('{n} hjul', { n: 3 }) + '</th><th>' + txl('{n} hjul', { n: 4 }) + '</th><th>' + txl('{n} hjul', { n: 5 }) + '</th><th>' + txl('{n} hjul', { n: 6 }) + '</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
+        '<section><h3>Wild</h3><div class="sym-rule"><img src="' + icon(WILD) + '" alt=""><p>' + txl('<b>Wild</b> finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.') + '</p></div></section>' +
+        '<section><h3>' + txl('Bonusspel') + '</h3>' +
+        '<div class="sym-rule"><img src="' + icon(SCAT) + '" alt=""><p>' + txl('<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.', { n: M.fsAwardTime(3), r: M.FS_RETRIGGER }) + '</p></div><ul style="margin-top:10px">' +
+        '<li>' + txl('Väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).', { d: M.TIME.fsDepth }) + '</li>' +
         // prototypen: samma kassett som i Maniac (M.TIME.fsStartDraw)
-        (M.TIME.fsStartDraw && M.TIME.fsLayersDraw ? '<li>' + mtRuleText(false, 'Bonusspelet') + '</li>' +
-          '<li>Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.</li>'
-          : '<li>Multin börjar på x' + M.TIME.fsStart + ' och gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.</li>') +
-        '<li>I Bonusspelet är vinsterna vinsttabellen gånger ' + fmtScale(M.TIME.fsScale) + ', och sedan gånger multin.</li>' +
-        '<li>Köp: ' + M.fsAwardTime(3) + ' frispinn direkt för ' + BUY_X + ' gånger insatsen. Köpt Bonusspel ger i snitt ' + BUY_RTP + ' % tillbaka.</li></ul></section>' +
-        '<section><h3>Maniac-bonus</h3><ul>' +
-        '<li>Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i ' + (M.TIME.goldP * 100).toLocaleString('sv-SE', { maximumFractionDigits: 1 }) + ' % av fallen. Guldbomben startar Maniac-bonusen med ' + M.TIME.maniacSpins + ' frispinn.</li>' +
-        '<li>Djupare tid: väggen har ' + M.TIME.maniacDepth + ' lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till ' + M.TIME.maniacDepth + ' snurr (siffran vid hörnet visar hur långt bakåt).</li>' +
+        fsRule +
+        '<li>' + txl('I Bonusspelet är vinsterna vinsttabellen gånger {s}, och sedan gånger multin.', { s: fmtScale(M.TIME.fsScale) }) + '</li>' +
+        '<li>' + txl('Köp: {n} frispinn direkt för {x} gånger insatsen. Köpt Bonusspel ger i snitt {p} tillbaka.', { n: M.fsAwardTime(3), x: BUY_X, p: BUY_RTP }) + '</li></ul></section>' +
+        '<section><h3>' + txl('Maniac-bonus') + '</h3><ul>' +
+        '<li>' + txl('Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Maniac-bonusen med {n} frispinn.', { p: percent(M.TIME.goldP * 100), n: M.TIME.maniacSpins }) + '</li>' +
+        '<li>' + txl('Djupare tid: väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till {d} snurr (siffran vid hörnet visar hur långt bakåt).', { d: M.TIME.maniacDepth }) + '</li>' +
         // prototypen: alla lager fyllda från start och startmulti per lager (M.TIME.maniacStartDraw)
-        (M.TIME.maniacStartDraw && M.TIME.maniacLayersDraw ? '<li>' + mtRuleText(true, 'Maniac') + '</li>' +
-          '<li>Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>'
-          : M.TIME.maniacStartDraw ? '<li>Alla ' + M.TIME.maniacDepth + ' lager är fyllda från start, med nya bräden från grundspelets hjul. Varje lager ger en startmulti på x' +
-          Math.min.apply(null, M.TIME.maniacStartDraw.v) + '–x' + Math.max.apply(null, M.TIME.maniacStartDraw.v) + ', och multin börjar på summan: x' + mtRange() + '.</li>' +
-          '<li>Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>'
-          : '<li>Multin börjar på x' + M.TIME.maniacStart + ' och ökar efter varje vinststeg med lika mycket som hörnen ligger bakåt, från +1 till +' + M.TIME.maniacDepth + '. Multin nollställs aldrig.</li>') +
-        '<li>I Maniac är vinsterna vinsttabellen gånger ' + fmtScale(M.TIME.maniacScale) + ', och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.</li>' +
-        '<li>Köp: Maniac för ' + M.TIME.maniacBuy + ' gånger insatsen. Köpt Maniac ger i snitt 96,0 % tillbaka.</li></ul></section>' +
-        '<section><h3>Lavin och multiplikator</h3><ul>' +
-        '<li>Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.</li>' +
-        '<li>I grundspelet finns ingen multi: varje vinst betalar som i vinsttabellen. Multin finns i Bonusspelet.</li>' +
-        '<li>Total vinst per spelomgång (grundsnurr och bonus) är högst ' + fmtX(M.TIME.maxX) + ' gånger insatsen. När den nås avslutas bonusen direkt.</li>' +
-        '<li>Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.</li>' +
-        '<li>Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.</li></ul></section>' +
-        '<section><h3>Kontroller</h3><ul>' +
-        '<li>Mellanslag eller den runda knappen snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt.</li>' +
-        '<li>Blixten slår på turbo.' + (MARKET.autoplay ? ' Pilarna startar autospel med ' + (function () { var a = AUTO_COUNTS.filter(function (n) { return n <= MARKET.autoMax; }); return a.slice(0, -1).join(', ') + ' eller ' + a[a.length - 1]; })() + ' snurr. Du kan välja att autospelet stoppar när en bonus startar, när saldot har minskat med ett visst belopp eller när en vinst är minst ett visst belopp. Ett tryck på pilarna eller snurrknappen stoppar autospelet.' : '') + '</li>' +
-        '<li>Tryck på insatsen för att välja belopp direkt.</li></ul></section>';
+        mnRule +
+        '<li>' + txl('I Maniac är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.', { s: fmtScale(M.TIME.maniacScale) }) + '</li>' +
+        '<li>' + txl('Köp: Maniac för {x} gånger insatsen. Köpt Maniac ger i snitt {p} tillbaka.', { x: M.TIME.maniacBuy, p: BUY_RTP_MN }) + '</li></ul></section>' +
+        '<section><h3>' + txl('Lavin och multiplikator') + '</h3><ul>' +
+        '<li>' + txl('Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.') + '</li>' +
+        '<li>' + txl('I grundspelet finns ingen multi: varje vinst betalar som i vinsttabellen. Multin finns i Bonusspelet.') + '</li>' +
+        '<li>' + txl('Total vinst per spelomgång (grundsnurr och bonus) är högst {x} gånger insatsen. När den nås avslutas bonusen direkt.', { x: fmtX(M.TIME.maxX) }) + '</li>' +
+        '<li>' + txl('Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.') + '</li>' +
+        '<li>' + txl('Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.') + '</li></ul></section>' +
+        '<section><h3>' + txl('Kontroller') + '</h3><ul>' +
+        '<li>' + txl('Mellanslag eller den runda knappen snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt.') + '</li>' +
+        '<li>' + txl('Blixten slår på turbo.') + (MARKET.autoplay ? ' ' + txl('Pilarna startar autospel med {list} snurr. Du kan välja att autospelet stoppar när en bonus startar, när saldot har minskat med ett visst belopp eller när en vinst är minst ett visst belopp. Ett tryck på pilarna eller snurrknappen stoppar autospelet.', { list: autoList }) : '') + '</li>' +
+        '<li>' + txl('Tryck på insatsen för att välja belopp direkt.') + '</li></ul></section>';
       return;
     }
     $('#infoBody').innerHTML =
@@ -12625,7 +13004,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       '<li>Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.</li>' +
       '<li>I grundspelet ger varje lavin i samma snurr högre multi: x1, x2, x3 och sedan x5.</li>' +
       '<li>I Maniac Mode ökar multin med +1 för varje lavin och nollställs aldrig under bonusen.</li>' +
-      '<li>Köp bonus ger 10 frispinn direkt för ' + BUY_X + ' gånger insatsen.</li>' +
+      ('<li>' + txl('Köp bonus') + ' ger 10 frispinn direkt för ') + BUY_X + ' gånger insatsen.</li>' +
       '<li>Total vinst per spelrunda är högst 5 000 gånger insatsen.</li></ul></section>' +
       '<section><h3>Kontroller</h3><ul>' +
       '<li>Mellanslag eller den runda knappen snurrar. Tryck igen medan hjulen snurrar för att stoppa direkt.</li>' +
@@ -12633,8 +13012,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       '<li>Tryck på insatsen för att välja belopp direkt.</li></ul></section>';
   }
   // en skala med tre decimaler och decimalkomma (0,224)
-  function fmtScale(x) { return x.toLocaleString('sv-SE', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); }
-  function fmtX(x) { return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function fmtScale(x) { return num(x, { minimumFractionDigits: 3, maximumFractionDigits: 3 }); }
+  function fmtX(x) { return num(x); }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   // ---------------------------------------------------------------- hjältar
@@ -12672,8 +13051,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var open = el.betMenu.hidden;
     closePopmenus();
     if (!open) return;
-    el.betMenu.innerHTML = '<span class="ttl">Insats</span>' + BETS.map(function (b, i) {
-      return '<button type="button" data-i="' + i + '"' + (i === state.betIdx ? ' class="on"' : '') + '>' + money(b).replace(',00', '') + '</button>';
+    el.betMenu.innerHTML = '<span class="ttl">' + txl('Insats') + '</span>' + BETS.map(function (b, i) {
+      return '<button type="button" data-i="' + i + '"' + (i === state.betIdx ? ' class="on"' : '') + '>' + moneyShort(b) + '</button>';
     }).join('');
     el.betMenu.hidden = false;
   });
@@ -12714,7 +13093,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Telefonen: Köp bonus är en rund bombknapp som står fristående till vänster om knappraden (layer-panel.css; affischen i
   // panelen syns inte där). Den trycker på affischen, och hud() gråar den när det inte går att köpa.
   if (TIDS) (function () {
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'buy-bar'; b.setAttribute('aria-label', 'Köp bonus');
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'buy-bar'; b.setAttribute('aria-label', txl('Köp bonus'));
     var im = new Image(); im.alt = ''; b.appendChild(im);
     b.addEventListener('click', function () { if (!el.buy.disabled) el.buy.click(); });
     var bar = $('#bar'); bar.insertBefore(b, bar.firstChild);
@@ -13324,15 +13703,15 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // köp-bonus-affischen: bonusbomben och "BONUS SPEL"
     var bpT = document.querySelector('#btnBuy .bp-title');
     if (bpT) {
-      bpT.innerHTML = 'BONUS<br>SPEL';
+      bpT.innerHTML = txl('BONUS<br>SPEL');
       var bomb = new Image(); bomb.className = 'bp-bomb'; bomb.alt = ''; bomb.src = icon(SCAT);
       bpT.parentNode.insertBefore(bomb, bpT);
-      $('#btnBuy').setAttribute('aria-label', 'Köp bonus: ' + M.fsAwardTime(3) + ' frispinn i Bonusspelet');
+      $('#btnBuy').setAttribute('aria-label', txl('Köp bonus: {n} frispinn i Bonusspelet', { n: M.fsAwardTime(3) }));
       var bpSub = document.querySelector('#btnBuy .bp-sub');
       if (bpSub) bpSub.textContent = 'Bonusspel & Maniac';
     }
     var fsLbl = document.querySelector('#fsTotal') && document.querySelector('#fsTotal').previousElementSibling;
-    if (fsLbl) fsLbl.textContent = 'Total vinst';
+    if (fsLbl) fsLbl.textContent = txl('Total vinst');
     TESTS.tcarla = function () { forceSpray = true; TESTS.bonus(); };
     TESTS.cascade = function () { tidsTest(function (r) { return winSteps(r) >= 3; }); };
     TESTS.big = function () { tidsTest(function (r) { return r.x >= 55 && r.scatters < 3; }); };
@@ -13608,7 +13987,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     g.lineWidth = 1.5; g.strokeStyle = INK; rr(g, x - 2, y - 2, w + 4, w + 4, 12); g.stroke();
     if (depth) {
       g.font = '13px ' + DISPLAY; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
-      g.fillText(depth + ' BAKÅT', x + 8, y + 9);
+      g.fillText(depth + txl(' BAKÅT'), x + 8, y + 9);
     } else {
       var t = w / 3;
       G3.front.forEach(function (col, c) { col.forEach(function (sym, r) { gTile(g, sym, x + c * t + 2, y + r * t + 2, t - 4); }); });
@@ -13645,7 +14024,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // hur långt bakåt det gäller nu
     var deep = carla ? (v > 1.5 ? 3 : v > 1.25 ? 2 : 1) : (v > 1.25 ? 2 : 1);
     var lk = gPop(v, deep === 1 ? -1 : (carla ? (deep === 3 ? 1.5 : 1.25) : 1.25));
-    gText(g, deep + ' SNURR BAKÅT', GUIDE_W / 2, 204, 22, LAYER_COL[deep - 1], -0.03, lk);
+    gText(g, deep + txl(' SNURR BAKÅT'), GUIDE_W / 2, 204, 22, LAYER_COL[deep - 1], -0.03, lk);
     g.restore();
   }
 
@@ -13673,13 +14052,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // guldet: en blixt över bomben
     var fl = gSeg(u, 2.85, 3.25);
     if (fl > 0 && fl < 1) { g.save(); g.globalAlpha = 1 - fl; g.fillStyle = '#fff6c0'; g.beginPath(); g.arc(bx + 2.5 * s, by + 2.5 * s, s * (0.4 + fl * 1.1), 0, Math.PI * 2); g.fill(); g.restore(); }
-    if (u >= 1.55 && !gold) gText(g, 'BONUSSPEL!', GUIDE_W / 2, by - 2, 34, '#ff8629', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 1.55, 1.8)));
+    if (u >= 1.55 && !gold) gText(g, (txl('BONUSSPEL') + '!'), GUIDE_W / 2, by - 2, 34, '#ff8629', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 1.55, 1.8)));
     if (gold) gText(g, 'MANIAC!', GUIDE_W / 2, by - 2, 38, '#ffd21f', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 3.0, 3.25)));
     g.restore();
   }
 
   // ---------------------------------------------------------------- rutorna
-  function gThousands(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function gThousands(n) { return num(n); }
   // det gamla spelet (utan Tidsvägar): en ruta per funktion med symbolen som studsar
   function gIconDemo(sym) {
     return function (g, u) {
@@ -13689,10 +14068,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     };
   }
   var GUIDE = TIDS ? [
-    { t: 'Laviner', x: '6 hjul, 6 rader och 46 656 vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.', demo: demoCascade },
-    { t: 'Layerspins', x: 'Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.', demo: demoTime },
-    { t: 'Kassetten', x: 'Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.', demo: demoLayers },
-    { t: 'Bonusspel & Maniac', x: '3 bomber ger Bonusspelet: ' + M.fsAwardTime(3) + (M.TIME.fsLayersDraw ? ' frispinn och ' + mtLayersText(false) + ' lager med multi. ' : ' frispinn där multin växer och aldrig nollställs. ') + (M.TIME.maniacLayersDraw ? 'Guldbomben startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + mtLayersText() + ' lager med multi. ' : 'Blir en bomb guld startar Maniac med ' + M.TIME.maniacSpins + ' frispinn och ' + M.TIME.maniacDepth + ' lager bakåt. ') + 'Köp: Bonusspel ' + BUY_X + 'x, Maniac ' + M.TIME.maniacBuy + 'x.', demo: demoBonus }
+    { t: txl('Laviner'), x: txl('6 hjul, 6 rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.', { w: num(46656) }), demo: demoCascade },
+    { t: 'Layerspins', x: txl('Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.'), demo: demoTime },
+    { t: txl('Kassetten'), x: txl('Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.'), demo: demoLayers },
+    { t: txl('Bonusspel & Maniac'), x: (M.TIME.fsLayersDraw ? txl('3 bomber ger Bonusspelet: {n} frispinn och {l} lager med multi.', { n: M.fsAwardTime(3), l: mtLayersText(false) }) : txl('3 bomber ger Bonusspelet: {n} frispinn där multin växer och aldrig nollställs.', { n: M.fsAwardTime(3) })) + ' ' +
+      (M.TIME.maniacLayersDraw ? txl('Guldbomben startar Maniac med {n} frispinn och {l} lager med multi.', { n: M.TIME.maniacSpins, l: mtLayersText() }) : txl('Blir en bomb guld startar Maniac med {n} frispinn och {d} lager bakåt.', { n: M.TIME.maniacSpins, d: M.TIME.maniacDepth })) + ' ' +
+      txl('Köp: Bonusspel {a}x, Maniac {b}x.', { a: BUY_X, b: M.TIME.maniacBuy }), demo: demoBonus }
   ] : [
     { t: 'Laviner', x: 'Vinster sprängs, nya symboler faller in och multin stiger till x5.', demo: gIconDemo(8) },
     { t: 'Maniac Mode', x: '3 bonusstjärnor ger 10–20 frispinn där multin växer utan tak.', demo: gIconDemo(1) },
@@ -13762,6 +14143,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     $('#optMusic').checked = Sound.musicOn;
     $('#optTurbo').checked = state.turbo;
     $('#mReset').disabled = state.busy;
+    // språket byts inte mitt i en omgång (lang.js)
+    document.querySelectorAll('.lang-pick button').forEach(function (b) { b.disabled = state.busy; });
     dlgMenu.showModal();
   });
   $('#mInfo').addEventListener('click', function () { dlgMenu.close(); openInfo(); });
@@ -13955,13 +14338,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function guideBuild() {
     var k = guideDpr();
     $('#guideTrack').innerHTML = GUIDE.map(function (s, i) {
-      return '<section class="g-slide" aria-roledescription="ruta" aria-label="' + (i + 1) + ' av ' + GUIDE.length + ': ' + s.t + '">' +
+      return '<section class="g-slide" aria-roledescription="' + txl('ruta') + '" aria-label="' + txl('{i} av {n}: {t}', { i: i + 1, n: GUIDE.length, t: s.t }) + '">' +
         '<canvas class="g-demo" width="' + Math.round(GUIDE_W * k) + '" height="' + Math.round(GUIDE_H * k) + '" aria-hidden="true"></canvas>' +
         // Layerspins-rutans rubrik är märket (ls-brand.js), samma som i introt och i spelet
         (TIDS && s.t === 'Layerspins' ? '<h3 class="g-ls">' + s.t + lsLockupHtml() + '</h3>' : '<h3>' + s.t + '</h3>') + '<p>' + s.x + '</p></section>';
     }).join('');
     var dots = $('#guideDots');
-    dots.innerHTML = GUIDE.map(function (s, i) { return '<button type="button" aria-label="Ruta ' + (i + 1) + ': ' + s.t + '"></button>'; }).join('');
+    dots.innerHTML = GUIDE.map(function (s, i) { return '<button type="button" aria-label="' + txl('Ruta {i}: {t}', { i: i + 1, t: s.t }) + '"></button>'; }).join('');
     dots.querySelectorAll('button').forEach(function (b, i) { b.addEventListener('click', function () { guideGo(i); }); });
     $('#guideMax b').textContent = GUIDE_MAX;
     guide.built = true;
@@ -14184,7 +14567,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       root.classList.add('si-wait');
       var gate = document.createElement('button');
       gate.type = 'button'; gate.className = 'si-gate';
-      gate.innerHTML = '<i class="si-gate-play" aria-hidden="true"></i><b>TRYCK FÖR ATT STARTA</b><small>Med ljud</small>';
+      gate.innerHTML = ('<i class="si-gate-play" aria-hidden="true"></i><b>' + txl('TRYCK FÖR ATT STARTA') + '</b><small>' + txl('Med ljud') + '</small>');
       root.appendChild(gate);
       function go(e) {
         if (e && e.type === 'keydown' && !/^(Enter| |Spacebar)$/.test(e.key)) return;
