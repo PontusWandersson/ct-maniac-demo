@@ -2022,8 +2022,11 @@ body.tids .bp-price {
 @media (prefers-reduced-motion: reduce) { .kq-ripple { animation: none; } }
 /* vakterna vid vägen syns bara på telefonen (på datorn står knappraden framför dem) */
 :root:not(.portrait) .kq-road { display: none; }
-/* Skattkammaren (kq-scene.js): strålarna bakom brädet vrider sig sakta och glittret på skatten tindrar */
-body.kq-inside .kq-rays { transform-origin: 800px 470px; animation: kqRays 90s linear infinite; }
+/* i bonusen syns inte slottet, och speglingarna står still (de kostar annars en omritning av slottet i varje bildruta) */
+body.kq-inside .kq-ripple { animation-play-state: paused; }
+/* Skattkammaren (kq-scene.js): strålarna bakom brädet vrider sig sakta och glittret på skatten tindrar. Strålarna är en
+   egen bild som vrids kring ljusets mitt i ritningen (800, 470 av 1600 × 1000). */
+body.kq-inside .kq-rays { transform-origin: 50% 47%; animation: kqRays 90s linear infinite; }
 body.kq-inside .kq-twinkle { animation: kqTwinkle 2.4s ease-in-out infinite; }
 .kq-twinkle { opacity: 0; }
 @keyframes kqRays { to { transform: rotate(360deg); } }
@@ -10476,6 +10479,17 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     });
     g.restore();
   }
+  // Spelet skakar till när ett torn rasar: samma skakning som shakeBoard(2) (cascShake i fold-and-winshow.css), men som en
+  // animation i koden med fasta värden, så att webbläsaren flyttar spelet utan att räkna om hela sidan (användaren
+  // 2026-10-27: "det laggar när tornen rasar"; när flera torn rasade efter varandra laggade det). Nästa torn börjar om
+  // skakningen, som förut.
+  var srShakeAnim = null;
+  function srShakeGame() {
+    if (POP_STILL || !gameEl.animate) return;
+    if (srShakeAnim) srShakeAnim.cancel();
+    srShakeAnim = gameEl.animate([{ translate: '0 0' }, { translate: '-2px 0.9px', offset: 0.15 }, { translate: '2px -1.2px', offset: 0.35 },
+      { translate: '-1.2px 0.8px', offset: 0.55 }, { translate: '0.7px -0.5px', offset: 0.75 }, { translate: '0 0' }], { duration: 300, easing: 'linear' });
+  }
   // rows: raderna som rasar (båda om inget anges)
   function srCrumble(r, fast, idx, rows) {
     rows = rows || [0, 1];
@@ -10498,7 +10512,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
           })(bx, by);
         }
       });
-      srSnd.crumble(); preFlare(); if (typeof shakeBoard === 'function') shakeBoard(2);
+      srSnd.crumble(); preFlare(); srShakeGame();
       return wait(fall, true);
     }).then(function () {
       rows.forEach(function (row) { srGlowT[r][row] = clock; srCrumbling[r][row] = false; }); srDirty = true;
@@ -10583,9 +10597,10 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var f = document.createElement('div'); f.className = 'sr-flash' + (gold ? ' gold' : '') + (soft ? ' soft' : '');
     document.body.appendChild(f); setTimeout(function () { f.remove(); }, 900);
   }
-  // facklorna i tronsalen flammar upp en kort stund (kq-scene.js, proto.css)
+  // facklorna i tronsalen flammar upp en kort stund (kq-scene.js, proto.css); flammar de redan förlängs det bara (sidan
+  // räknas inte om mitt i, det laggade när många torn rasade efter varandra)
   function preFlare() {
-    document.body.classList.remove('kq-flare'); void document.body.offsetWidth; document.body.classList.add('kq-flare');
+    document.body.classList.add('kq-flare');
     clearTimeout(preFlare.t); preFlare.t = setTimeout(function () { document.body.classList.remove('kq-flare'); }, 700);
   }
   // ---------------------------------------------------------------- Tronen på brädet
@@ -11186,9 +11201,20 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         '<path d="M-14 -4 L14 -4 M-7 -13 L-3 -4 L0 14 M7 -13 L3 -4" stroke="rgba(21,17,31,0.45)" stroke-width="2" fill="none"/>' +
         '<path d="M-8 -9 L-3 -9" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/></g>';
     }
+    // Det som rör sig i skattkammaren (facklornas och ljuskronornas sken och lågor, glittret och strålarna) är egna små
+    // bilder ovanpå resten (användaren 2026-10-27: "det laggar när tornen rasar"): förut låg allt i en bild, och varje
+    // låga som fladdrade fick webbläsaren att rita om hela skattkammaren med alla mynt i varje bildruta. Nu flyttas och
+    // skalas de små bilderna bara, och resten ritas en gång. Lagren ligger i samma ordning som allt ritades förut (se room).
+    // part: en liten bild med klassen cls som täcker rutan x, y, w, h i ritningen (1600 × 1000); facklans låga skalas från
+    // rutans nederkant mitt på och skenet och glittret från mitten (proto.css), som förut.
+    var glows = '', fixtures = '', flames = '', sparks = '';
+    function part(cls, x, y, w, h, body, style) {
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="' + cls + '" viewBox="' + [x, y, w, h].map(function (v) { return +v.toFixed(2); }).join(' ') + '"' + (style ? ' style="' + style + '"' : '') + '>' + body + '</svg>';
+    }
     function sparkle(x, y, k, d) {
-      return '<path class="kq-twinkle" style="animation-delay:' + d.toFixed(2) + 's;transform-origin:' + x + 'px ' + y + 'px" d="M' + x + ' ' + (y - 16 * k) + ' L' + (x + 4 * k) + ' ' + (y - 4 * k) + ' L' + (x + 16 * k) + ' ' + y +
-        ' L' + (x + 4 * k) + ' ' + (y + 4 * k) + ' L' + x + ' ' + (y + 16 * k) + ' L' + (x - 4 * k) + ' ' + (y + 4 * k) + ' L' + (x - 16 * k) + ' ' + y + ' L' + (x - 4 * k) + ' ' + (y - 4 * k) + ' Z" fill="#fffbe6"/>';
+      sparks += part('kq-twinkle', x - 16 * k, y - 16 * k, 32 * k, 32 * k, '<path d="M' + x + ' ' + (y - 16 * k) + ' L' + (x + 4 * k) + ' ' + (y - 4 * k) + ' L' + (x + 16 * k) + ' ' + y +
+        ' L' + (x + 4 * k) + ' ' + (y + 4 * k) + ' L' + x + ' ' + (y + 16 * k) + ' L' + (x - 4 * k) + ' ' + (y + 4 * k) + ' L' + (x - 16 * k) + ' ' + y + ' L' + (x - 4 * k) + ' ' + (y - 4 * k) + ' Z" fill="#fffbe6"/>',
+        'animation-delay:' + d.toFixed(2) + 's');
     }
     // en hög med guldmynt (mitt i cx, botten i y, bredd w, höjd h): en guldkulle med mynt, ädelstenar och glitter på ytan
     function pile(cx, y, w, h, n) {
@@ -11240,16 +11266,16 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         '<path d="M-30 -82 H30" stroke="#e0a000" stroke-width="6"/><circle cx="0" cy="-70" r="7" fill="#2fbf6a" stroke="' + I + '" stroke-width="3"/>' +
         '<path d="M-22 -90 Q-20 -66 -6 -56" stroke="#fff6c8" stroke-width="4" fill="none" stroke-linecap="round"/></g>';
     }
-    // en pelare med guldkapitäl och en fackla
+    // en pelare med guldkapitäl och en fackla (skenet, hållaren och lågan läggs i sina lager)
     function pillar(x) {
+      glows += part('kq-glow', x + 35 - 140, 240, 280, 280, '<circle cx="' + (x + 35) + '" cy="380" r="140" fill="url(#vtorch)"/>');
+      fixtures += '<path d="M' + (x + 21) + ' 420 L' + (x + 49) + ' 420 L' + (x + 43) + ' 470 L' + (x + 27) + ' 470 Z" fill="#e0a000" stroke="' + INKC + '" stroke-width="6"/>';
+      flames += part('kq-flame', x + 9, 340, 52, 78, '<path d="M' + (x + 35) + ' 340 C' + (x + 61) + ' 372 ' + (x + 55) + ' 408 ' + (x + 35) + ' 418 C' + (x + 15) + ' 408 ' + (x + 9) + ' 372 ' + (x + 35) + ' 340 Z" fill="#ff9a1f" stroke="' + INKC + '" stroke-width="6"/>' +
+        '<path d="M' + (x + 35) + ' 372 C' + (x + 47) + ' 388 ' + (x + 45) + ' 404 ' + (x + 35) + ' 410 C' + (x + 25) + ' 404 ' + (x + 23) + ' 388 ' + (x + 35) + ' 372 Z" fill="#ffe27a"/>');
       return '<rect x="' + x + '" y="60" width="70" height="820" fill="url(#vstone)" stroke="' + INKC + '" stroke-width="8"/>' +
         '<rect x="' + (x + 10) + '" y="60" width="11" height="820" fill="rgba(255,220,160,0.14)"/>' +
         '<rect x="' + (x - 16) + '" y="40" width="102" height="36" rx="5" fill="url(#vgold)" stroke="' + INKC + '" stroke-width="7"/>' +
-        '<rect x="' + (x - 16) + '" y="862" width="102" height="36" rx="5" fill="url(#vgold)" stroke="' + INKC + '" stroke-width="7"/>' +
-        '<circle class="kq-glow" cx="' + (x + 35) + '" cy="380" r="140" fill="url(#vtorch)"/>' +
-        '<path d="M' + (x + 21) + ' 420 L' + (x + 49) + ' 420 L' + (x + 43) + ' 470 L' + (x + 27) + ' 470 Z" fill="#e0a000" stroke="' + INKC + '" stroke-width="6"/>' +
-        '<g class="kq-flame"><path d="M' + (x + 35) + ' 340 C' + (x + 61) + ' 372 ' + (x + 55) + ' 408 ' + (x + 35) + ' 418 C' + (x + 15) + ' 408 ' + (x + 9) + ' 372 ' + (x + 35) + ' 340 Z" fill="#ff9a1f" stroke="' + INKC + '" stroke-width="6"/>' +
-        '<path d="M' + (x + 35) + ' 372 C' + (x + 47) + ' 388 ' + (x + 45) + ' 404 ' + (x + 35) + ' 410 C' + (x + 25) + ' 404 ' + (x + 23) + ' 388 ' + (x + 35) + ' 372 Z" fill="#ffe27a"/></g>';
+        '<rect x="' + (x - 16) + '" y="862" width="102" height="36" rx="5" fill="url(#vgold)" stroke="' + INKC + '" stroke-width="7"/>';
     }
     // en rundbåge mellan två pelare (x0–x1) med guldkant och ett mörkare valv bakom
     function arch(x0, x1, top) {
@@ -11258,33 +11284,37 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         '<path d="M' + (x0 + 16) + ' 880 L' + (x0 + 16) + ' ' + (top + r) + ' A' + (r - 16) + ' ' + (r - 16) + ' 0 0 1 ' + (x1 - 16) + ' ' + (top + r) + ' L' + (x1 - 16) + ' 880" fill="none" stroke="#e0a000" stroke-width="6"/>' +
         '<path d="M' + (mid - 22) + ' ' + (top - 2) + ' L' + mid + ' ' + (top - 30) + ' L' + (mid + 22) + ' ' + (top - 2) + ' Z" fill="url(#vgold)" stroke="' + INKC + '" stroke-width="5" stroke-linejoin="round"/>';
     }
-    // en ljuskrona i guld med ljus som brinner
+    // en ljuskrona i guld med ljus som brinner (kedjan står kvar i bilden; skenet, kronan med ljusen och lågorna läggs i
+    // sina lager)
     function chandelier(x, y, k) {
-      var I = INKC, out = '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')">' +
-        '<path d="M0 -400 V-40" stroke="' + I + '" stroke-width="6"/>' +
-        '<circle cx="0" cy="40" r="170" fill="url(#vtorch)" class="kq-glow"/>' +
-        '<path d="M-120 20 Q0 80 120 20" fill="none" stroke="' + I + '" stroke-width="16"/><path d="M-120 20 Q0 80 120 20" fill="none" stroke="#ffcc33" stroke-width="9"/>' +
+      var I = INKC, g = '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')">';
+      glows += part('kq-glow', x - 170 * k, y + (40 - 170) * k, 340 * k, 340 * k, g + '<circle cx="0" cy="40" r="170" fill="url(#vtorch)"/></g>');
+      fixtures += g + '<path d="M-120 20 Q0 80 120 20" fill="none" stroke="' + I + '" stroke-width="16"/><path d="M-120 20 Q0 80 120 20" fill="none" stroke="#ffcc33" stroke-width="9"/>' +
         '<path d="M-60 -40 L60 -40 L30 30 L-30 30 Z" fill="url(#vgold)" stroke="' + I + '" stroke-width="6" stroke-linejoin="round"/>';
       [-120, -60, 0, 60, 120].forEach(function (cx, i) {
         var cy = i === 2 ? 50 : i % 2 ? 42 : 20;
-        out += '<rect x="' + (cx - 7) + '" y="' + (cy - 36) + '" width="14" height="36" rx="3" fill="#fff6e0" stroke="' + I + '" stroke-width="4"/>' +
-          '<g class="kq-flame"><path d="M' + cx + ' ' + (cy - 62) + ' C' + (cx + 12) + ' ' + (cy - 48) + ' ' + (cx + 8) + ' ' + (cy - 38) + ' ' + cx + ' ' + (cy - 36) + ' C' + (cx - 8) + ' ' + (cy - 38) + ' ' + (cx - 12) + ' ' + (cy - 48) + ' ' + cx + ' ' + (cy - 62) + ' Z" fill="#ffb02e" stroke="' + I + '" stroke-width="3.5"/></g>';
+        fixtures += '<rect x="' + (cx - 7) + '" y="' + (cy - 36) + '" width="14" height="36" rx="3" fill="#fff6e0" stroke="' + I + '" stroke-width="4"/>';
+        flames += part('kq-flame', x + (cx - 12) * k, y + (cy - 62) * k, 24 * k, 26 * k, g + '<path d="M' + cx + ' ' + (cy - 62) + ' C' + (cx + 12) + ' ' + (cy - 48) + ' ' + (cx + 8) + ' ' + (cy - 38) + ' ' + cx + ' ' + (cy - 36) + ' C' + (cx - 8) + ' ' + (cy - 38) + ' ' + (cx - 12) + ' ' + (cy - 48) + ' ' + cx + ' ' + (cy - 62) + ' Z" fill="#ffb02e" stroke="' + I + '" stroke-width="3.5"/></g>');
       });
-      return out + '</g>';
+      fixtures += '</g>';
+      return g + '<path d="M0 -400 V-40" stroke="' + I + '" stroke-width="6"/></g>';
     }
-    // strålarna bakom brädet: tolv kilar från mitten som sakta vrider sig (kq-rays)
-    var rays = '<g class="kq-rays">';
+    // strålarna bakom brädet: tolv kilar från mitten som sakta vrider sig (kq-rays: hela bilden vrids)
+    var rays = '<svg xmlns="http://www.w3.org/2000/svg" class="kq-rays" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">';
     for (var ri = 0; ri < 12; ri++) {
       var a0 = ri * Math.PI / 6, a1 = a0 + Math.PI / 14, R = 2600;
       rays += '<path d="M800 470 L' + (800 + Math.cos(a0) * R).toFixed(0) + ' ' + (470 + Math.sin(a0) * R).toFixed(0) + ' L' + (800 + Math.cos(a1) * R).toFixed(0) + ' ' + (470 + Math.sin(a1) * R).toFixed(0) + ' Z" fill="rgba(255,214,120,0.09)"/>';
     }
-    rays += '</g>';
-    var twinkles = '';
+    rays += '</svg>';
     [[160, 640, 1], [420, 760, 0.8], [1180, 770, 0.9], [1450, 600, 1.1], [700, 900, 0.8], [880, 880, 1], [980, 930, 0.7], [600, 960, 0.9],
       [240, 500, 0.7], [1360, 470, 0.7], [800, 140, 0.8], [640, 210, 0.6], [960, 200, 0.6], [80, 820, 0.9], [1530, 830, 0.9], [1290, 700, 0.8]].forEach(function (p, i) {
-      twinkles += sparkle(p[0], p[1], p[2], (i * 0.37) % 2.4);
+      sparkle(p[0], p[1], p[2], (i * 0.37) % 2.4);
     });
-    var room = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">' +
+    // Skattkammaren i lager, nerifrån och upp: väggen, valven och guldljuset; strålarna; pelarna, ljuskronornas kedjor,
+    // golvet och skatten; facklornas och ljuskronornas sken; hållarna och ljuskronorna; lågorna; glittret; och skuggan i
+    // kanterna överst (som förut ritades sist). Mönstren och färgerna finns i den första bilden och gäller alla lager.
+    var SVG0 = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">';
+    var room = SVG0 +
       '<defs>' +
       '<pattern id="vbrick" width="120" height="60" patternUnits="userSpaceOnUse"><rect width="120" height="60" fill="#3a1336"/>' +
       '<path d="M0 0 H120 M0 30 H120 M60 0 V30 M0 30 V60 M120 30 V60" stroke="#1f0a1f" stroke-width="4"/>' +
@@ -11306,7 +11336,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       // rundbågarna längs väggen (utanför ritningen fler), guldljuset och strålarna från mitten
       arch(-660, -260) + arch(1860, 2260) + arch(-1160, -760) + arch(2360, 2760) + arch(-120, 300, 150) + arch(1300, 1720, 150) +
       arch(420, 1180, 40) +
-      '<rect x="-2400" y="-2000" width="6400" height="5000" fill="url(#vlight)"/>' + rays +
+      '<rect x="-2400" y="-2000" width="6400" height="5000" fill="url(#vlight)"/></svg>' + rays + SVG0 +
       pillar(-210) + pillar(1740) + pillar(330) + pillar(1200) + pillar(-710) + pillar(2240) +
       chandelier(110, 150, 0.8) + chandelier(1490, 150, 0.8) +
       // golvet: mörk marmor med guldlinjer
@@ -11318,9 +11348,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       pile(110, 905, 640, 250, 70) + pile(1490, 905, 640, 250, 70) +
       chest(370, 915, 1.05, false) + chest(1230, 915, 1.05, true) +
       crownOnCushion(1500, 668, 0.95) + goblet(95, 664, 0.95) +
-      pile(800, 1020, 860, 190, 70) + chest(800, 1010, 0.9, false) +
-      twinkles +
-      '<rect x="-2400" y="-2000" width="6400" height="5000" fill="url(#vvig)"/>' +
+      pile(800, 1020, 860, 190, 70) + chest(800, 1010, 0.9, false) + '</svg>' +
+      glows + SVG0 + fixtures + '</svg>' + flames + sparks +
+      SVG0 + '<rect x="-2400" y="-2000" width="6400" height="5000" fill="url(#vvig)"/>' +
       '</svg>';
     // ---- slottet på ängen (grundspelet)
     function tower(x, w, top, bot, roofH, flag) {
@@ -11455,21 +11485,22 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       var el = document.createElement('div');
       el.className = b[0]; el.setAttribute('aria-hidden', 'true');
       el.innerHTML = b[1];
-      svgs.push(el.firstChild);
+      // varje bild (skattkammarens lager och de små bilderna) med sin ruta i ritningen
+      Array.prototype.forEach.call(el.children, function (svg) { var v = svg.viewBox.baseVal; svgs.push({ el: svg, x: v.x, y: v.y, w: v.width, h: v.height }); });
       if (old && old.parentNode) old.parentNode.insertBefore(el, old);
       else document.body.insertBefore(el, document.body.firstChild);
     });
     // Datorn: ritningen följer spelet (#game, som layout skalar med --uiz och lägger mitt i fönstret): lika hög som spelet
     // gånger 1000/1018 (i designstorleken 1408 × 1018 blir det exakt som förut) och mitt bakom det. Telefonen: ritningen
-    // fyller skärmen (som slice). Läggs om när fönstret eller spelets storlek ändras.
+    // fyller skärmen (som slice). Läggs om när fönstret eller spelets storlek ändras. De små bilderna läggs på sin ruta.
     function placeScene() {
       var g = document.getElementById('game'), W = window.innerWidth, H = window.innerHeight, s, cx, cy;
       if (!g || document.documentElement.classList.contains('portrait')) { s = Math.max(W / 1600, H / 1000); cx = W / 2; cy = H / 2; }
       else { var r = g.getBoundingClientRect(); s = r.height / 1000; cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
       if (!(s > 0)) return;
-      svgs.forEach(function (svg) {
-        svg.style.width = (1600 * s) + 'px'; svg.style.height = (1000 * s) + 'px';
-        svg.style.left = (cx - 800 * s) + 'px'; svg.style.top = (cy - 500 * s) + 'px';
+      svgs.forEach(function (p) {
+        p.el.style.width = (p.w * s) + 'px'; p.el.style.height = (p.h * s) + 'px';
+        p.el.style.left = (cx + (p.x - 800) * s) + 'px'; p.el.style.top = (cy + (p.y - 500) * s) + 'px';
       });
     }
     placeScene();
