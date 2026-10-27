@@ -447,6 +447,8 @@ body.tids .time-cap { top: auto; bottom: auto; }
 .spin.busy { filter: saturate(.6) brightness(.92); }
 /* pilen snurrar medan hjulen snurrar: vinkeln sätts av spin-ico.js (mjukt upp och ner, inget hopp mellan snurren) */
 .spin svg { rotate: var(--spin-a, 0deg); }
+/* pilen eller fyrkanten (hud-1.js sätter hidden) */
+.spin svg[hidden] { display: none; }
 .spin.stop { background: var(--pop); color: var(--paper); box-shadow: inset 0 0 0 4px #ff8080, inset 0 -9px 0 4px rgba(21, 17, 31, .2), 4px 5px 0 var(--ink); }
 .spin .count { font: 400 40px/1 var(--display); }
 .spin .sub { position: absolute; bottom: 13px; left: 0; right: 0; font: 700 9.5px/1 var(--ui); letter-spacing: .12em; }
@@ -1476,18 +1478,18 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .lang-pick button { font: 700 14px/1 var(--ui); color: var(--ink); background: #fff; border: 2.5px solid var(--ink); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
 .lang-pick button.on { background: var(--sun); box-shadow: 2px 2px 0 var(--ink); }
 .lang-pick button:disabled { opacity: .45; cursor: default; }
-/* språkknappen ute på spelet (lang.js): SV | EN, det valda språket gult. Den ligger ovanpå (position absolute), så att
-   toppraden och allt annat står kvar där det stod. Datorn: bredvid info-knappen. Telefonen: till höger om LAYERSPINS-raden. */
-/* datorn: i raden efter info-knappen; den negativa marginalen tar bort knappens bredd ur raden, så att kolumnen inte växer */
-.ibtn.langbtn { width: 74px; margin-right: -82px; gap: 5px; display: inline-flex; align-items: center; justify-content: center; font: 800 13px/1 var(--ui); letter-spacing: .04em; }
+/* språkknappen ute på spelet (lang.js): SV | EN, det valda språket gult. Den ligger under TEST-knappen (användaren
+   2026-10-27), ovanpå (position absolute), så att toppraden och allt annat står kvar där det stod. */
+.ibtn.langbtn { width: 74px; gap: 5px; display: inline-flex; align-items: center; justify-content: center; font: 800 13px/1 var(--ui); letter-spacing: .04em; }
+.g-top .ibtn.langbtn { position: absolute; left: 0; top: calc(100% + 8px); margin: 0; z-index: 40; }
 .langbtn b { opacity: .55; font-weight: 800; }
 .langbtn b.on { opacity: 1; color: var(--sun); }
 .langbtn i { width: 1.5px; height: 14px; background: rgba(255, 246, 224, .5); }
 .ibtn.langbtn:disabled { opacity: .45; cursor: default; }
-/* telefonen: ingen plats i toppraden, så den ligger till höger om LAYERSPINS-raden, ovanpå (räknas från toppraden) */
-.portrait .g-top .ibtn.langbtn { position: absolute; right: 6px; top: calc(100% + 16px); width: 64px; height: 34px; margin: 0; font-size: 12px; z-index: 40; }
-/* telefonen i bonusen: raden med frispinn, multi och total vinst ligger där, och språket byts ändå inte mitt i en omgång */
-.portrait body.fs .g-top .ibtn.langbtn { display: none; }
+/* telefonen: lite mindre */
+.portrait .g-top .ibtn.langbtn { width: 64px; height: 34px; font-size: 12px; }
+/* i bonusen: rutorna med frispinn, multi och total vinst ligger där (datorn: under TEST), och språket byts ändå inte mitt i en omgång */
+body.fs .g-top .ibtn.langbtn { display: none; }
 /* insatsen i knappraden (hud-1.js): talet och en osynlig kopia av den högsta insatsen i samma ruta, så att rutan alltid är
    lika bred och knappraden står still när insatsen ändras. Telefonen har en fast bredd och krymper i stället långa belopp. */
 #bet { display: inline-grid; justify-items: start; }
@@ -1664,10 +1666,11 @@ body.tids .buy-poster .bp-sub { display: none; }
   --fh: clamp(240px, calc((100vw - 560px) * .9 + 160px), min(80vh, 760px)); --fw: calc(var(--fh) * .611);
   background: none; overflow-x: hidden; isolation: isolate; grid-template-columns: minmax(0, 1fr);
 }
-/* bakgrunden ligger i två lager: hel när startskärmen visas, två rivna halvor när man trycker SPELA */
+/* bakgrunden ligger i två lager: hel när startskärmen visas, två rivna halvor när man trycker SPELA. Den är helt täckande,
+   så att spelet inte syns bakom startskärmen (användaren 2026-10-27); SPELA tonar bort den (outBg). */
 .intro::before, .intro::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(ellipse 70% 55% at 50% 36%, rgba(86, 34, 128, .55), transparent 72%), rgba(8, 6, 22, .93);
+  background: radial-gradient(ellipse 70% 55% at 50% 36%, rgba(86, 34, 128, .55), transparent 72%), #080616;
 }
 .intro::after { display: none; }
 .intro-card { position: relative; z-index: 1; gap: 12px; width: 100%; max-width: 680px; min-width: 0; justify-self: center; }
@@ -2718,6 +2721,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 
     // ---- knappar, autospel och mätare
     'Stoppa hjulen': 'Stop the reels',
+    'Stoppa autospel': 'Stop autoplay',
     'Snurra': 'Spin',
     'Ingen gräns': 'No limit',
     'Antal snurr': 'Number of spins',
@@ -6176,14 +6180,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       }
     }
     var spinning = state.phase === 'spinning';
+    // När spelet snurrar av sig själv är knappen en stoppknapp hela tiden, röd med fyrkanten (användaren 2026-10-27):
+    // autospelet (AUTO under; ett tryck stoppar autospelet, events-1.js spinPress) och bonusen (BONUS under; ett tryck
+    // stoppar hjulen snabbare och hoppar fram i vinsterna, men bonusen fortsätter). Den byter inte till gul mellan snurren.
+    var fsLook = !!state.fs, autoLook = state.auto > 0 && !fsLook, stopLook = spinning || autoLook || fsLook;
     el.spinWrap.classList.toggle('spinning', spinning);
-    el.spin.classList.toggle('stop', spinning && !state.fs);
-    el.spin.classList.toggle('busy', state.busy && !spinning);
-    el.icoSpin.hidden = spinning && !state.fs;
-    el.icoStop.hidden = !(spinning && !state.fs);
+    el.spin.classList.toggle('stop', stopLook);
+    el.spin.classList.toggle('busy', state.busy && !stopLook);
+    // svg har ingen .hidden i alla webbläsare (Chrome och Edge), så attributet sätts direkt
+    el.icoSpin.toggleAttribute('hidden', stopLook);
+    el.icoStop.toggleAttribute('hidden', !stopLook);
     el.spinCount.hidden = true;
-    el.spinSub.textContent = !state.fs && state.auto > 0 ? 'AUTO' : '';
-    el.spin.setAttribute('aria-label', spinning ? txl('Stoppa hjulen') : txl('Snurra'));
+    el.spinSub.textContent = autoLook ? 'AUTO' : fsLook ? 'BONUS' : '';
+    el.spin.setAttribute('aria-label', autoLook ? txl('Stoppa autospel') : spinning || fsLook ? txl('Stoppa hjulen') : txl('Snurra'));
     el.auto.setAttribute('aria-pressed', state.auto > 0 ? 'true' : 'false');
     el.autoBadge.hidden = !(state.auto > 0);
     el.autoBadge.textContent = state.auto;
@@ -8918,7 +8927,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   // ---------------------------------------------------------------- händelser
-  el.spin.addEventListener('click', function () { if (state.auto > 0 && !state.busy) return; spin(); });
+  // Snurrknappen (och mellanslag): under autospel utanför bonusen stoppar den autospelet (snurret som pågår spelas klart,
+  // sedan blir knappen gul igen); annars snurrar den, eller stoppar hjulen medan de snurrar.
+  function spinPress() {
+    if (state.auto > 0 && !state.fs) { state.auto = 0; hud(); return; }
+    if (state.auto > 0 && !state.busy) return;
+    spin();
+  }
+  el.spin.addEventListener('click', spinPress);
   function changeBet(idx) {
     if (state.busy) return;
     idx = Math.max(0, Math.min(BETS.length - 1, idx));
@@ -8943,7 +8959,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       return '<button type="button" data-i="' + i + '"' + (i === state.betIdx ? ' class="on"' : '') + '>' + moneyShort(b) + '</button>';
     }).join('');
     el.betMenu.hidden = false;
+    centerBetMenu();
   });
+  // Insatsmenyn står mitt på skärmen i sidled (dator och telefon), ovanför knappraden. Knappraden är skalad (--uiz), så
+  // menyn flyttas 100 px på prov för att se hur mycket en px i menyn blir på skärmen.
+  function centerBetMenu() {
+    var m = el.betMenu; if (m.hidden) return;
+    m.style.left = '0px';
+    var a = m.getBoundingClientRect();
+    m.style.left = '100px';
+    var k = (m.getBoundingClientRect().left - a.left) / 100 || 1;
+    m.style.left = Math.round((window.innerWidth / 2 - (a.left + a.width / 2)) / k) + 'px';
+  }
+  window.addEventListener('resize', centerBetMenu);
   el.betMenu.addEventListener('click', function (e) {
     e.stopPropagation();
     var i = e.target && e.target.getAttribute('data-i');
@@ -9855,7 +9883,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (document.querySelector('dialog[open]') || !introEl.hidden) return;
     e.preventDefault();
     if (currentOverlay && currentOverlay._close) { currentOverlay._close(); return; }
-    if (e.code === 'Space' && !e.repeat && !(state.auto > 0 && !state.busy)) spin();
+    if (e.code === 'Space' && !e.repeat) spinPress();
   });
 
   // sidan döljs (bytt flik eller app): ljudet pausas. Tillbaka: ljudet startas direkt. Kommer det inte igång (telefonen
