@@ -2227,23 +2227,12 @@ body.tids .g-dots button { border-color: #ffcc33; }
 body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-color: #ffcc33; box-shadow: 0 0 8px rgba(255, 204, 51, .7); }
 /* telefonen: rubriken lika hög som C&T:s (31 px), på en rad även på smala telefoner (Bonus & KingzBonus är lång) */
 .portrait body.tids .g-slide h3 { font-size: min(23px, 6vw); line-height: 31px; white-space: nowrap; }
-/* Det som rör sig flyttas med transform; vattenfallet och kvarnens vingar är CSS-animationer. */
+/* Det som rör sig flyttas med transform; vattenfallet ritas i en egen liten bild och kvarnens vingar snurrar med CSS. */
 .realm-art { position: fixed; z-index: -1; pointer-events: none; will-change: transform; }
 .intro.leaving .realm-art { animation: outBg .34s ease-in forwards; }
-/* vattenfallet: ljusa strimmor längs fallet och vita stråk som rinner nedåt; det blir bredare nedåt och tunnas ut mot
-   molnen */
-.realm-fall {
-  position: absolute;
-  background: linear-gradient(180deg, rgba(255,255,255,.75) 0 18%, transparent 18% 100%) 0 0 / 100% var(--rp),
-    repeating-linear-gradient(90deg, #bfe8ff 0 var(--rs), #7cc4ee var(--rs) calc(var(--rs) * 2));
-  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
-  -webkit-mask-image: linear-gradient(180deg, #000 65%, transparent); mask-image: linear-gradient(180deg, #000 65%, transparent);
-  animation: realmFall .6s linear infinite;
-}
-@keyframes realmFall { to { background-position: 0 var(--rp), 0 0; } }
 .realm-sails { animation: realmSpin 10s linear infinite; }
 @keyframes realmSpin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .realm-fall, .realm-sails { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .realm-sails { animation: none; } }
 </style>
 
 <!-- laddningsstapeln i det första introt (loader.css, loader.js): syns direkt när sidan öppnas -->
@@ -11645,7 +11634,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     }
     REALM.el = []; var before = host.firstChild;
     function add(node, x, y) { node.classList.add('realm-art'); node.style.left = x + 'px'; node.style.top = y + 'px'; host.insertBefore(node, before); REALM.el.push(node); return node; }
-    var A = { W: W, H: H, u: u, isles: [], balloons: [], seas: [], birds: null };
+    var A = { W: W, H: H, u: u, isles: [], falls: [], balloons: [], seas: [], birds: null };
 
     // ---------------- himlen: solnedgång från mörklila uppe till guld vid molnhavet, solen med strålar och molnbanker
     var sk = realmCanvas(W, H, d), g = sk.g;
@@ -11690,11 +11679,10 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       var art = realmIsland(o, u, d, rnd, lw), wrap = document.createElement('div');
       var x = o.cx - art.w / 2, y = o.top;
       wrap.appendChild(art.c);
-      if (o.fall && seaTop < H) {
-        var fw = Math.max(6, 14 * u * Math.min(1, o.w / (160 * u))), fall = document.createElement('div');
-        fall.className = 'realm-fall';
-        fall.style.cssText = 'left:' + (art.fallX - fw / 2) + 'px;top:' + art.fallY + 'px;width:' + fw + 'px;height:' + Math.max(10, seaTop + 40 * u - (y - art.top0) - art.fallY) + 'px;--rp:' + (26 * u).toFixed(1) + 'px;--rs:' + Math.max(2, 3 * u).toFixed(1) + 'px';
-        wrap.appendChild(fall);
+      if (art.fall && seaTop < H) {
+        var fl = realmFall(art.fall, seaTop + 40 * u - (y - art.top0), u, d, lw);
+        fl.c.style.position = 'absolute'; fl.c.style.left = fl.x + 'px'; fl.c.style.top = fl.y + 'px';
+        wrap.appendChild(fl.c); A.falls.push(fl);
       }
       if (art.sails) {
         art.sails.c.className = 'realm-sails'; art.sails.c.style.position = 'absolute';
@@ -11775,27 +11763,30 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     grass(); g.fillStyle = '#2f8a46'; g.fill();
     g.beginPath(); g.moveTo(-3 * k, y0 + 7 * k); g.quadraticCurveTo(w * 0.5, y0 - 9 * k, w + 3 * k, y0 + 7 * k); g.lineTo(w + 3 * k, y0 + 7 * k); g.quadraticCurveTo(w * 0.5, y0 - 2 * k, -3 * k, y0 + 7 * k); g.fillStyle = '#4fb565'; g.fill();
     g.strokeStyle = INKT; g.lineWidth = lw; grass(); g.stroke();
-    // träd i spelets stil: stam och tre gröna klot med ljus ovansida
-    var tx = o.mill ? [0.26] : o.trees === 2 ? [0.3, 0.62] : [0.22, 0.48, 0.74];
+    function gy(x) { var t = (x + 3 * k) / (w + 6 * k); return y0 + 8 * k - 34 * k * t * (1 - t); }
+    // dammen som vattenfallet rinner ur
+    if (o.fall) {
+      var px = w * 0.84, py = gy(px) + 1 * k;
+      g.fillStyle = '#6fbbe8'; g.beginPath(); g.ellipse(px, py, w * 0.1, 2.8 * k, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#bfe8ff'; g.beginPath(); g.ellipse(px - w * 0.02, py - 0.6 * k, w * 0.05, 1.1 * k, 0, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = INKT; g.lineWidth = lw * 0.8; g.beginPath(); g.ellipse(px, py, w * 0.1, 2.8 * k, 0, 0, Math.PI * 2); g.stroke();
+    }
+    // träd i spelets stil: stam och tre gröna klot med ljus ovansida, med stammen i gräset och en skugga under
+    var tx = o.mill ? [0.26] : o.trees === 2 ? [0.3, 0.6] : [0.2, 0.44, 0.66];
     tx.forEach(function (p, i) {
-      var tk = k * (0.55 + (i === 1 ? 0.15 : 0)), x = w * p, y = y0 - 2 * k - Math.sin(p * Math.PI) * 6 * k;
+      var tk = k * (0.55 + (i === 1 ? 0.15 : 0)), x = w * p, gr = gy(x), y = gr + 1.5 * k - 2 * tk;
+      g.fillStyle = 'rgba(20,60,30,0.4)'; g.beginPath(); g.ellipse(x + 2 * tk, gr + 1 * k, 11 * tk, 2.2 * k, 0, 0, Math.PI * 2); g.fill();
       g.fillStyle = '#6b4226'; g.fillRect(x - 3 * tk, y - 14 * tk, 6 * tk, 16 * tk); g.strokeStyle = INKT; g.lineWidth = lw * 0.8; g.strokeRect(x - 3 * tk, y - 14 * tk, 6 * tk, 16 * tk);
       [[-9, -20, 11, '#256b3a'], [9, -19, 10, '#256b3a'], [0, -31, 13, '#2f8a46']].forEach(function (c) {
         g.fillStyle = c[3]; g.beginPath(); g.arc(x + c[0] * tk, y + c[1] * tk, c[2] * tk, 0, Math.PI * 2); g.fill(); g.stroke();
       });
       g.fillStyle = '#4fb565'; g.beginPath(); g.arc(x - 4 * tk, y - 35 * tk, 5 * tk, 0, Math.PI * 2); g.fill();
     });
-    var out = { c: cv.c, w: w + pad * 2, top0: top0, fallX: pad + w * 1.0, fallY: y0 + 9 * k };
-    if (o.fall) {
-      // vattnet rinner i en båge över kanten innan det faller
-      var fw2 = Math.max(6, 14 * u * Math.min(1, w / (160 * u)));
-      g.fillStyle = '#8fd0f2'; g.strokeStyle = INKT; g.lineWidth = Math.max(1.2, 1.8 * u);
-      g.beginPath(); g.moveTo(w * 0.8, y0 + 1 * k); g.quadraticCurveTo(w * 0.97, y0 - 1 * k, w + fw2 / 2, y0 + 10 * k); g.lineTo(w - fw2 / 2, y0 + 10 * k); g.quadraticCurveTo(w * 0.94, y0 + 4 * k, w * 0.8, y0 + 5 * k); g.closePath(); g.fill(); g.stroke();
-      g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = Math.max(1, 1.4 * u); g.beginPath(); g.moveTo(w * 0.84, y0 + 2 * k); g.quadraticCurveTo(w * 0.95, y0 + 1 * k, w + fw2 * 0.1, y0 + 8 * k); g.stroke();
-    }
+    var out = { c: cv.c, w: w + pad * 2, top0: top0 };
+    if (o.fall) out.fall = { x: pad + w * 0.78, w: w, k: k, ty: y0, fw: Math.max(6, w * 0.08), pond: gy(w * 0.84) + 1 * k };
     if (o.mill) {
       // väderkvarnen: ett vitt torn med lila tak; vingarna ritas för sig och snurrar (CSS)
-      var mx = w * 0.64, base = y0 - 2 * k, mh = 46 * k, mw0 = 22 * k, mw1 = 14 * k;
+      var mx = w * 0.64, base = gy(w * 0.64) + 2 * k, mh = 46 * k, mw0 = 22 * k, mw1 = 14 * k;
       g.fillStyle = '#ece2d0'; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx + mw1 / 2, base - mh); g.lineTo(mx + mw0 / 2, base); g.closePath(); g.fill();
       g.fillStyle = 'rgba(20,8,40,0.18)'; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx - mw1 * 0.1, base - mh); g.lineTo(mx - mw0 * 0.15, base); g.fill();
       g.strokeStyle = INKT; g.lineWidth = lw; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx + mw1 / 2, base - mh); g.lineTo(mx + mw0 / 2, base); g.stroke();
@@ -11815,6 +11806,36 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       out.sails = { c: sv.c, r: sr }; out.millX = pad + mx; out.millY = base - mh + 4 * k;
     }
     return out;
+  }
+  // Vattenfallet: en ström som rinner ur dammen, i en båge över öns kant och sedan rakt ner i molnen. Formen fylls med
+  // strimmor (färdigritade en gång) som flyttas nedåt varje bildruta, så att vattnet rinner. bottom: var molnen täcker
+  // det (i öns mått).
+  function realmFall(f, bottom, u, d, lw) {
+    var k = f.k, fw = f.fw, top = f.ty - 4 * k, ex = f.w * 0.22, ty = 4 * k, py = f.pond - top;
+    var cw = ex + fw * 1.6, ch = Math.max(20, bottom - top), cv = realmCanvas(cw, ch, d), g = cv.g;
+    var B = ch, cx = ex + fw * 0.35, rnd = realmRand(91);
+    // strimmorna: en bit som upprepas uppifrån och ner
+    var TH = Math.max(24, 34 * u), tile = realmCanvas(cw, TH, d), tg = tile.g;
+    for (var i = 0; i < cw * TH / (22 * u * u); i++) {
+      var sx = rnd() * cw, sy = rnd() * TH, len = (8 + rnd() * 18) * u, r = rnd();
+      tg.strokeStyle = r < 0.45 ? 'rgba(255,255,255,0.8)' : r < 0.8 ? 'rgba(191,232,255,0.95)' : 'rgba(40,110,180,0.35)';
+      tg.lineWidth = (0.8 + rnd() * 1.4) * u;
+      [0, -TH].forEach(function (o) { tg.beginPath(); tg.moveTo(sx, sy + o); tg.lineTo(sx, sy + o + len); tg.stroke(); });
+    }
+    function outer() { g.moveTo(f.w * 0.1, py - 0.6 * k); g.quadraticCurveTo(ex + fw * 0.9, py - 0.6 * k, ex + fw * 0.9, ty + 14 * k); g.lineTo(cx + fw * 0.85, B); }
+    function inner() { g.moveTo(cx - fw * 0.85, B); g.lineTo(ex - fw * 0.2, ty + 14 * k); g.quadraticCurveTo(ex - fw * 0.2, ty + 6 * k, f.w * 0.1, py + 1.6 * k); }
+    function shape() { g.beginPath(); outer(); g.lineTo(cx - fw * 0.85, B); g.lineTo(ex - fw * 0.2, ty + 14 * k); g.quadraticCurveTo(ex - fw * 0.2, ty + 6 * k, f.w * 0.1, py + 1.6 * k); g.closePath(); }
+    return { c: cv.c, x: f.x, y: top, draw: function (t) {
+      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.c.width, cv.c.height); g.setTransform(d, 0, 0, d, 0, 0);
+      g.save(); shape(); g.clip();
+      g.fillStyle = '#6fbbe8'; g.fillRect(0, 0, cw, ch);
+      for (var yy = (t * 90 * u) % TH - TH; yy < ch; yy += TH) g.drawImage(tile.c, 0, yy, cw, TH);
+      g.lineWidth = Math.max(1.2, fw * 0.14); g.strokeStyle = 'rgba(255,255,255,0.75)';
+      g.beginPath(); g.moveTo(f.w * 0.16, py - 0.2 * k); g.quadraticCurveTo(ex + fw * 0.62, py, ex + fw * 0.62, ty + 16 * k); g.lineTo(cx + fw * 0.55, B); g.stroke();
+      g.restore();
+      g.strokeStyle = '#15111f'; g.lineWidth = lw * 0.8;
+      g.beginPath(); outer(); g.stroke(); g.beginPath(); inner(); g.stroke();
+    } };
   }
   // En varmluftsballong: höljet i två färger (ränder), ljus och skugga, ett guldband vid öppningen, rep och en korg. Den
   // största har en krona på toppen och en liten vimpel; den avlägsna är blekare.
@@ -11918,6 +11939,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       var t = still ? 0 : (now - t0) / 1000;
       A.seas.forEach(function (s) { tr(s.el, -((t * s.v) % s.P), s.bob ? Math.sin(t * 0.4) * s.bob : 0); });
       A.isles.forEach(function (i) { tr(i.el, 0, Math.sin(t * 0.5 + i.ph) * i.amp); });
+      A.falls.forEach(function (f) { f.draw(t); });
       A.balloons.forEach(function (b) {
         var x;
         if (b.v) { var span = A.W + b.w * 2; x = ((b.x0 + b.w + t * b.v) % span + span) % span - b.w; }
