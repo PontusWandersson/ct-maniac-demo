@@ -2466,8 +2466,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     10: [5, 5, 5, 5, 5, 5],
     11: [5, 5, 5, 5, 5, 5]
   };
-  // Sannolikhet för stapelhöjd 1, 2, 3, 4.
-  var STACK = [0.15, 0.30, 0.35, 0.20];
+  // Sannolikhet för stapelhöjd 1, 2, 3, 4 (Kingz & Queenz 2026-10-28, volatilitet 3/5: lägre staplar, se SR nedan; förut
+  // [0.15, 0.30, 0.35, 0.20]).
+  var STACK = [0.4, 0.35, 0.2, 0.05];
 
   // 3 bomber i Bonusspelet ger så många frispinn till
   var FS_RETRIGGER = 5;
@@ -2762,8 +2763,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
    * opts.ghost: förra snurrets bräde (grundspelet), opts.layers: lagren bakåt (kassetten och bonusarna), opts.depth: hur
    * många lager som följer med efter rundan, opts.payScale: bonusens vinsttabell, opts.plain: grundspel utan multi,
    * opts.goldCheck: guldbomben kan komma (grundspelet). Kingz & Queenz: opts.srDepth[r] = hjulets LAYER (småhjulen,
-   * dbEvaluate med grundspelets vinsttabell) och opts.srMult[r] = hjulets multi (en vinst gångras med multin på varje hjul
-   * den går genom). */
+   * dbEvaluate med grundspelets vinsttabell) och opts.srMv[r] = [övre, undre]: småhjulens multis (0 = ingen). En vinst får
+   * multisarna på hjulen den går genom, och en multi som en vinst går genom växer med sitt eget värde (x2 blir x4, sedan x6)
+   * och gäller från nästa lavin. opts.cascade: laviner även när TIME.cascade är false (grundspelets småhjul). */
   function playRound(rng, opts) {
     opts = opts || {};
     // opts.strips: egna hjulremsor. opts.stops: stoppen är redan dragna (bonusköpets startbräde), då dras inga slumptal
@@ -2787,19 +2789,25 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     // fsTmult: false = i bonusarna finns bara den växande multin, ingen tidsmulti per vinst
     var noTm = plain || (opts.fs && TIME.fsTmult === false);
     var startGrid = grid;
+    // småhjulens multis i det här snurret (de växer mellan lavinerna)
+    var srMv = opts.srMv ? opts.srMv.map(function (p) { return p.slice(); }) : null;
     for (;;) {
       var ev = opts.srDepth ? dbEvaluate(grid, layers, opts.srDepth, TIME.scale) : layers ? evaluateDeep(grid, layers) : ghost ? evaluateTime(grid, ghost, noTm) : evaluate(grid);
       // bonusens egen vinsttabell (payScale)
       if (opts.payScale && opts.payScale !== 1) { ev.wins.forEach(function (wn) { wn.x *= opts.payScale; }); ev.x *= opts.payScale; }
-      // grundspelets småhjul: varje vinst gångras med multin på hjulen den går genom (srm), och multUse = hjulen vars multi
-      // användes (klienten lyser upp småhjulet)
+      // grundspelets småhjul: varje vinst får multin på hjulen den går genom (srm; TIME.srAdd: multisarna läggs ihop, annars
+      // gångras de), och multUse = hjulen vars multi användes (klienten lyser upp småhjulet)
       var multUse = null;
-      if (opts.srMult) {
+      if (srMv) {
         ev.x = 0; multUse = [];
         ev.wins.forEach(function (wn) {
-          var m = 1;
-          for (var q = 0; q < wn.len; q++) if (opts.srMult[q] > 1) { m *= opts.srMult[q]; if (multUse.indexOf(q) < 0) multUse.push(q); }
-          wn.srm = m; wn.x *= m; ev.x += wn.x;
+          var m = 0;
+          for (var q = 0; q < wn.len; q++) srMv[q].forEach(function (v) {
+            if (!v) return;
+            m = TIME.srAdd ? m + v : (m || 1) * v;
+            if (multUse.indexOf(q) < 0) multUse.push(q);
+          });
+          wn.srm = Math.max(1, m); wn.x *= wn.srm; ev.x += wn.x;
         });
       }
       if (!ev.wins.length) break;
@@ -2818,16 +2826,21 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
           if (L[gr2][gy2] >= 0) { ghostUsed.push({ r: gr2, y: gy2, sym: L[gr2][gy2], depth: dep }); L[gr2][gy2] = -1; }
         }); });
       });
-      if (TIME.cascade === false) {
+      // layFill: lagerrutorna som vinsterna hämtade (småhjulen, klienten lyser upp hjulets LAYER-ikon)
+      var layFill = opts.srDepth ? ghostUsed.map(function (u) { return { r: u.r, k: u.depth, y: u.y, sym: u.sym }; }) : null;
+      if (TIME.cascade === false && !opts.cascade) {
         // vanliga snurr: vinsten betalas och brädet står kvar (ingen lavin)
-        // layFill: lagerrutorna som vinsterna hämtade (småhjulen, klienten lyser upp hjulets LAYER-ikon)
         steps.push({ type: 'win', grid: grid, wins: ev.wins, baseX: ev.x, mult: mult, x: ev.x * mult, removed: removed, moves: null, next: grid, ghostUsed: ghostUsed,
-          layFill: opts.srDepth ? ghostUsed.map(function (u) { return { r: u.r, k: u.depth, y: u.y, sym: u.sym }; }) : null, multUse: multUse });
+          layFill: layFill, multUse: multUse });
         totalX += ev.x * mult;
         break;
       }
       var t = tumble(strips, grid, stops, removed);
-      steps.push({ type: 'win', grid: grid, wins: ev.wins, baseX: ev.x, mult: mult, x: ev.x * mult, removed: removed, moves: t.moves, next: t.grid, ghostUsed: ghostUsed });
+      // småhjulens multis i vinsterna växer med sitt eget värde till nästa lavin (srMv före steget och srMvOut efter)
+      var mvIn = srMv ? srMv.map(function (p) { return p.slice(); }) : null;
+      if (srMv) multUse.forEach(function (q) { srMv[q] = srMv[q].map(function (v, row) { return v ? v + opts.srMv[q][row] : 0; }); });
+      steps.push({ type: 'win', grid: grid, wins: ev.wins, baseX: ev.x, mult: mult, x: ev.x * mult, removed: removed, moves: t.moves, next: t.grid, ghostUsed: ghostUsed,
+        layFill: layFill, multUse: multUse, srMv: mvIn, srMvOut: srMv ? srMv.map(function (p) { return p.slice(); }) : null });
       totalX += ev.x * mult;
       grid = t.grid; stops = t.stops;
       // bonusarna: multin växer med summan av lagrens siffror i vinsterna (LAYER 3 = +3)
@@ -2852,7 +2865,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // rng (den certifierade generatorn), i en fast ordning. Utbetalningen är x gånger insatsen, avrundad till hela ören en
   // gång per spelomgång (payout).
   // 1.5.0 (2026-10-24): prototypens matte (sparade omgångar hette 1.4.0-proto) är nu spelets enda matte, med samma utfall.
-  var ENGINE_VERSION = '1.5.0';
+  // 1.6.0 (2026-10-28): Kingz & Queenz med volatilitet 3/5, laviner när grundspelets småhjul öppnas och tre nya småhjul
+  // per frispinn i mellanbonusen (sparade omgångar från 1.5.0 kan inte spelas upp igen; insatsen betalas tillbaka).
+  var ENGINE_VERSION = '1.6.0';
   // Grundspelet: grundremsorna, inga multis, och guldbomben kan komma.
   function baseOpts(extra) { var o = { fs: false, plain: true, goldCheck: true }; for (var k in extra) o[k] = extra[k]; return o; }
   function emptyGrid() { var g = []; for (var r = 0; r < REELS; r++) { var c = []; for (var y = 0; y < ROWS; y++) c.push(-1); g.push(c); } return g; }
@@ -2961,8 +2976,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   //     Tronerna landade, och de hjulens småhjul är öppna. Guldbonusen (som C&T:s Maniac, användaren 2026-10-26): har 3
   //     Troner landat kan den sista bli en guldtron (TIME.goldP, goldMin 3; 5 Troner ger alltid guld), och då rasar alla
   //     fem hjulens torn. Köpt Bonus eller Guldbonus: ett startbräde med exakt 3 Troner (royalBuy), i Guldbonusen är den
-  //     sista guld. I bonusen öppnar en Tron som landar på ett stängt hjul (när brädet
-  //     stannar eller i en lavin) hjulets två småhjul från nästa frispinn, och de står öppna resten av bonusen.
+  //     sista guld. I Bonusen (mellanbonusen) öppnas lika många nya hjul efter varje frispinn (royalBonus); bonushjulen har
+  //     inga Troner.
   //   Ett småhjul ger LAYER n, en multi (x2–x50) eller tomt (SR.w). Ett hjul får högst ett LAYER per snurr: har det övre
   //     småhjulet gett LAYER kan det undre inte göra det (SR_W_NL).
   //   LAYER n: hjulet kan hämta en symbol som saknas upp till n lager bakåt i snurret (närmaste lager först), som i C&T. Ett
@@ -2977,67 +2992,69 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     { k: 'multi', n: 2 }, { k: 'multi', n: 3 }, { k: 'multi', n: 5 }, { k: 'multi', n: 10 }, { k: 'multi', n: 20 }, { k: 'multi', n: 25 }, { k: 'multi', n: 50 }];
   // w: vikterna per småhjul (SR_ICONS i ordning). vis: remsan som syns medan småhjulen snurrar (bara utseendet; vad som
   // landar avgörs av w). spins: frispinn. layers: lager bakåt. pay: bonusens vinsttabell (gånger den vanliga, oberoende av
-  // grundspelets TIME.scale). buy och goldBuy: priserna för en köpt Bonus och KingzBonus (gånger insatsen; köpt Bonus har
-  // bara sina 3 hjul öppna hela bonusen, lock i royalBonus, och kostar därför mindre: 100x blev 68x 2026-10-27). goldP: chansen
-  // att den sista av 3–4 Troner blir guld. trons: Tronblock per hjul på bonushjulen.
-  // baseTrons: Tronblock per hjul på grundhjulen. wilds: wildblock (Narren) per hjul, på grundhjulen och bonushjulen
-  // (användaren 2026-10-27: "lägg till en passande wildsymbol"); hjul 1 har ingen, som i C&T.
+  // grundspelets TIME.scale). buy och goldBuy: priserna för en köpt Bonus och KingzBonus (gånger insatsen). goldP: chansen
+  // att den sista av 3–4 Troner blir guld. baseTrons: Tronblock per hjul på grundhjulen. wilds: wildblock (Narren) per hjul,
+  // på grundhjulen och bonushjulen (användaren 2026-10-27: "lägg till en passande wildsymbol"); hjul 1 har ingen, som i C&T.
   var SR = {
     w: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5],
     vis: [10, 4, 4, 3, 3, 2, 4, 3, 3, 2, 2, 1, 1],
-    spins: 10, layers: 5, pay: 0.2416, buy: 68, goldBuy: 214, goldP: 0.15, trons: 1, baseTrons: [1, 2, 2, 2, 1], wilds: [0, 1, 1, 1, 1]
+    spins: 10, layers: 5, pay: 0.1235, buy: 48, goldBuy: 151, goldP: 0.15, baseTrons: [1, 1, 2, 1, 1], wilds: [0, 1, 1, 1, 1]
   };
   // köpmenyn (C&T:s, buy.js): Bonusen för BUY_X (state.js) och Guldbonusen i Maniacs plats
   TIME.fsBuy = SR.buy; TIME.maniacBuy = SR.goldBuy; TIME.maniacSpins = SR.spins;
-  // guldtronen (goldP, goldMin, maniacMin; playRound). Grundspelets vinster (scale) är sänkta så att grundspelet och bonusen
-  // tillsammans ger cirka 96 %: bonusen ger nästan hälften (se simuleringen nedan).
-  TIME.goldP = SR.goldP; TIME.goldMin = 3; TIME.maniacMin = 5; TIME.scale = 3.03;
+  // guldtronen (goldP, goldMin, maniacMin; playRound). scale: grundspelets vinster (vanliga snurr och småhjulen).
+  TIME.goldP = SR.goldP; TIME.goldMin = 3; TIME.maniacMin = 5; TIME.scale = 3.27;
   // Maxvinsten (användaren 2026-10-27: "20 är för mycket för detta spelet"): högst 10 000 gånger insatsen per spelomgång
-  // (C&T har 20 000x). Den långa kontrollen med 160 M omgångar visade att bara 8 omgångar gick över 10 000x (cirka 1 på 20
-  // miljoner): taket sänker hela spelet cirka 0,024 procentenheter, köpt Bonus inte alls (största köpet 6 700x) och köpt
-  // KingzBonus cirka 0,002. Volatiliteten är kvar på Hög 4/5 (SD cirka 13,6 i stället för 13,9).
+  // (C&T har 20 000x).
   TIME.maxX = 10000;
-  // Korta simuleringar (2026-10-27, wilden på hjul 2–5 och grundspelets småhjul med multi per hjul, 3 × 1 M omgångar och
-  // 20 000 köp av varje, inte kalibrerat): hela spelet cirka 95–98 % (snitt cirka 96,5 %), SD cirka 13–17, grundspelet cirka
-  // 51,6 % varav småhjulen cirka 17,4 % (de öppnas var 10:e snurr och ger vinst i cirka 43 % av dem, i snitt cirka 1,7x),
-  // vinst i cirka 30 % av snurren, Bonusen cirka var 250:e snurr (i snitt cirka 113x, median cirka 60x) och Guldbonusen cirka
-  // var 1 650:e (i snitt cirka 205x). Köpt Bonus (100x) cirka 96–98 %, köpt Guldbonus (212x) cirka 96–97 %. Den långa svansen
-  // svänger mycket i korta körningar. (Förut: grundspelets multi för hela snurret scale 3,22; utan småhjulen i grundspelet
-  // 4,1; utan wilden, 2026-10-26, scale 4,2, pay 0,28864, 220x.)
-  // Lång kontroll 2026-10-27 (160 M omgångar, 4 M köp av varje, före lock): hela spelet 96,43 % (96,22–96,64), köpt Bonus
-  // 100x 95,48 %, köpt Guldbonus 212x 96,53 %. Med lock (köpt Bonus bara 3 öppna, KingzBonus utan Troner; 16 M omgångar och
-  // 4 M köp): köpt Bonus i snitt 64,8x (100x gav 64,8 %, därför 68x: cirka 95,3 %), KingzBonus i snitt 205,8x (214x: cirka
-  // 96,2 %), hela spelet cirka 96 %. Inte kalibrerat (användaren väntar med kalibreringen).
+  // Volatilitet 3/5 (användaren 2026-10-28: "skala om denna produkt till volatilitet 3/5 … så man vinner oftare"; förut Hög
+  // 4/5, SD cirka 13,6, vinst i 30 % av snurren):
+  //   - symbolerna står i lägre staplar (STACK [0,4, 0,35, 0,2, 0,05] i stället för [0,15, 0,30, 0,35, 0,20]), så att fler
+  //     olika symboler syns per hjul och det blir vinst oftare (cirka 46 % av snurren), med mindre vinster per gång;
+  //   - grundspelets småhjul får laviner och multis som växer, och multisarna på en vinstväg läggs ihop (TIME.srAdd: x2 och
+  //     x3 = x5; gångrade blev spridningen för stor), mest LAYER och små multis (baseW), oftast 1–2 småhjul (baseOpen);
+  //   - Bonusen kommer oftare med mindre vinster (en Tron färre på hjul 2 och 4, pay halverad).
+  // Kort simulering (2026-10-28, 24 M omgångar och 400 000 köp av varje, scale 3,29, inte kalibrerat): hela spelet 96,36 %
+  // ±0,31, SD 7,85 (Medel 3/5), vinst i 45,9 % av snurren (minst insatsen 13,1 %). Vanliga snurr 40,3 %, småhjulen 24,3 %
+  // (var 10:e snurr, vinst i 60 % av dem, laviner i 27 %, i snitt 2,4x), Bonusen 22,3 % (var 201:a snurr inklusive
+  // KingzBonus, i snitt 44,9x) och KingzBonus 9,5 % (var 1 526:e, i snitt 145,6x). Störst 2 096x; 1 000x eller mer cirka 1
+  // på 500 000. Köpt Bonus i snitt 46,2x (48x: 96,3 %), köpt KingzBonus i snitt 145,3x (151x: cirka 96,2 %). scale 3,27
+  // drar ner hela spelet cirka 0,4 procentenheter.
+  // (Förut, 2026-10-27, Hög 4/5: lång kontroll med 160 M omgångar 96,43 %, SD 13,6; scale 3,03, pay 0,2416, köp 68x och 214x.)
   var SR_W_NL = SR.w.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
   // Grundspelet (användaren 2026-10-27: "helt RNG kan olika många småhjul öppnas och leverera ett layer eller en
   // multiplier"). baseP: chansen per grundsnurr att småhjul öppnas. baseOpen: vikterna för 1, 2, 3, 4 och 5 öppna småhjul
   // (vilka av de tio slumpas). baseW: vikterna för ikonerna (SR_ICONS) i grundspelet: LAYER 1–3 (väggen har de tre senaste
-  // brädena) och multi x2–x10, aldrig tomt. Ett hjul får högst ett LAYER. En multi gäller vinster som går genom hjulet
-  // (användaren 2026-10-27), och går vinsten genom flera hjul med multi gångras de (x2 och x5 = x10, som C&T:s wilds); ett hjul
-  // med LAYER n kan hämta en symbol som saknas upp till n snurr bakåt.
-  SR.baseP = 0.1; SR.baseOpen = [45, 30, 15, 7, 3]; SR.baseW = [0, 30, 22, 14, 0, 0, 22, 10, 4, 1, 0, 0, 0];
+  // brädena) och multi x2–x5, aldrig tomt. Ett hjul får högst ett LAYER. En multi gäller vinster som går genom hjulet
+  // (användaren 2026-10-27), och går vinsten genom flera multis läggs de ihop (srAdd); ett hjul med LAYER n kan hämta en
+  // symbol som saknas upp till n snurr bakåt.
+  SR.baseP = 0.1; SR.baseOpen = [55, 28, 12, 4, 1]; SR.baseW = [0, 30, 22, 14, 0, 0, 12, 4, 1, 0, 0, 0, 0];
+  TIME.srAdd = true;
   var SR_BASE_NL = SR.baseW.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
   // Vilka småhjul som öppnas och vad de ger: cells[r] = [övre, undre] (ikonens nummer, -1 = stängt), depth[r] (hjulets
-  // LAYER) och mult[r] (hjulets multi, båda småhjulens gångrade). Småhjulen dras i ordningen de visas (övre raden först,
+  // LAYER) och mv[r] = [övre, undre] (småhjulens multis, 0 = ingen). Småhjulen dras i ordningen de visas (övre raden först,
   // från vänster till höger).
   function srBaseDraw(rng) {
-    var n = 1 + srPick(rng, SR.baseOpen), pos = [], cells = [], depth = [], mult = [], i;
+    var n = 1 + srPick(rng, SR.baseOpen), pos = [], cells = [], depth = [], mv = [], i;
     for (i = 0; i < REELS * 2; i++) pos.push(i);
     for (i = 0; i < n; i++) { var j = i + Math.floor(rng() * (pos.length - i)), t = pos[i]; pos[i] = pos[j]; pos[j] = t; }
-    for (i = 0; i < REELS; i++) { cells.push([-1, -1]); depth.push(0); mult.push(1); }
+    for (i = 0; i < REELS; i++) { cells.push([-1, -1]); depth.push(0); mv.push([0, 0]); }
     pos.slice(0, n).sort(function (a, b) { return (a % 2) - (b % 2) || a - b; }).forEach(function (p) {
       var r = p >> 1, row = p & 1, ic = srPick(rng, depth[r] ? SR_BASE_NL : SR.baseW), o = SR_ICONS[ic];
       cells[r][row] = ic;
-      if (o.k === 'layer') depth[r] = o.n; else if (o.k === 'multi') mult[r] *= o.n;
+      if (o.k === 'layer') depth[r] = o.n; else if (o.k === 'multi') mv[r][row] = o.n;
     });
-    return { cells: cells, depth: depth, mult: mult };
+    return { cells: cells, depth: depth, mv: mv };
   }
   // Ett grundsnurr: med chansen baseP öppnas småhjul (srBase), och snurret spelas med hjulens LAYER mot väggen (de tre
   // senaste brädena; rutor som används förbrukas som i C&T) och hjulens multi. Annars ett vanligt grundsnurr.
+  // Användaren 2026-10-28: när småhjulen är öppna blir det laviner ("så man kan vinna lite större i basspelet"): vinnande
+  // symboler försvinner och nya faller in tills det inte blir vinst längre, och en multi som en vinst går genom växer med
+  // sitt eget värde till nästa lavin (x2 blir x4, x3 blir x6).
   function srBaseRound(rng, hist) {
     if (rng() >= SR.baseP) return playRound(rng, baseOpts({ ghost: hist[0] }));
     var sr = srBaseDraw(rng);
-    var r = playRound(rng, baseOpts({ ghost: hist[0], layers: hist.slice(0, 3), depth: 3, srDepth: sr.depth, srMult: sr.mult }));
+    var r = playRound(rng, baseOpts({ ghost: hist[0], layers: hist.slice(0, 3), depth: 3, srDepth: sr.depth, srMv: sr.mv, cascade: true }));
     r.srBase = sr;
     return r;
   }
@@ -3054,10 +3071,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
   TIME.baseBlocks = srBlocks(SR.baseTrons);
   applyTime();
-  STRIPS.fs = buildStrips(srBlocks([SR.trons, SR.trons, SR.trons, SR.trons, SR.trons]), 0x7A0E5);
-  // bonushjulen utan Troner: bonusar där inget mer kan öppnas (lock: KingzBonus och köpt Bonus), så att en Tron aldrig ser
-  // ut att kunna öppna något
-  STRIPS.fsLock = buildStrips(srBlocks([0, 0, 0, 0, 0]), 0x7A0E5);
+  // bonushjulen: utan Troner (i bonusen öppnar ingen Tron något; vilka småhjul som är öppna avgör royalBonus)
+  STRIPS.fs = buildStrips(srBlocks([0, 0, 0, 0, 0]), 0x7A0E5);
   // remsan som småhjulen visar i farten: ikonerna blandade med ett fast frö
   var SR_STRIP = (function () {
     var list = [], rnd = mulberry32(0xD3E9B0);
@@ -3124,21 +3139,11 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
   // Ett frispinn på bonushjulen med laviner. multi: bonusens multi när brädet snurrar. Varje steg betalar x max(1, multi)
   // (mult) och har multin före steget (m0); efter steget växer den med stegets deep. layers ändras (förbrukade lagerrutor
-  // blir -1). open: hjulen vars småhjul är öppna; opened = de stängda hjul som fick en Tron (r, rad y, at: -1 när brädet
-  // stannade, annars i vilken lavin den föll in). lock: hjulen utan Troner (STRIPS.fsLock), och inget öppnas; strips säger
-  // klienten vilka hjul som snurrar.
-  function dbSpin(rng, layers, depth, multi, open, x0, lock) {
-    var strips = lock ? STRIPS.fsLock : STRIPS.fs, stops = [], grid = [], opened = [];
+  // blir -1).
+  function dbSpin(rng, layers, depth, multi, x0) {
+    var strips = STRIPS.fs, stops = [], grid = [];
     for (var r = 0; r < REELS; r++) { var st = Math.floor(rng() * strips[r].length); stops.push(st); grid.push(windowAt(strips, r, st)); }
-    function trons(g, at) {
-      if (lock) return;
-      for (var q = 0; q < REELS; q++) {
-        if (open[q] || opened.some(function (o) { return o.r === q; })) continue;
-        for (var y = 0; y < ROWS; y++) if (g[q][y] === S) { opened.push({ r: q, y: y, at: at }); break; }
-      }
-    }
     var steps = [], x = 0, startGrid = grid;
-    trons(grid, -1);
     for (;;) {
       var ev = dbEvaluate(grid, layers, depth);
       if (!ev.wins.length) break;
@@ -3152,39 +3157,44 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       var used = layFill.map(function (q) { return { r: q.r, y: q.y, depth: q.k }; });
       steps.push({ type: 'win', grid: grid, wins: ev.wins, baseX: ev.x, mult: m, m0: multi, x: ev.x * m, removed: removed, moves: t.moves, next: t.grid, ghostUsed: used, layFill: layFill });
       x += ev.x * m; multi += grow; grid = t.grid; stops = t.stops;
-      trons(grid, steps.length - 1);
       if (x0 + x >= TIME.maxX) break;
     }
-    return { startGrid: startGrid, steps: steps, finalGrid: grid, x: x, scatters: 0, fsMult: multi, opened: opened, strips: lock ? 'fsLock' : null };
+    return { startGrid: startGrid, steps: steps, finalGrid: grid, x: x, scatters: 0, fsMult: multi };
   }
-  // Hela bonusen. open0[r]: hjul r är öppet när bonusen startar (Tronernas hjul; alla fem i Guldbonusen). x0: vad omgången
+  // n slumpade hjul av fem (open[r] = true för de valda)
+  function srOpenDraw(rng, n) {
+    var pos = [], open = [], i;
+    for (i = 0; i < REELS; i++) { pos.push(i); open.push(false); }
+    for (i = 0; i < n; i++) { var j = i + Math.floor(rng() * (REELS - i)), t = pos[i]; pos[i] = pos[j]; pos[j] = t; open[pos[i]] = true; }
+    return open;
+  }
+  // Hela bonusen. open0[r]: hjul r är öppet när bonusen startar (Tronernas hjul; alla fem i KingzBonus). x0: vad omgången
   // redan har vunnit (för taket). Användaren 2026-10-26 (inspirerat av Nolimit City): varje frispinn får varje öppet
   // småhjul en ny ikon (sr): hjulets LAYER gäller just det snurret, och multisarna läggs på bonusens multi, som växer och
-  // aldrig nollställs ("låt den växa"). En Tron som landar på ett stängt hjul öppnar det från nästa frispinn. Varje frispinn:
-  // sr (småhjulen), openIn (öppna hjul före snurret), multIn (multin när brädet snurrar, efter småhjulen), ghostIn (hörnen
-  // som klienten visar: LAYER 1 på hjul som har ett LAYER), layersIn (lagren före snurret), opened (hjul som en Tron
-  // öppnade) och fsMult (multin efter snurret). lock (användaren 2026-10-27: "mellanbonusen fungerar exakt som KingzBonus
-  // fast enbart med 3 öppna slott uppe och nere"): de öppna hjulen är de enda hela bonusen, utan Troner på bonushjulen
-  // (KingzBonus och köpt Bonus); en Bonus från grundspelet kan som förut öppna fler med Troner.
-  function royalBonus(rng, open0, x0, gold, lock) {
-    var open = open0.slice(), i, x0_ = x0 || 0;
+  // aldrig nollställs ("låt den växa"). Mellanbonusen (användaren 2026-10-28: "3 nya småhjul som öppnas efter varje snurr,
+  // inte 3 fasta"): första frispinnet har Tronernas hjul öppna, och efter varje frispinn slumpas lika många nya hjul bland
+  // de fem (samma hjul kan komma igen). Varje frispinn: sr (småhjulen), openIn (öppna hjul i snurret), multIn (multin när
+  // brädet snurrar, efter småhjulen), ghostIn (hörnen som klienten visar: LAYER 1 på hjul som har ett LAYER), layersIn
+  // (lagren före snurret) och fsMult (multin efter snurret).
+  function royalBonus(rng, open0, x0, gold) {
+    var open = open0.slice(), nOpen = open0.filter(Boolean).length, i, x0_ = x0 || 0;
     var layers = []; for (i = 0; i < SR.layers; i++) layers.push(srBoard(rng));
     var layers0 = layers.map(copyGrid), spins = [], x = 0, multi = 0;
     for (var n = 0; n < SR.spins && x0_ + x < TIME.maxX; n++) {
+      if (n > 0 && nOpen < REELS) open = srOpenDraw(rng, nOpen);
       var openIn = open.slice(), sr = srDraw(rng, open);
       multi += sr.add;
       var ghostIn = layers[0].map(function (col, q) { return col.map(function (v) { return sr.depth[q] > 0 ? v : -1; }); });
       var layersIn = layers.map(copyGrid);
-      var sp = dbSpin(rng, layers, sr.depth, multi, open, x0_ + x, lock);
+      var sp = dbSpin(rng, layers, sr.depth, multi, x0_ + x);
       sp.sr = sr; sp.openIn = openIn; sp.multIn = multi; sp.ghostIn = ghostIn; sp.layersIn = layersIn;
-      sp.opened.forEach(function (o) { open[o.r] = true; });
       multi = sp.fsMult;
       spins.push(sp); x += sp.x;
       // en egen kopia: lagerrutor som förbrukas (-1) får aldrig ändra brädena som spinnet visar
       layers = [copyGrid(sp.finalGrid)].concat(layers).slice(0, SR.layers);
     }
     var sup = open0.every(function (v) { return v; });
-    return { royal: true, sup: sup, gold: !!gold, maniac: !!gold, lock: !!lock, awarded: SR.spins, open0: open0.slice(), layers0: layers0, spins: spins,
+    return { royal: true, sup: sup, gold: !!gold, maniac: !!gold, awarded: SR.spins, open0: open0.slice(), layers0: layers0, spins: spins,
       finalGrid: layers[0], rawX: x, x: Math.min(x, TIME.maxX), capped: x >= TIME.maxX };
   }
   // hjulen där en Tron står på brädet
@@ -3192,9 +3202,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // spelmotorns bonus i grundspelet (playGame): 3 eller fler Troner, hjulen med Troner öppna; guldtronen öppnar alla
   var ALL_OPEN = [true, true, true, true, true];
   TIME.buyFn = function (rng, hist, gold) { return royalBuy(rng, hist, !!gold); };
-  TIME.bonusFn = function (rng, base) { return base.gold ? royalBonus(rng, ALL_OPEN, base.x, true, true) : royalBonus(rng, tronReels(base.finalGrid), base.x); };
+  TIME.bonusFn = function (rng, base) { return base.gold ? royalBonus(rng, ALL_OPEN, base.x, true) : royalBonus(rng, tronReels(base.finalGrid), base.x); };
   // Ett bonusköp (eller TEST): grundhjulen snurras tills de visar exakt 3 Troner utan vinst, och det brädet spelas som ett
-  // grundsnurr (inga fler slumptal för hjulen); sedan bonusen med Tronernas hjul öppna, och bara dem (lock). gold:
+  // grundsnurr (inga fler slumptal för hjulen); sedan bonusen med Tronernas hjul öppna i första frispinnet. gold:
   // KingzBonus, den sista Tronen är guld och alla hjul är öppna.
   function royalBuy(rng, hist, gold) {
     var want = 3, B = STRIPS.base;
@@ -3206,7 +3216,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       if (evaluate(grid).wins.length || tronReels(grid).filter(Boolean).length !== want) continue;
       var r0 = playRound(rng, { fs: false, plain: true, stops: stops });
       if (gold) for (var b = 0; b < REELS; b++) for (var z = 0; z < ROWS; z++) if (grid[b][z] === S) r0.gold = { r: b, y: z };
-      return finish(r0, gold ? royalBonus(rng, ALL_OPEN, 0, true, true) : royalBonus(rng, tronReels(r0.finalGrid), 0, false, true), hist, null);
+      return finish(r0, gold ? royalBonus(rng, ALL_OPEN, 0, true) : royalBonus(rng, tronReels(r0.finalGrid), 0), hist, null);
     }
   }
 
@@ -3439,8 +3449,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'Kungligt!': 'Royal!',
     'Ståtligt!': 'Majestic!',
     'Väl kämpat!': 'Well fought!',
-    'Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi gångras de.':
-      'Mini reels: sometimes one or more mini reels above and below the board open while it spins. LAYER n lets the reel fetch a missing symbol from up to n spins back. A multiplier applies to wins that pass through its reel, and a win through several reels with multipliers multiplies them together.',
+    'Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.':
+      'Mini reels: sometimes one or more mini reels above and below the board open while it spins. LAYER n lets the reel fetch a missing symbol from up to n spins back. A multiplier applies to wins that pass through its reel, and a win through several reels with multipliers adds them together. While the mini reels are open, wins cascade: winning symbols disappear and new ones fall in until there are no more wins, and a multiplier that was part of a win grows by its own value (x2 becomes x4) for the next cascade.',
     '+1 MILJON': '+1 MILLION',
     '<b>Narren</b> är wild. Den finns på hjul 2–5 och ersätter alla symboler utom Tronen.': '<b>The Jester</b> is wild. It appears on reels 2–5 and substitutes for all symbols except the Throne.',
     'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.': 'If the symbol is missing on the next reel, the previous spin\'s symbol in the torn corner can fill the gap, and the win continues.',
@@ -3529,13 +3539,13 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     '{h} hjul, {r} rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Narren är wild på hjul 2–5 och ersätter alla symboler utom Tronen.':
       '{h} reels, {r} rows and {w} ways to win. Matching symbols on adjacent reels from the left win. The Jester is wild on reels 2–5 and substitutes for all symbols except the Throne.',
     'Småhjulen': 'The small reels',
-    'Ibland öppnas småhjul ovanför och under brädet. En multi gäller vinster genom hjulet och flera gångras. LAYER n hämtar en saknad symbol upp till n snurr bakåt.':
-      'Sometimes small reels open above and below the board. A multi applies to wins through its reel, and several multis multiply. LAYER n fetches a missing symbol up to n spins back.',
+    'Ibland öppnas småhjul ovanför och under brädet. Då blir det laviner, och en multi som vinner växer till nästa lavin. Flera multis läggs ihop. LAYER n hämtar en saknad symbol upp till n snurr bakåt.':
+      'Sometimes small reels open above and below the board. Then wins cascade, and a multi that wins grows for the next cascade. Several multis add up. LAYER n fetches a missing symbol up to n spins back.',
     'Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.':
       'Earlier boards stay behind as layers. If the symbol is missing on a reel with LAYER, it can be fetched from the layers, and the win continues.',
     'Bonus & KingzBonus': 'Bonus & KingzBonus',
-    '3 Troner ger Bonusen: {n} frispinn, Tronernas småhjul öppna och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.':
-      '3 Thrones give the Bonus: {n} free spins, the Thrones\' small reels open and a growing multi. The gold Throne gives KingzBonus with all open. Buy: Bonus {a}x, KingzBonus {b}x.',
+    '3 Troner ger Bonusen: {n} frispinn med 3 nya öppna hjul varje snurr och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.':
+      '3 Thrones give the Bonus: {n} free spins with 3 new open reels every spin and a growing multi. The gold Throne gives KingzBonus with all open. Buy: Bonus {a}x, KingzBonus {b}x.',
 
     // ---- studiointrot
     'TRYCK FÖR ATT STARTA': 'TAP TO START',
@@ -3574,7 +3584,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'KUNGLIG BONUS': 'ROYAL BONUS',
     'Tryck för att snurra': 'Tap to spin',
     '<p>Tornen rasar och <b>småhjulen</b> ger LAYER och multi</p>': '<p>The towers fall and the <b>small reels</b> give LAYER and multi</p>',
-    '<p>Det småhjulen ger <b>står kvar</b> alla frispinn</p>': '<p>What the small reels give <b>stays</b> for all free spins</p>',
+    '<p><b>{n} nya hjul</b> öppnas efter varje frispinn</p>': '<p><b>{n} new reels</b> open after every free spin</p>',
+    '<p><b>Alla småhjul</b> är öppna varje frispinn</p>': '<p><b>All small reels</b> are open every free spin</p>',
     '<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>': '<p>A win from a layer raises the multi by the layer number: <b>LAYER 3 = +3</b></p>',
     '<p><b>MULTI</b> nollställs aldrig</p>': '<p><b>MULTI</b> never resets</p>'
   };
@@ -9052,7 +9063,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     reels.forEach(function (rl) { rl.goldRow = null; rl.cells.forEach(function (c) { c.goldBomb = false; c.goldT0 = null; }); });
     if (res.gold) reels[res.gold.r].goldRow = res.gold.y;
     var t = T();
-    // res.strips: spelmotorns egna hjul för snurret (Kingz & Queenz: bonushjulen utan Troner, M.STRIPS.fsLock)
+    // res.strips: spelmotorns egna hjul för snurret (namnet på ett M.STRIPS), annars bonushjulen eller grundhjulen
     var strips = res.strips && M.STRIPS[res.strips] ? M.STRIPS[res.strips] : fs ? M.STRIPS.fs : REN_STRIPS;
     spinCtx = { scatters: 0 };
     showGhost(res);
@@ -9803,6 +9814,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       } else await wait(showTime(showT), true);
       // bonusen: hörnen från väggens lager flyger in i multin (gäller nästa vinst)
       if (fs && state.fs.layers) await growMulti(st);
+      // spelets egna saker när vinsten har visats (Kingz & Queenz: småhjulens multi växer till nästa lavin, small-reels.js)
+      for (var wh = 0; wh < winShownHooks.length; wh++) await winShownHooks[wh](st, fs);
       ballStop();
       hidePop(); clearChips(); sweepFx = null;
       eatGhosts(st.ghostUsed);
@@ -9952,6 +9965,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
   // roundEndHooks: körs när en omgång är klar (Kingz & Queenz: grundspelets småhjul stängs, small-reels.js)
   var roundEndHooks = [];
+  // winShownHooks: körs (och inväntas) när ett vinststeg har visats, innan symbolerna försvinner (presentSteps)
+  var winShownHooks = [];
   function endRound(res) {
     hideBaseLayers(); clearMaxEnd();
     roundEndHooks.forEach(function (f) { f(res); });
@@ -10144,12 +10159,12 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
 
   // Användaren 2026-10-26: brädet som i dag med en rad ovanför och en rad under, ett småhjul per hjul och rad. I grundspelet
-  // står ett torn framför varje småhjul. I bonusen snurrar de öppna småhjulen en gång när bonusen startar ("småhjul 1 snurrar först
-  // … sen när alla småhjul har snurrat … börjar huvudgridden snurra") och ger LAYER, multi eller tomt; en Tron som landar på
-  // ett stängt hjul får hjulets två torn att rasa ("ett torn som rasar … med en bra animation"), och då snurrar det
-  // hjulets småhjul en gång. Det småhjulen ger står kvar alla frispinn ("det som småhjulen direkt får … stannar alla freespins"). Guldbonusen (en guldtron, som C&T:s Maniac) har alla öppna från start. Layerspins är som i C&T (den röda tråden): bonusrutan med
-  // LAYERSPINS och lagren som tänds, lagervinsterna och multin som växer. Ikonen på småhjulet visar hjulets LAYER;
-  // en kopia flyger hem till lagret i bonusrutan. Spelmotorn (M.royalBonus) avgör allt; här visas det.
+  // står en stentavla framför varje småhjul; ibland rasar några och småhjulen ger LAYER eller multi, och då blir det laviner
+  // där multin växer (2026-10-28). I bonusen snurrar de öppna småhjulen före varje frispinn och ger LAYER, multi eller tomt:
+  // i Bonusen öppnas nya hjul efter varje frispinn (2026-10-28), och KingzBonus (en guldtron, som C&T:s Maniac) har alla öppna.
+  // Layerspins är som i C&T (den röda tråden): bonusrutan med LAYERSPINS och lagren som tänds, lagervinsterna och multin som
+  // växer. Ikonen på småhjulet visar hjulets LAYER; en kopia flyger hem till lagret i bonusrutan. Spelmotorn (M.royalBonus)
+  // avgör allt; här visas det.
   // Delen är fristående: den lägger in sina element själv och använder plattformens krokar (boardExtra, layoutHooks,
   // frameHooks och Reel med en rad), så att den kan flyttas till plattformen som en egen modul.
 
@@ -10323,7 +10338,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         rr(g, ix + s * 0.08, y + (h - s) / 2 + s * 0.08, s * 0.84, s * 0.84, s * 0.18); g.fill(); g.restore();
       }
       var bump = f >= 0 && f < 0.35 ? 1 + 0.16 * Math.sin(f / 0.35 * Math.PI) : 1, bs = s * bump;
-      g.drawImage(sprites[sym], x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+      // en multi som har vuxit (grundspelets laviner) visar sitt nya värde
+      g.drawImage(srMultNow[r][row] ? srMultSprite(srMultNow[r][row]) : sprites[sym], x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
     }
     g.restore();
   }
@@ -10537,15 +10553,18 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // tornen byggs upp igen när bonusen är slut: de faller ner på plats och studsar
   var SR_DROP = 0.45;
   function srDropY(r, row) { var t = clock - srDropT[r][row]; if (t >= SR_DROP) { srDropT[r][row] = -1; srDirty = true; return 0; } if (t < 0) return -srH * 1.2; var k = t / SR_DROP; return -srH * (1 - k) * (1 - k) * Math.cos(k * 9) * 0.9; }
+  // Hjul r:s tavlor byggs upp igen: de faller ner på plats från tiden at (clock), eller står där direkt (at < 0)
+  function srShut(r, at) {
+    for (var dr = 0; dr < 2; dr++) srDropT[r][dr] = srRowOpen[r][dr] && at >= 0 ? at + dr * 0.03 : -1;
+    srOpen[r] = false; srRowOpen[r] = [false, false]; srCrumbling[r] = [false, false]; srShake[r] = [-1, -1]; srGlowT[r] = [-1, -1];
+    srLayerRow[r] = -1; srFill[r] = false; srMultUse[r] = false; srMultNow[r] = [0, 0];
+    SRR[r].forEach(function (rl) { rl.setGrid([SR0]); });
+    srDirty = true;
+  }
   // instant: tavlorna står på plats direkt (brädet är hopvikt), annars faller de ner och studsar
   function srCloseAll(instant) {
-    for (var r = 0; r < REELS; r++) {
-      for (var dr = 0; dr < 2; dr++) srDropT[r][dr] = srRowOpen[r][dr] && !instant ? clock + r * 0.06 + dr * 0.03 : -1;
-      srFocusR = -1;
-      srOpen[r] = false; srRowOpen[r] = [false, false]; srCrumbling[r] = [false, false]; srShake[r] = [-1, -1]; srGlowT[r] = [-1, -1]; srLayerRow[r] = -1; srFill[r] = false; srMultUse[r] = false;
-      SRR[r].forEach(function (rl) { rl.setGrid([SR0]); });
-    }
-    srDim = srDimTo = 0; srActive = null; srBig = null; srDirty = true;
+    for (var r = 0; r < REELS; r++) srShut(r, instant ? -1 : clock + r * 0.06);
+    srFocusR = -1; srDim = srDimTo = 0; srActive = null; srBig = null; srDirty = true;
   }
   // ---------------------------------------------------------------- ljud
   // Syntade som spelets övriga ljud, med hovets instrument (kq-sound.js: trumpeter, pukor, harpa, klockspel och kör;
@@ -10624,6 +10643,36 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // på väg att stanna med spänning (srBoardSuspense), dess småhjul med värden lyser.
   var srLayerRow = [], srFill = [], srMultUse = [], srFocusR = -1;
   for (sri = 0; sri < REELS; sri++) { srLayerRow.push(-1); srFill.push(false); srMultUse.push(false); }
+  // ---------------------------------------------------------------- multin som växer (grundspelet)
+  // Användaren 2026-10-28: "vinner man med multi på hjulen 2x och 3x … ökas multin med det till nästa lavin". En multi som
+  // en vinst går genom växer med sitt eget värde (spelmotorns srMv före steget och srMvOut efter): när vinsten har visats
+  // slår ett nytt värde ner i småhjulets fönster (x2 blir x4) med en blixt, gnistor och klockspelet. srMultNow[r][rad]: värdet
+  // som visas (0 = ikonens eget).
+  var srMultNow = [], srMultC = {};
+  for (sri = 0; sri < REELS; sri++) srMultNow.push([0, 0]);
+  // en juvel med valfritt värde, ritad som småhjulens ikoner (makeSprite med en tillfällig symbol), i samma storlek
+  function srMultSprite(n) {
+    var size = sprites[SR0].width, key = n + ':' + size;
+    if (!srMultC[key]) {
+      var tmp = SYM.length;
+      SYM.push({ name: n + 'x', tile: '#2a2540', sr: { k: 'multi', n: n } });
+      try { srMultC[key] = makeSprite(tmp, size); } finally { SYM.pop(); }
+    }
+    return srMultC[key];
+  }
+  winShownHooks.push(async function (st, fs) {
+    if (fs || !st.srMvOut) return;
+    var grown = 0;
+    for (var r = 0; r < REELS; r++) for (var row = 0; row < 2; row++) {
+      var v = st.srMvOut[r][row];
+      if (!v || v === st.srMv[r][row]) continue;
+      srMultNow[r][row] = v; srFlash[r][row] = 0; srSparks(r, row, 14, '#ffcc33');
+      srSnd.multi(v); grown++;
+    }
+    if (!grown) return;
+    srDirty = true;
+    await wait(showTime(state.turbo ? 0.2 : 0.55), true);
+  });
   // En vinst hämtar från ett hjuls lager (flow.js, fills från spelmotorn: { r, k }): småhjulet med LAYER-ikonen lyser i
   // lagrets färg. multUse (grundspelet, spelmotorns hjul vars multi vinsterna använder): hjulets multi-ikon lyser i guld.
   // null: släck.
@@ -10836,17 +10885,16 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // brädet väntar på småhjulen innan det börjar stanna (spin-reels.js spinHold)
   // (i den kungliga bonusen srSpinLive, i grundspelet när småhjul öppnas srBaseLive)
   spinHold = function (res, fs) { return fs && royalRun && res.sr ? srSpinLive(res) : !fs && res.srBase ? srBaseLive(res) : null; };
-  // Troner som landade på stängda hjul i bonusen (opened från spelmotorn): Tronen lyser, och hjulets två torn rasar.
-  async function srTronOpen(list) {
-    for (var i = 0; i < list.length; i++) {
-      var o = list[i], reel = reels[o.r], y = -1;
-      for (var q = 0; q < reel.cells.length; q++) if (reel.cells[q].sym === M.S) y = q;
-      if (y >= 0) reel.cells[y].celebrate = true;
-      srSnd.tron();
-      await wait(state.turbo ? 0.15 : 0.5, true);
-      await srCrumble(o.r, state.turbo);
-      if (y >= 0 && reel.cells[y]) reel.cells[y].celebrate = false;
-    }
+  // Mellanbonusen (användaren 2026-10-28: "3 nya småhjul som öppnas efter varje snurr, inte 3 fasta"): före varje frispinn
+  // byggs tavlorna upp igen på hjulen som inte är med längre (de faller ner och studsar), och sedan rasar tavlorna på de nya
+  // hjulen (övre raden från vänster till höger, sedan den nedre). Hjul som är med igen står öppna.
+  async function srReopen(openIn, fast) {
+    var shut = [], add = [], r;
+    for (r = 0; r < REELS; r++) { if (srOpen[r] && !openIn[r]) shut.push(r); if (!srOpen[r] && openIn[r]) add.push(r); }
+    if (!shut.length && !add.length) return;
+    shut.forEach(function (q, i) { srShut(q, clock + i * 0.06); });
+    if (shut.length) await wait(fast ? 0.15 : SR_DROP + 0.1, true);
+    await srRowWave(add, fast);
   }
   // ---------------------------------------------------------------- den kungliga bonusen
   // Bonusen spelas (plan = game.bonus från spelmotorn, M.royalBonus): tronsalen tonar fram, tornen på Tronernas hjul rasar
@@ -10930,7 +10978,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     // in i bonusen (användaren 2026-10-27: "ta bort inzoomningen och behåll bara att gridden vecklas ihop sig", sedan "typ
     // någon svart bild"): brädet viks ihop, skärmen tonar ner i svart (srVeil) medan skattkammaren tas fram
     // bakom (kq-inside, kq-scene.js), affischen kommer och efter den vecklas det nya brädet ut
-    var fast = !!state.turbo;
+    var fast = !!state.turbo, nOpen = plan.open0.filter(Boolean).length;
     await srFold(true, fast);
     // den svarta bilden: skattkammaren tas fram bakom, och affischen kommer när det svarta tonar bort
     await srVeil(true, fast);
@@ -10949,7 +10997,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     }
     await overlay('<span class="ov-kicker">Bonus</span><h2 class="ov-title">' + (srGold ? txl('KINGZBONUS') : txl('KUNGLIG BONUS')) + '</h2>' +
       '<div class="ov-big">' + txl('{n} frispinn', { n: M.SR.spins }) + '</div>' +
-      '<div class="cv-facts">' + txl('<p>Tornen rasar och <b>småhjulen</b> ger LAYER och multi</p>') + txl('<p>Det småhjulen ger <b>står kvar</b> alla frispinn</p>') + '</div>' +
+      '<div class="cv-facts">' + txl('<p>Tornen rasar och <b>småhjulen</b> ger LAYER och multi</p>') +
+        (nOpen >= REELS ? txl('<p><b>Alla småhjul</b> är öppna varje frispinn</p>') : txl('<p><b>{n} nya hjul</b> öppnas efter varje frispinn</p>', { n: nOpen })) + '</div>' +
       '<div class="cv-layers">' + [1, 2, 3, 4, 5].map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em></i>'; }).join('') + '</div>' +
       '<div class="cv-facts">' + txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>') + txl('<p><b>MULTI</b> nollställs aldrig</p>') + '</div>' +
       '<p class="ov-tap"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>' + (state.auto > 0 ? '<span class="ov-auto">' + txl('Startar automatiskt') + '</span>' : ''),
@@ -10967,15 +11016,14 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var n = plan.spins.length, si = 0;
     while (si < n) {
       var res = plan.spins[si++];
+      // mellanbonusen: nya hjul öppnas före varje frispinn utom det första (srReopen)
+      if (si > 1) await srReopen(res.openIn, state.turbo);
       state.fs.left--; renderMeter(); hud(); clearChips();
       state.slam = false; state.hurry = false;
       await spinReels(res, true);
       srBoardReset();
-      var now = res.opened.filter(function (o) { return o.at < 0; }), later = res.opened.filter(function (o) { return o.at >= 0; });
-      if (now.length) await srTronOpen(now);
       if (res.steps.length) await wait(showTime(0.15), true);
       await presentSteps(res, true);
-      if (later.length && !state.maxShown) await srTronOpen(later);
       state.fs.mult = res.fsMult; renderMeter();
       if (state.maxShown || state.roundWin >= capFor()) break;
       await wait(showTime(T().fsGap), true);
@@ -11778,7 +11826,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       '<section><h3>' + txl('Spelomgången') + '</h3><ul>' +
       '<li>' + txl('Vanliga snurr: vinsterna betalas och brädet står kvar till nästa snurr.') + '</li>' +
       // Kingz & Queenz: grundspelets småhjul (small-reels.js, M.SR.baseP)
-      (M.SR && M.SR.baseP ? '<li>' + txl('Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi gångras de.') + '</li>' : '') +
+      (M.SR && M.SR.baseP ? '<li>' + txl('Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.') + '</li>' : '') +
       '<li>' + txl('Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.') + '</li>' +
       '<li>' + txl('Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.') + '</li></ul></section>' +
       '<section><h3>' + txl('Kontroller') + '</h3><ul>' +
@@ -12629,10 +12677,10 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // rader) med småhjulens rader ovanför och under, med spelets egna symboler och småhjulsikoner (makeSprite), och
   // använder hjälparna i guide-slides.js (gSeg, gTile, gGlow och de andra). Affischen och knapparna: kq-guide.css.
   var KG_FONT = '"Cinzel Decorative", "Times New Roman", serif';
-  // Volatiliteten (vol-meter.js räknar nivån ur spridningen per snurr, i gånger insatsen): den långa kontrollen med 160
-  // miljoner omgångar (2026-10-27) gav standardavvikelsen 13,87 i hela spelet. Gränserna är C&T:s (9–15 hög, över 15
-  // extrem), så nivån är 4 av 5: Hög. Räkna om när matten ändras.
-  VOL_LEVEL = 4;
+  // Volatiliteten (vol-meter.js räknar nivån ur spridningen per snurr, i gånger insatsen): användaren 2026-10-28 ville ha
+  // 3/5. En kort simulering med 24 miljoner omgångar gav standardavvikelsen 7,85 i hela spelet (math.js). Gränserna är
+  // C&T:s (5–9 medel), så nivån är 3 av 5: Medel (förut 4: Hög, 13,87). Räkna om när matten ändras.
+  VOL_LEVEL = 3;
 
   // ---------------------------------------------------------------- brädet
   // Måtten: s = rutan, sh = småhjulens höjd, x och y = övre vänstra hörnet av den övre raden; by = brädets överkant och bot
@@ -12805,9 +12853,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       });
     }
     g.restore();
-    // multin: 3x och 2x blir 6x
+    // multin: 3x och 2x blir 5x (multisarna läggs ihop)
     var mt = tWin + 1.0;
-    kgText(g, '6x', G.x + G.w / 2, G.by + 1.5 * s, 50, '#ffcc33', -0.06, u >= mt ? 2.1 - 1.1 * gOut(gSeg(u, mt, mt + 0.25)) : 0);
+    kgText(g, '5x', G.x + G.w / 2, G.by + 1.5 * s, 50, '#ffcc33', -0.06, u >= mt ? 2.1 - 1.1 * gOut(gSeg(u, mt, mt + 0.25)) : 0);
     g.restore();
   }
 
@@ -12904,9 +12952,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // Texterna beskriver vad som händer, aldrig hur ofta eller vad man minst vinner (användaren 2026-10-20).
   GUIDE = [
     { t: txl('Vinstvägar'), x: txl('{h} hjul, {r} rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Narren är wild på hjul 2–5 och ersätter alla symboler utom Tronen.', { h: M.REELS, r: M.ROWS, w: num(Math.pow(M.ROWS, M.REELS)) }), demo: kgDemoWays },
-    { t: txl('Småhjulen'), x: txl('Ibland öppnas småhjul ovanför och under brädet. En multi gäller vinster genom hjulet och flera gångras. LAYER n hämtar en saknad symbol upp till n snurr bakåt.'), demo: kgDemoSmall },
+    { t: txl('Småhjulen'), x: txl('Ibland öppnas småhjul ovanför och under brädet. Då blir det laviner, och en multi som vinner växer till nästa lavin. Flera multis läggs ihop. LAYER n hämtar en saknad symbol upp till n snurr bakåt.'), demo: kgDemoSmall },
     { t: 'Layerspins', x: txl('Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.'), demo: kgDemoLayers },
-    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn, Tronernas småhjul öppna och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
+    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn med 3 nya öppna hjul varje snurr och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
   ];
   // Varje knapp väljer ett slumpat snurr som visar funktionen (flow.js nxPick; köpt Maniac via buyGame). Bara i prototypen
   // (mode-setup.js: nxTestTab). Nya funktioner läggs till här när de byggs.
