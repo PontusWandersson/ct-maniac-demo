@@ -1921,9 +1921,10 @@ body.kq-inside .kq-bg-in { opacity: 1; }
 .kq-bg { overflow: hidden; }
 .kq-bg svg { position: absolute; left: 0; top: 0; display: block; width: 100%; height: 100%; overflow: visible; }
 #bg { display: none !important; }
-/* startskärmens bakgrund: helt mörk, så att spelplanen inte syns bakom (användaren 2026-10-27: "gör bakgrunden mer mörk så
-   man inte ser spelplanen"), med ett svagt lila sken bakom affischen */
-.intro::before, .intro::after { background: radial-gradient(ellipse 70% 55% at 50% 38%, rgba(74, 35, 144, .32), transparent 72%), #05030a !important; }
+/* startskärmens bakgrund: täckande, så att spelplanen inte syns bakom (användaren 2026-10-27: "gör bakgrunden mer mörk så
+   man inte ser spelplanen"). Bilden är riket ovan molnen (intro-realm.js); det här är himlens färger, som syns tills
+   bilden är ritad, så att det inte blinkar i en annan färg */
+.intro::before, .intro::after { background: linear-gradient(#1c1446, #3e2580 45%, #5a3290 80%, #7a3f8e) !important; }
 /* Sidokolumnerna (LAYER SPINS och köpaffischen till vänster) står lika nära ramen som i C&T (47 px vid full storlek),
    fast brädet är smalare för att småhjulens rader ska få plats (användaren 2026-10-26: "samma avstånd från gridden"). */
 :root:not(.portrait) .g-mid { justify-content: center; column-gap: calc(47px * var(--uiz)); }
@@ -2226,6 +2227,23 @@ body.tids .g-dots button { border-color: #ffcc33; }
 body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-color: #ffcc33; box-shadow: 0 0 8px rgba(255, 204, 51, .7); }
 /* telefonen: rubriken lika hög som C&T:s (31 px), på en rad även på smala telefoner (Bonus & KingzBonus är lång) */
 .portrait body.tids .g-slide h3 { font-size: min(23px, 6vw); line-height: 31px; white-space: nowrap; }
+/* Det som rör sig flyttas med transform; vattenfallet och kvarnens vingar är CSS-animationer. */
+.realm-art { position: fixed; z-index: -1; pointer-events: none; will-change: transform; }
+.intro.leaving .realm-art { animation: outBg .34s ease-in forwards; }
+/* vattenfallet: ljusa strimmor längs fallet och vita stråk som rinner nedåt; det blir bredare nedåt och tunnas ut mot
+   molnen */
+.realm-fall {
+  position: absolute;
+  background: linear-gradient(180deg, rgba(255,255,255,.75) 0 18%, transparent 18% 100%) 0 0 / 100% var(--rp),
+    repeating-linear-gradient(90deg, #bfe8ff 0 var(--rs), #7cc4ee var(--rs) calc(var(--rs) * 2));
+  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 65%, transparent); mask-image: linear-gradient(180deg, #000 65%, transparent);
+  animation: realmFall .6s linear infinite;
+}
+@keyframes realmFall { to { background-position: 0 var(--rp), 0 0; } }
+.realm-sails { animation: realmSpin 10s linear infinite; }
+@keyframes realmSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .realm-fall, .realm-sails { animation: none; } }
 </style>
 
 <!-- laddningsstapeln i det första introt (loader.css, loader.js): syns direkt när sidan öppnas -->
@@ -11569,6 +11587,367 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     // C&T:s gränd (#bg) och ram (#frameArt) syns inte i Kingz & Queenz (proto.css), så de ritas inte heller: förut ritades
     // de om varje gång brädet bytte storlek, och då hackade spelet när bonusen började och slutade (användaren 2026-10-27)
     drawBackdrop = function () {};
+  })();
+  // Användaren 2026-10-28: bakgrunden ska ha "samma stil som spelet men inte ha med spelet att göra"; kungastaden i natten
+  // "påminner rent för mycket om C&T var lite fantasifull", och riket ovan molnen blev "Mycket bra".
+  // Riket ovan molnen: en solnedgång i guld och lila över ett hav av moln, flygande öar (en med ett vattenfall som rinner
+  // ner i molnen, en med en väderkvarn) och varmluftsballonger i lila och guld, den största med en krona på toppen, som
+  // seglar sakta förbi. Ingen natt, ingen stad och inga fönster (det är C&T:s bild), och inget från själva spelet.
+  // Det stilla ritas en gång (himlen, solen och molnbankerna, och mörkret bakom texten); det som rör sig är små färdiga
+  // bilder som bara flyttas (CSS-transform): öarna guppar, ballongerna seglar, fåglarna flyger och molnhavet glider.
+  // Vattenfallet och kvarnens vingar är CSS-animationer.
+  var REALM = { el: null, raf: 0, key: '', A: null };
+  function realmRand(seed) { var a = seed >>> 0; return function () { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }; }
+  function realmOffTop(el) { var y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
+  function realmCanvas(w, h, d) {
+    var c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w * d)); c.height = Math.max(1, Math.ceil(h * d));
+    c.style.width = w + 'px'; c.style.height = h + 'px'; c.style.display = 'block';
+    var g = c.getContext('2d'); g.scale(d, d); g.lineJoin = 'round'; g.lineCap = 'round';
+    return { c: c, g: g };
+  }
+  function drawIntroRealm() {
+    var host = document.getElementById('intro'); if (!host) return;
+    realmRelease();
+    var W = window.innerWidth, H = window.innerHeight, d = Math.min(2, window.devicePixelRatio || 1);
+    // kortet mäts (affischen gungar in med en animation, så dess överkant räknas från kortet utan transform)
+    var card = host.querySelector('.intro-card'), poster = host.querySelector('.guide-poster');
+    var cr = card ? card.getBoundingClientRect() : { top: 0, bottom: H * 0.75 }, cw = card ? card.offsetWidth : Math.min(680, W);
+    var cardB = cr.bottom, posterT = poster && card ? cr.top + realmOffTop(poster) - realmOffTop(card) : H * 0.1;
+    var phone = document.documentElement.classList.contains('portrait') || W < 600, side = Math.max(0, (W - cw) / 2);
+    var u = phone ? Math.min(W / 390, Math.max(1, H / 844)) : Math.min(H / 1018, W / 1408 * 1.1);
+    var lw = Math.max(1.6, 2.6 * u), rnd = realmRand(20261028), free = H - cardB, INKT = '#15111f';
+    // Var sakerna ligger. Datorn: molnhavet nedtill, öarna och solen på sidorna om affischen, ballongerna seglar tvärs över
+    // (bakom affischen). Telefonen: affischen är lika bred som skärmen, så molnhavet, solen, en ö och en ballong ligger
+    // under kortet (platsen mäts, den skiljer mycket mellan telefoner) och en liten ballong svävar bredvid loggan.
+    var seaTop, sunX, sunY, sunR, isles = [], balloons = [], birds = null, rich;
+    if (phone) {
+      rich = free >= 130 * u;
+      seaTop = free >= 34 * u ? cardB + (rich ? Math.min(free * 0.52, free - 44 * u) : Math.max(12 * u, free * 0.4)) : H + 20;
+      sunR = 30 * u; sunX = W * 0.76; sunY = Math.max(cardB + 8 * u + sunR, seaTop - sunR * 0.8);
+      if (rich) {
+        var iw = Math.min(78 * u, (seaTop - cardB) * 1.2);
+        isles.push({ cx: W * 0.19, top: cardB + 6 * u + iw * 0.36, w: iw, trees: 2, fall: true, amp: 2.5 * u });
+        balloons.push({ s: 24 * u, kind: 'crown', y: cardB + 8 * u, v: 7 * u, x0: W * 0.45, amp: 3 * u, drift: true });
+      }
+      if (posterT > 52 * u) balloons.push({ s: Math.min(20 * u, (posterT - 10 * u) / 1.8), kind: 'gold', y: 6 * u, v: 0, x0: W - 34 * u, amp: 2.5 * u, sway: 8 * u });
+      if (posterT > 62 * u) birds = { y: posterT * 0.38, s: 0.75 };
+    } else {
+      rich = true;
+      seaTop = H * 0.68; sunR = 70 * u; sunX = W - side * 0.45; sunY = seaTop + sunR * 0.2;
+      if (side > 150 * u) {
+        isles.push({ cx: side * 0.45, top: H * 0.34, w: Math.min(side * 0.62, 200 * u), trees: 3, fall: true, amp: 5 * u });
+        isles.push({ cx: W - side * 0.4, top: H * 0.15, w: Math.min(side * 0.42, 130 * u), trees: 1, mill: true, amp: 4 * u });
+      }
+      balloons.push({ s: 50 * u, kind: 'crown', y: H * 0.13, v: 9 * u, x0: side * 0.25, amp: 6 * u, drift: true });
+      balloons.push({ s: 30 * u, kind: 'gold', y: H * 0.43, v: 12 * u, x0: W - side * 0.7, amp: 5 * u, drift: true });
+      balloons.push({ s: 16 * u, kind: 'far', y: H * 0.53, v: 5 * u, x0: side * 0.75, amp: 3 * u, drift: true });
+      birds = { y: H * 0.27, s: 1 };
+    }
+    REALM.el = []; var before = host.firstChild;
+    function add(node, x, y) { node.classList.add('realm-art'); node.style.left = x + 'px'; node.style.top = y + 'px'; host.insertBefore(node, before); REALM.el.push(node); return node; }
+    var A = { W: W, H: H, u: u, isles: [], balloons: [], seas: [], birds: null };
+
+    // ---------------- himlen: solnedgång från mörklila uppe till guld vid molnhavet, solen med strålar och molnbanker
+    var sk = realmCanvas(W, H, d), g = sk.g;
+    // på telefonen börjar solnedgångens värme först under kortet (så att texten under SPELA syns)
+    var skyB = seaTop < H ? seaTop : H * 1.3, sky = g.createLinearGradient(0, 0, 0, skyB);
+    var yB = phone ? Math.min(0.96, (cardB + 4 * u) / skyB) : 0.7, yC = phone ? Math.min(0.98, (cardB + (seaTop - cardB) * 0.5) / skyB) : 0.88;
+    sky.addColorStop(0, '#1c1446'); sky.addColorStop(yB * 0.6, '#3e2580'); sky.addColorStop(yB, '#7a3f8e'); sky.addColorStop(Math.max(yC, yB + 0.01), '#e0784a'); sky.addColorStop(1, '#ffc861');
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    var starB = Math.min(seaTop, H) * 0.3;
+    for (var i = 0; i < W * starB / 3000; i++) {
+      g.fillStyle = 'rgba(255,246,224,' + (0.15 + rnd() * 0.45) + ')';
+      g.beginPath(); g.arc(rnd() * W, rnd() * starB, (0.5 + rnd() * 1) * u, 0, Math.PI * 2); g.fill();
+    }
+    if (seaTop < H) {
+      var sg = g.createRadialGradient(sunX, sunY, sunR * 0.8, sunX, sunY, sunR * 5);
+      sg.addColorStop(0, 'rgba(255,214,120,0.5)'); sg.addColorStop(1, 'rgba(255,214,120,0)');
+      g.fillStyle = sg; g.fillRect(sunX - sunR * 5, sunY - sunR * 5, sunR * 10, sunR * 10);
+      // strålarna: svaga kilar ut från solen
+      g.fillStyle = 'rgba(255,241,168,0.08)';
+      for (var r = 0; r < 12; r++) {
+        var a0 = Math.PI + r * Math.PI / 11 - 0.05, a1 = a0 + 0.09, L = sunR * 7;
+        g.beginPath(); g.moveTo(sunX, sunY); g.lineTo(sunX + Math.cos(a0) * L, sunY + Math.sin(a0) * L); g.lineTo(sunX + Math.cos(a1) * L, sunY + Math.sin(a1) * L); g.closePath(); g.fill();
+      }
+      g.fillStyle = '#ffd36b'; g.beginPath(); g.arc(sunX, sunY, sunR, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#fff1a8'; g.beginPath(); g.arc(sunX + sunR * 0.12, sunY - sunR * 0.12, sunR * 0.72, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = INKT; g.lineWidth = lw; g.beginPath(); g.arc(sunX, sunY, sunR, 0, Math.PI * 2); g.stroke();
+      // molnbanker långt bort: långa platta moln utan kontur, belysta underifrån av solen
+      var bankN = phone ? 3 : 6, bankTop = phone ? Math.max(cardB + 4 * u, seaTop - 40 * u) : seaTop - 150 * u;
+      for (var b = 0; b < bankN; b++) {
+        var bw = (phone ? 70 + rnd() * 70 : 160 + rnd() * 220) * u, bh = (phone ? 5 : 9) * u + rnd() * (phone ? 4 : 8) * u;
+        var bx = rnd() * W - bw * 0.3, by = bankTop + rnd() * Math.max(4 * u, seaTop - bankTop - bh * 2);
+        g.fillStyle = b % 2 ? 'rgba(138,90,168,0.55)' : 'rgba(217,138,90,0.45)';
+        g.beginPath(); g.ellipse(bx + bw / 2, by, bw / 2, bh, 0, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.ellipse(bx + bw * 0.35, by - bh * 0.6, bw * 0.22, bh * 0.9, 0, 0, Math.PI * 2); g.fill();
+        g.fillStyle = 'rgba(255,214,140,0.35)'; g.fillRect(bx + bw * 0.15, by + bh * 0.55, bw * 0.7, Math.max(1.2, 1.4 * u));
+      }
+    }
+    add(sk.c, 0, 0);
+
+    // ---------------- de flygande öarna (guppar), med vattenfall ner i molnen och en väderkvarn vars vingar snurrar
+    isles.forEach(function (o, k) {
+      var art = realmIsland(o, u, d, rnd, lw), wrap = document.createElement('div');
+      var x = o.cx - art.w / 2, y = o.top;
+      wrap.appendChild(art.c);
+      if (o.fall && seaTop < H) {
+        var fw = Math.max(6, 14 * u * Math.min(1, o.w / (160 * u))), fall = document.createElement('div');
+        fall.className = 'realm-fall';
+        fall.style.cssText = 'left:' + (art.fallX - fw / 2) + 'px;top:' + art.fallY + 'px;width:' + fw + 'px;height:' + Math.max(10, seaTop + 40 * u - (y - art.top0) - art.fallY) + 'px;--rp:' + (26 * u).toFixed(1) + 'px;--rs:' + Math.max(2, 3 * u).toFixed(1) + 'px';
+        wrap.appendChild(fall);
+      }
+      if (art.sails) {
+        art.sails.c.className = 'realm-sails'; art.sails.c.style.position = 'absolute';
+        art.sails.c.style.left = (art.millX - art.sails.r) + 'px'; art.sails.c.style.top = (art.millY - art.sails.r) + 'px';
+        wrap.appendChild(art.sails.c);
+      }
+      add(wrap, x, y - art.top0);
+      A.isles.push({ el: wrap, amp: o.amp, ph: k * 2.1 });
+    });
+    // ---------------- ballongerna
+    balloons.forEach(function (o, k) {
+      var art = realmBalloon(o.s, o.kind, u, d, lw), wrap = document.createElement('div');
+      wrap.appendChild(art.c); add(wrap, 0, 0);
+      A.balloons.push({ el: wrap, w: art.w, h: art.h, y: o.y, v: o.v, x0: o.x0 - art.w / 2, amp: o.amp, ph: k * 1.7, sway: o.sway || 0 });
+    });
+    // ---------------- fåglarna: en liten plog som flyger förbi ibland
+    if (birds) {
+      var bc = realmCanvas(70 * u * birds.s, 30 * u * birds.s, d), bwrap = document.createElement('div');
+      bwrap.appendChild(bc.c); add(bwrap, 0, 0);
+      A.birds = { el: bwrap, g: bc.g, w: 70 * u * birds.s, h: 30 * u * birds.s, y: birds.y, s: birds.s, fr: -1 };
+    }
+    // ---------------- molnhavet: två lager som glider åt vänster (det bakre långsammare) och böljar lite
+    if (seaTop < H) {
+      var back = phone ? [{ dy: 0, r: [9, 22] }] : [{ dy: 0, r: [18, 44] }];
+      var front = phone ? [{ dy: 0, r: [12, 30] }, { dy: 44, r: [18, 40] }] : [{ dy: 0, r: [26, 64] }, { dy: 120, r: [40, 96] }, { dy: 250, r: [50, 110] }];
+      back.forEach(function (r) { r.body = '#a090d6'; r.rim = '#ffd9a0'; });
+      front.forEach(function (r, i) { r.body = ['#7866ba', '#5a4aa0', '#4a3c8e'][i]; r.rim = ['#f6c08a', '#d99878', '#b98270'][i]; });
+      [{ top: seaTop, rows: back, P: (phone ? 260 : 640) * u, v: 4 * u, bob: 0 },
+        { top: seaTop + (phone ? Math.min(28 * u, (H - seaTop) * 0.35) : 80 * u), rows: front, P: (phone ? 300 : 780) * u, v: 8 * u, bob: 2 * u }
+      ].forEach(function (o) {
+        var art = realmSea(W, H, o, u, d, rnd, lw);
+        add(art.c, 0, art.y);
+        A.seas.push({ el: art.c, P: o.P, v: o.v, bob: o.bob });
+      });
+    }
+    // ---------------- mörkare kanter, och mörkare bakom volatiliteten, pilarna, SPELA och texten under
+    var ve = realmCanvas(W, H, d), vg = ve.g;
+    var rg = vg.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.35, W / 2, H * 0.45, Math.max(W, H) * 0.8);
+    rg.addColorStop(0, 'rgba(14,6,34,0)'); rg.addColorStop(1, 'rgba(14,6,34,0.4)');
+    vg.fillStyle = rg; vg.fillRect(0, 0, W, H);
+    if (phone) {
+      var pt = cardB - 210 * u, pb = vg.createLinearGradient(0, pt, 0, cardB + 12 * u);
+      pb.addColorStop(0, 'rgba(14,6,34,0)'); pb.addColorStop(0.2, 'rgba(14,6,34,0.45)'); pb.addColorStop(0.88, 'rgba(14,6,34,0.45)'); pb.addColorStop(1, 'rgba(14,6,34,0)');
+      vg.fillStyle = pb; vg.fillRect(0, pt, W, cardB + 12 * u - pt);
+    } else {
+      var cb = vg.createLinearGradient(side - 40 * u, 0, W - side + 40 * u, 0);
+      cb.addColorStop(0, 'rgba(14,6,34,0)'); cb.addColorStop(0.16, 'rgba(14,6,34,0.6)'); cb.addColorStop(0.84, 'rgba(14,6,34,0.6)'); cb.addColorStop(1, 'rgba(14,6,34,0)');
+      vg.fillStyle = cb; vg.fillRect(side - 40 * u, H * 0.69, cw + 80 * u, H * 0.31);
+    }
+    add(ve.c, 0, 0);
+    REALM.A = A;
+    realmAnim();
+  }
+  // En flygande ö: en sten som smalnar av nedåt (med skikt och några lösa stenar under), gräs på toppen och träd i spelets
+  // stil; ibland en liten väderkvarn (vingarna är en egen bild som snurrar). Bilden får plats med träden och kvarnen.
+  function realmIsland(o, u, d, rnd, lw) {
+    var w = o.w, h = w * 0.78, top0 = o.mill ? w * 0.95 : w * 0.5, pad = 6 * u, INKT = '#15111f';
+    var cv = realmCanvas(w + pad * 2, top0 + h + w * 0.25 + pad, d), g = cv.g;
+    g.translate(pad, 0);
+    var y0 = top0, k = w / 100;
+    // lösa stenar under ön
+    [[0.32, 0.92, 4], [0.62, 1.02, 3], [0.46, 1.12, 2.4]].forEach(function (p) {
+      g.fillStyle = '#5a3f7a'; g.beginPath(); g.ellipse(w * p[0], y0 + h * p[1], p[2] * k * 1.4, p[2] * k, 0.3, 0, Math.PI * 2); g.fill(); g.strokeStyle = INKT; g.lineWidth = lw * 0.8; g.stroke();
+    });
+    var pts = [[0, 6], [10, 20], [18, 36], [30, 50], [40, 66], [50, 80], [58, 62], [70, 48], [82, 32], [92, 18], [100, 6]];
+    function rock() { g.beginPath(); g.moveTo(0, y0 + 6 * k); pts.forEach(function (p) { g.lineTo(p[0] * k, y0 + p[1] * k); }); g.closePath(); }
+    rock(); g.fillStyle = '#6a4a8a'; g.fill();
+    g.save(); rock(); g.clip();
+    g.strokeStyle = '#563a78'; g.lineWidth = Math.max(1.4, 2.2 * u);
+    for (var s = 1; s < 6; s++) { g.beginPath(); g.moveTo(0, y0 + s * 13 * k); for (var x = 0; x <= w; x += w / 6) g.lineTo(x, y0 + s * 13 * k + Math.sin(x * 0.12 + s) * 2.5 * k); g.stroke(); }
+    g.fillStyle = 'rgba(20,8,40,0.32)'; g.beginPath(); g.moveTo(0, y0); g.lineTo(w * 0.34, y0); g.lineTo(w * 0.5, y0 + h); g.lineTo(0, y0 + h); g.fill();
+    g.fillStyle = dotPattern(g, 5 * u, 0.9 * u, 'rgba(20,8,40,0.35)', d); g.fillRect(w * 0.3, y0, w * 0.1, h);
+    g.fillStyle = 'rgba(255,190,120,0.3)'; g.beginPath(); g.moveTo(w * 0.86, y0); g.lineTo(w, y0 + 6 * k); g.lineTo(w * 0.58, y0 + 62 * k); g.lineTo(w * 0.7, y0 + 30 * k); g.fill();
+    g.restore();
+    g.strokeStyle = INKT; g.lineWidth = lw; rock(); g.stroke();
+    // gräset på toppen med en mörkare kant som hänger ner lite
+    function grass() { g.beginPath(); g.moveTo(-3 * k, y0 + 8 * k); g.quadraticCurveTo(w * 0.5, y0 - 9 * k, w + 3 * k, y0 + 8 * k); for (var i = 10; i >= 0; i--) g.lineTo(w * i / 10, y0 + 8 * k + (i % 2 ? 5 : 2) * k); g.closePath(); }
+    grass(); g.fillStyle = '#2f8a46'; g.fill();
+    g.beginPath(); g.moveTo(-3 * k, y0 + 7 * k); g.quadraticCurveTo(w * 0.5, y0 - 9 * k, w + 3 * k, y0 + 7 * k); g.lineTo(w + 3 * k, y0 + 7 * k); g.quadraticCurveTo(w * 0.5, y0 - 2 * k, -3 * k, y0 + 7 * k); g.fillStyle = '#4fb565'; g.fill();
+    g.strokeStyle = INKT; g.lineWidth = lw; grass(); g.stroke();
+    // träd i spelets stil: stam och tre gröna klot med ljus ovansida
+    var tx = o.mill ? [0.26] : o.trees === 2 ? [0.3, 0.62] : [0.22, 0.48, 0.74];
+    tx.forEach(function (p, i) {
+      var tk = k * (0.55 + (i === 1 ? 0.15 : 0)), x = w * p, y = y0 - 2 * k - Math.sin(p * Math.PI) * 6 * k;
+      g.fillStyle = '#6b4226'; g.fillRect(x - 3 * tk, y - 14 * tk, 6 * tk, 16 * tk); g.strokeStyle = INKT; g.lineWidth = lw * 0.8; g.strokeRect(x - 3 * tk, y - 14 * tk, 6 * tk, 16 * tk);
+      [[-9, -20, 11, '#256b3a'], [9, -19, 10, '#256b3a'], [0, -31, 13, '#2f8a46']].forEach(function (c) {
+        g.fillStyle = c[3]; g.beginPath(); g.arc(x + c[0] * tk, y + c[1] * tk, c[2] * tk, 0, Math.PI * 2); g.fill(); g.stroke();
+      });
+      g.fillStyle = '#4fb565'; g.beginPath(); g.arc(x - 4 * tk, y - 35 * tk, 5 * tk, 0, Math.PI * 2); g.fill();
+    });
+    var out = { c: cv.c, w: w + pad * 2, top0: top0, fallX: pad + w * 1.0, fallY: y0 + 9 * k };
+    if (o.fall) {
+      // vattnet rinner i en båge över kanten innan det faller
+      var fw2 = Math.max(6, 14 * u * Math.min(1, w / (160 * u)));
+      g.fillStyle = '#8fd0f2'; g.strokeStyle = INKT; g.lineWidth = Math.max(1.2, 1.8 * u);
+      g.beginPath(); g.moveTo(w * 0.8, y0 + 1 * k); g.quadraticCurveTo(w * 0.97, y0 - 1 * k, w + fw2 / 2, y0 + 10 * k); g.lineTo(w - fw2 / 2, y0 + 10 * k); g.quadraticCurveTo(w * 0.94, y0 + 4 * k, w * 0.8, y0 + 5 * k); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = Math.max(1, 1.4 * u); g.beginPath(); g.moveTo(w * 0.84, y0 + 2 * k); g.quadraticCurveTo(w * 0.95, y0 + 1 * k, w + fw2 * 0.1, y0 + 8 * k); g.stroke();
+    }
+    if (o.mill) {
+      // väderkvarnen: ett vitt torn med lila tak; vingarna ritas för sig och snurrar (CSS)
+      var mx = w * 0.64, base = y0 - 2 * k, mh = 46 * k, mw0 = 22 * k, mw1 = 14 * k;
+      g.fillStyle = '#ece2d0'; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx + mw1 / 2, base - mh); g.lineTo(mx + mw0 / 2, base); g.closePath(); g.fill();
+      g.fillStyle = 'rgba(20,8,40,0.18)'; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx - mw1 * 0.1, base - mh); g.lineTo(mx - mw0 * 0.15, base); g.fill();
+      g.strokeStyle = INKT; g.lineWidth = lw; g.beginPath(); g.moveTo(mx - mw0 / 2, base); g.lineTo(mx - mw1 / 2, base - mh); g.lineTo(mx + mw1 / 2, base - mh); g.lineTo(mx + mw0 / 2, base); g.stroke();
+      g.fillStyle = '#5a3426'; g.beginPath(); g.moveTo(mx - 4 * k, base); g.lineTo(mx - 4 * k, base - 9 * k); g.arc(mx, base - 9 * k, 4 * k, Math.PI, 0); g.lineTo(mx + 4 * k, base); g.fill(); g.stroke();
+      g.fillStyle = '#ffd36b'; g.fillRect(mx - 3 * k, base - 30 * k, 6 * k, 7 * k); g.lineWidth = lw * 0.7; g.strokeRect(mx - 3 * k, base - 30 * k, 6 * k, 7 * k);
+      g.fillStyle = '#3a2580'; g.beginPath(); g.moveTo(mx - mw1 / 2 - 4 * k, base - mh + 2 * k); g.lineTo(mx, base - mh - 14 * k); g.lineTo(mx + mw1 / 2 + 4 * k, base - mh + 2 * k); g.closePath(); g.fill(); g.lineWidth = lw; g.stroke();
+      var sr = 30 * k, sv = realmCanvas(sr * 2, sr * 2, d), sgx = sv.g;
+      sgx.translate(sr, sr);
+      for (var b = 0; b < 4; b++) {
+        sgx.save(); sgx.rotate(b * Math.PI / 2 + 0.3);
+        sgx.strokeStyle = INKT; sgx.lineWidth = Math.max(1.6, 2.6 * u); sgx.beginPath(); sgx.moveTo(0, 0); sgx.lineTo(0, -sr * 0.92); sgx.stroke();
+        sgx.fillStyle = '#fff6e0'; sgx.fillRect(1.5 * k, -sr * 0.9, 7 * k, sr * 0.68); sgx.lineWidth = Math.max(1.2, 1.6 * u); sgx.strokeRect(1.5 * k, -sr * 0.9, 7 * k, sr * 0.68);
+        sgx.beginPath(); for (var l = 1; l < 4; l++) { sgx.moveTo(1.5 * k, -sr * 0.9 + l * sr * 0.17); sgx.lineTo(8.5 * k, -sr * 0.9 + l * sr * 0.17); } sgx.stroke();
+        sgx.restore();
+      }
+      sgx.fillStyle = '#ffcc33'; sgx.beginPath(); sgx.arc(0, 0, 3.2 * k, 0, Math.PI * 2); sgx.fill(); sgx.strokeStyle = INKT; sgx.lineWidth = Math.max(1.2, 1.6 * u); sgx.stroke();
+      out.sails = { c: sv.c, r: sr }; out.millX = pad + mx; out.millY = base - mh + 4 * k;
+    }
+    return out;
+  }
+  // En varmluftsballong: höljet i två färger (ränder), ljus och skugga, ett guldband vid öppningen, rep och en korg. Den
+  // största har en krona på toppen och en liten vimpel; den avlägsna är blekare.
+  function realmBalloon(s, kind, u, d, lw) {
+    var R = s / 2, crown = kind === 'crown', far = kind === 'far', pad = 4 * u, ct = crown ? R * 0.7 : 0;
+    var w = s + pad * 2, h = ct + R * 2.9 + pad * 2, cv = realmCanvas(w, h, d), g = cv.g, INKT = far ? '#3a2a5e' : '#15111f';
+    var cx = w / 2, cy = pad + ct + R, lwb = far ? Math.max(1, lw * 0.5) : lw;
+    var col = crown ? ['#7a3bd8', '#ffcc33'] : far ? ['#9a84d8', '#e2d6f5'] : ['#ffcc33', '#fff6e0'];
+    function env() { g.beginPath(); g.arc(cx, cy, R, Math.PI * 0.8, Math.PI * 2.2); g.lineTo(cx + R * 0.26, cy + R * 1.18); g.lineTo(cx - R * 0.26, cy + R * 1.18); g.closePath(); }
+    env(); g.fillStyle = col[0]; g.fill();
+    g.save(); env(); g.clip();
+    g.fillStyle = col[1]; g.beginPath(); g.ellipse(cx, cy + R * 0.1, R * 0.62, R * 1.3, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = col[0]; g.beginPath(); g.ellipse(cx, cy + R * 0.1, R * 0.26, R * 1.3, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(20,8,40,0.22)'; g.beginPath(); g.ellipse(cx - R * 0.95, cy + R * 0.1, R * 0.6, R * 1.4, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.ellipse(cx + R * 0.42, cy - R * 0.5, R * 0.16, R * 0.3, -0.5, 0, Math.PI * 2); g.fill();
+    g.restore();
+    g.strokeStyle = INKT; g.lineWidth = lwb; env(); g.stroke();
+    // bandet vid öppningen, repen och korgen
+    g.fillStyle = far ? '#c9b46a' : '#e0a000'; g.fillRect(cx - R * 0.3, cy + R * 1.14, R * 0.6, R * 0.12); g.strokeRect(cx - R * 0.3, cy + R * 1.14, R * 0.6, R * 0.12);
+    g.lineWidth = Math.max(1, lwb * 0.6); g.beginPath();
+    g.moveTo(cx - R * 0.28, cy + R * 1.26); g.lineTo(cx - R * 0.22, cy + R * 1.62); g.moveTo(cx + R * 0.28, cy + R * 1.26); g.lineTo(cx + R * 0.22, cy + R * 1.62); g.stroke();
+    var bw = R * 0.5, bh = R * 0.36, bx = cx - bw / 2, by = cy + R * 1.62;
+    g.fillStyle = far ? '#8a7a6a' : '#8a5a3c'; g.fillRect(bx, by, bw, bh);
+    g.strokeStyle = far ? 'rgba(40,20,20,0.3)' : '#5a3426'; g.lineWidth = Math.max(1, 1.2 * u);
+    g.beginPath(); for (var l = 1; l < 3; l++) { g.moveTo(bx, by + bh * l / 3); g.lineTo(bx + bw, by + bh * l / 3); } g.stroke();
+    g.strokeStyle = INKT; g.lineWidth = lwb; g.strokeRect(bx, by, bw, bh);
+    if (crown) {
+      // kronan på toppen, med ädelstenar
+      var kw = R * 0.9, kb = cy - R * 0.92, kt = kb - ct * 0.95;
+      g.fillStyle = '#ffcc33'; g.beginPath(); g.moveTo(cx - kw / 2, kb); g.lineTo(cx - kw / 2, kt + ct * 0.35); g.lineTo(cx - kw * 0.27, kt + ct * 0.6); g.lineTo(cx, kt);
+      g.lineTo(cx + kw * 0.27, kt + ct * 0.6); g.lineTo(cx + kw / 2, kt + ct * 0.35); g.lineTo(cx + kw / 2, kb); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#fff1a8'; g.fillRect(cx - kw / 2 + 2 * u, kb - ct * 0.24, kw - 4 * u, ct * 0.12);
+      [[-0.3, '#3ccfcf'], [0, '#7a3bd8'], [0.3, '#3ccfcf']].forEach(function (p) { g.fillStyle = p[1]; g.beginPath(); g.arc(cx + kw * p[0], kb - ct * 0.2, Math.max(1.4, R * 0.07), 0, Math.PI * 2); g.fill(); g.lineWidth = Math.max(1, lwb * 0.5); g.stroke(); });
+      [-0.5, 0, 0.5].forEach(function (p) { g.fillStyle = '#fff6e0'; g.beginPath(); g.arc(cx + kw * p, p ? kt + ct * 0.35 : kt, Math.max(1.4, R * 0.06), 0, Math.PI * 2); g.fill(); g.stroke(); });
+      g.lineWidth = lwb;
+      // vimpeln under korgen
+      g.strokeStyle = INKT; g.beginPath(); g.moveTo(bx + bw, by + bh * 0.5); g.lineTo(bx + bw + R * 0.1, by + bh * 1.6); g.stroke();
+      g.fillStyle = '#7a3bd8'; g.beginPath(); g.moveTo(bx + bw + R * 0.08, by + bh * 0.9); g.lineTo(bx + bw + R * 0.42, by + bh * 1.15); g.lineTo(bx + bw + R * 0.1, by + bh * 1.45); g.closePath(); g.fill(); g.lineWidth = Math.max(1, lwb * 0.7); g.stroke();
+    }
+    if (far) cv.c.style.opacity = '0.85';
+    return { c: cv.c, w: w, h: h };
+  }
+  // Ett lager av molnhavet: en eller flera rader molnkullar (stora och små runda moln som flyter ihop), med bläckkant
+  // längs ovansidan och ett band av solljus längs kanten (samma form, förskjuten). Raderna upprepas varje P, så att lagret
+  // kan glida i all oändlighet; bilden är P bredare än skärmen.
+  function realmSea(W, H, o, u, d, rnd, lw) {
+    var rows = o.rows.map(function (row) {
+      var puffs = [], x = 0, r0 = row.r[0] * u, r1 = row.r[1] * u;
+      while (x < o.P) { var big = rnd() < 0.4, r = big ? r1 * (0.75 + rnd() * 0.25) : r0 + (r1 * 0.7 - r0) * rnd(); puffs.push([x, r]); x += r * (0.7 + rnd() * 0.35); }
+      var sc = o.P / x; puffs.forEach(function (p) { p[0] *= sc; });
+      return { dy: row.dy * u, r1: r1, puffs: puffs, body: row.body, rim: row.rim };
+    });
+    var rmax = rows[0].r1, y = o.top - rmax * 1.25 - lw * 3, cvw = W + o.P, cvh = H - y + 4, cv = realmCanvas(cvw, cvh, d), g = cv.g, base = o.top - y;
+    rows.forEach(function (row) {
+      var ry = base + row.dy, sh = row.r1 * 0.13;
+      function shape(dx, dy) {
+        g.beginPath();
+        for (var k = -1; k * o.P < cvw + o.P; k++) row.puffs.forEach(function (p) {
+          var px = p[0] + k * o.P + dx, py = ry - p[1] * 0.2 + dy;
+          if (px + p[1] < -lw * 2 || px - p[1] > cvw + lw * 2) return;
+          g.moveTo(px + p[1], py); g.arc(px, py, p[1], 0, Math.PI * 2);
+        });
+        g.rect(-20, ry + dy, cvw + 40, cvh);
+      }
+      shape(0, 0); g.fillStyle = '#15111f'; g.fill(); g.strokeStyle = '#15111f'; g.lineWidth = lw * 2; g.stroke();
+      g.save(); shape(0, 0); g.clip();
+      g.fillStyle = row.rim; g.fillRect(0, 0, cvw, cvh);
+      shape(-sh * 0.55, sh); g.fillStyle = row.body; g.fill();
+      g.restore();
+    });
+    var gr = g.createLinearGradient(0, base, 0, cvh); gr.addColorStop(0, 'rgba(30,16,70,0)'); gr.addColorStop(1, 'rgba(30,16,70,0.4)');
+    g.globalCompositeOperation = 'source-atop'; g.fillStyle = gr; g.fillRect(0, 0, cvw, cvh); g.globalCompositeOperation = 'source-over';
+    return { c: cv.c, y: y };
+  }
+  // fåglarna: fyra små siluetter i plog, två bilder för vingslagen
+  function realmBirds(B, fr) {
+    var g = B.g, u = REALM.A.u * B.s;
+    g.clearRect(-2, -2, B.w + 4, B.h + 4);
+    g.strokeStyle = '#2a1650'; g.lineWidth = Math.max(1.4, 2.4 * u);
+    [[10, 8], [26, 16], [42, 12], [58, 22]].forEach(function (p, i) {
+      var x = p[0] * u, y = p[1] * u, up = (fr + i) % 2 ? -4 * u : 2 * u;
+      g.beginPath(); g.moveTo(x - 6 * u, y + up); g.quadraticCurveTo(x - 3 * u, y - 2 * u, x, y + 1 * u); g.quadraticCurveTo(x + 3 * u, y - 2 * u, x + 6 * u, y + up); g.stroke();
+    });
+  }
+  // När startskärmen stängs tas bilderna bort, så att de inte tar telefonens minne medan man spelar. Nästa gång
+  // startskärmen visas (från menyn) ritas allt om.
+  function realmRelease() {
+    if (REALM.raf) { cancelAnimationFrame(REALM.raf); REALM.raf = 0; }
+    if (REALM.el) REALM.el.forEach(function (e) { e.querySelectorAll && e.querySelectorAll('canvas').forEach(function (c) { c.width = c.height = 0; }); if (e.tagName === 'CANVAS') e.width = e.height = 0; e.remove(); });
+    REALM.el = null; REALM.key = '';
+  }
+  // det som rör sig flyttas bara (inget ritas om, utom fåglarnas vingslag)
+  function realmAnim() {
+    if (REALM.raf) cancelAnimationFrame(REALM.raf);
+    var A = REALM.A, u = A.u, t0 = performance.now();
+    var still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function tr(el, x, y) { el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)'; }
+    (function step(now) {
+      var host = document.getElementById('intro');
+      if (!host || host.hidden) { REALM.raf = 0; realmRelease(); return; }
+      var t = still ? 0 : (now - t0) / 1000;
+      A.seas.forEach(function (s) { tr(s.el, -((t * s.v) % s.P), s.bob ? Math.sin(t * 0.4) * s.bob : 0); });
+      A.isles.forEach(function (i) { tr(i.el, 0, Math.sin(t * 0.5 + i.ph) * i.amp); });
+      A.balloons.forEach(function (b) {
+        var x;
+        if (b.v) { var span = A.W + b.w * 2; x = ((b.x0 + b.w + t * b.v) % span + span) % span - b.w; }
+        else x = b.x0 + Math.sin(t * 0.25 + b.ph) * b.sway;
+        tr(b.el, x, b.y + Math.sin(t * 0.6 + b.ph) * b.amp);
+      });
+      var B = A.birds;
+      if (B) {
+        var sp = 26 * u * B.s, run = (A.W + B.w * 2) / sp, ph = (t + run * 0.35) % (run + 22);
+        if (ph < run) {
+          var fr = Math.floor(t / 0.28) % 2; if (fr !== B.fr) { realmBirds(B, fr); B.fr = fr; }
+          tr(B.el, A.W + B.w - ph * sp, B.y + Math.sin(t * 0.8) * 4 * u);
+        } else if (B.fr !== -2) { tr(B.el, -B.w * 3, B.y); B.fr = -2; }
+      }
+      if (still) { REALM.raf = 0; return; }
+      REALM.raf = requestAnimationFrame(step);
+    })(performance.now());
+  }
+  (function () {
+    var host = document.getElementById('intro');
+    // ritas när startskärmen syns (mätningen av kortet behöver den), när typsnitten är laddade och när fönstret ändras
+    var go = function () {
+      if (!host || host.hidden) return;
+      var key = window.innerWidth + 'x' + window.innerHeight;
+      if (key === REALM.key && REALM.el) { if (!REALM.raf) realmAnim(); return; }
+      try { drawIntroRealm(); REALM.key = key; } catch (e) { console.error(e); }
+    };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { REALM.key = ''; setTimeout(go, 60); });
+    var rt = 0; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(go, 120); });
+    if (host && window.MutationObserver) new MutationObserver(function () { setTimeout(go, 30); }).observe(host, { attributes: true, attributeFilter: ['hidden'] });
   })();
   // När bonusen är slut kommer en affisch som berättar vad som hände: rubriken (GRYMT! ...), beloppet, en stor stämpel
   // med gånger insatsen ("x88"), tre klistermärken (frispinn, högsta multi, bästa snurr) och ett märke per lager med hur
