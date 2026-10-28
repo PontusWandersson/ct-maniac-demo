@@ -2016,12 +2016,14 @@ body.tids .bp-price {
 /* Reglernas små bräden har 5 hjul. */
 .wb-board, .wb-nums { grid-template-columns: repeat(5, 1fr) !important; }
 /* Slottet (kq-scene.js): vallgravens speglingar glittrar fram och tillbaka (riddarna står stilla). Stilla för den som vill
-   ha mindre rörelse. */
+   ha mindre rörelse. Speglingarna är en egen bild som är 1064 breda i ritningen: de glider 10 åt vänster och 12 åt höger
+   (i procent av bildens bredd, så att det följer ritningens storlek). */
 .kq-ripple { animation: kqRipple 3.2s ease-in-out infinite alternate; }
-@keyframes kqRipple { from { transform: translateX(-10px); opacity: .7; } to { transform: translateX(12px); opacity: 1; } }
+@keyframes kqRipple { from { transform: translateX(-0.94%); opacity: .7; } to { transform: translateX(1.128%); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .kq-ripple { animation: none; } }
-/* vakterna vid vägen syns bara på telefonen (på datorn står knappraden framför dem) */
-:root:not(.portrait) .kq-road { display: none; }
+/* vakterna vid vägen syns bara på telefonen (på datorn står knappraden framför dem), och hedersvakten vid brädet bara på
+   datorn */
+:root:not(.portrait) .kq-road, .portrait .kq-desk { display: none; }
 /* i bonusen syns inte slottet, och speglingarna står still (de kostar annars en omritning av slottet i varje bildruta) */
 body.kq-inside .kq-ripple { animation-play-state: paused; }
 /* Skattkammaren (kq-scene.js): strålarna bakom brädet vrider sig sakta och glittret på skatten tindrar. Strålarna är en
@@ -11376,13 +11378,15 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     }
     // Vallgraven (användaren 2026-10-26: "en vallgrav runt slottet och lite riddare"): vatten längs slottets fot som böjer
     // bakåt runt de yttre tornen, med solnedgångens speglingar som glittrar (kq-ripple, proto.css), och en vindbrygga i
-    // trä med kedjor från porten.
+    // trä med kedjor från porten. Speglingarna är en egen liten bild mellan vattnet och resten (som skattkammarens lågor),
+    // så att slottet inte ritas om i varje bildruta när de glittrar: bilden av slottet slutar efter vattnet och fortsätter
+    // efter speglingarna.
     function moat() {
       return '<path d="M190 748 Q200 716 270 722 L1330 722 Q1400 716 1410 748 Q1408 786 1320 790 L280 790 Q192 786 190 748 Z" fill="url(#water)" stroke="' + INKC + '" stroke-width="7"/>' +
-        '<path d="M206 744 Q220 730 280 731 L1320 731 Q1380 730 1394 744" fill="none" stroke="#2a2f7a" stroke-width="6"/>' +
-        '<g class="kq-ripple">' + [[300, 752, 90], [470, 768, 120], [640, 756, 70], [960, 762, 110], [1130, 750, 80], [1260, 770, 100], [380, 778, 60], [1040, 780, 70]].map(function (p) {
+        '<path d="M206 744 Q220 730 280 731 L1320 731 Q1380 730 1394 744" fill="none" stroke="#2a2f7a" stroke-width="6"/></svg>' +
+        part('kq-ripple', 298, 748, 1064, 34, [[300, 752, 90], [470, 768, 120], [640, 756, 70], [960, 762, 110], [1130, 750, 80], [1260, 770, 100], [380, 778, 60], [1040, 780, 70]].map(function (p) {
           return '<path d="M' + p[0] + ' ' + p[1] + ' h' + p[2] + '" stroke="rgba(255,190,150,0.55)" stroke-width="4" stroke-linecap="round"/>';
-        }).join('') + '</g>' +
+        }).join('')) + SVG0 +
         // vindbryggan och kedjorna från porten
         '<path d="M748 726 L852 726 L860 792 L740 792 Z" fill="#8a5a32" stroke="' + INKC + '" stroke-width="6" stroke-linejoin="round"/>' +
         '<path d="M746 742 H854 M744 758 H856 M742 774 H858" stroke="#5a3a1e" stroke-width="4"/>' +
@@ -11419,11 +11423,18 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         '<path d="M-10 -126 Q-6 -133 0 -134" stroke="rgba(255,255,255,0.8)" stroke-width="3" fill="none"/>' +
         '</g>';
     }
-    // Vakterna (användaren 2026-10-26: "rita så riddarna inte står i trädet"): två på ängen till höger om brädet, mellan
-    // brädet och träden, och två vid vägen längst fram (kq-road: bara på telefonen, där de syns under knappraden; på datorn
+    // Vakterna (användaren 2026-10-26: "rita så riddarna inte står i trädet"; 2026-10-27: "gör om så vi ser fler soldater
+    // på datorskärmen, nu står dem jättekonstigt", förut två staplade till höger om brädet och den ena avklippt av
+    // nederkanten). Datorn (kq-desk): en hedersvakt på var sida om brädet, vända mot porten: en vid vallgraven och tre på
+    // rad framme på ängen (till vänster under köpaffischen), lika på båda sidor. De två träden närmast brädet fick ge plats
+    // (de syntes bara på datorn). Telefonen (kq-road): två vid vägen längst fram, där de syns under knappraden (på datorn
     // skulle de titta fram bakom knappraden). Ingen står framför ett träd.
     function knights() {
-      return knight(1168, 885, 0.72, true) + knight(1185, 1000, 0.78, true) +
+      var desk = '';
+      [[455, 835, 0.56], [300, 975, 0.64], [378, 975, 0.64], [456, 975, 0.64]].forEach(function (p) {
+        desk += knight(p[0], p[1], p[2], false) + knight(1600 - p[0], p[1], p[2], true);
+      });
+      return '<g class="kq-desk">' + desk + '</g>' +
         '<g class="kq-road">' + knight(655, 1002, 0.72, false) + knight(945, 1002, 0.72, true) + '</g>';
     }
     var stars = '';
@@ -11475,7 +11486,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       tree(450, 720, 0.55) + tree(1150, 718, 0.55) + tree(620, 735, 0.42) + tree(985, 735, 0.42) +
       // vallgraven framför de små träden vid slottet (de står på slottets sida av vattnet)
       moat() +
-      tree(110, 860, 1.25) + tree(270, 900, 0.9) + tree(1490, 860, 1.25) + tree(1330, 900, 0.9) +
+      tree(110, 860, 1.25) + tree(1490, 860, 1.25) +
       tree(-170, 830, 1.05) + tree(-430, 860, 1.3) + tree(-760, 820, 0.95) + tree(1770, 830, 1.05) + tree(2030, 860, 1.3) + tree(2360, 820, 0.95) +
       knights() +
       '<rect x="-2400" y="-2000" width="6400" height="5000" fill="url(#cvig)"/>' +
@@ -11507,6 +11518,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     window.addEventListener('resize', function () { setTimeout(placeScene, 0); });
     var gameBox = document.getElementById('game');
     if (gameBox && window.ResizeObserver) new ResizeObserver(placeScene).observe(gameBox);
+    // C&T:s gränd (#bg) och ram (#frameArt) syns inte i Kingz & Queenz (proto.css), så de ritas inte heller: förut ritades
+    // de om varje gång brädet bytte storlek, och då hackade spelet när bonusen började och slutade (användaren 2026-10-27)
+    drawBackdrop = function () {};
   })();
   // När bonusen är slut kommer en affisch som berättar vad som hände: rubriken (GRYMT! ...), beloppet, en stor stämpel
   // med gånger insatsen ("x88"), tre klistermärken (frispinn, högsta multi, bästa snurr) och ett märke per lager med hur
