@@ -5256,8 +5256,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         if (rl.target[y] !== SCAT) continue;
         var cx = r * cell + cell / 2, cy = y * cell + cell / 2;
         g.globalAlpha = k;
-        // prototypen: bomben lyser genom mörkret och dunkar i takt med hjärtslaget (lite större), guldsken i guldväntan
-        var bs = cell * (1 + 0.09 * beat); g.drawImage(sprites[SCAT], r * cell + (cell - bs) / 2, y * cell + (cell - bs) / 2, bs, bs);
+        // prototypen: bomben lyser genom mörkret och dunkar i takt med hjärtslaget (lite större), guldsken i guldväntan.
+        // Guldbomben förblir guld: goldRow medan hjulet studsar klart, sedan rutans goldBomb (reels.js setGrid).
+        var gb = rl.goldRow === y || (rl.mode === 'grid' && rl.cells[y] && rl.cells[y].goldBomb);
+        var bs = cell * (1 + 0.09 * beat); g.drawImage(sprites[gb ? GOLD_BOMB : SCAT], r * cell + (cell - bs) / 2, y * cell + (cell - bs) / 2, bs, bs);
         g.shadowColor = gold ? '#ffd21f' : '#b45cff'; g.shadowBlur = cell * (0.3 + 0.3 * pulse + 0.25 * prog);
         g.lineWidth = cell * 0.07; g.strokeStyle = INK; rr(g, r * cell + cell * 0.04, y * cell + cell * 0.04, cell * 0.92, cell * 0.92, cell * 0.18); g.stroke();
         g.shadowBlur = 0;
