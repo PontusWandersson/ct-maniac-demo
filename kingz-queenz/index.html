@@ -2874,7 +2874,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // 1.5.0 (2026-10-24): prototypens matte (sparade omgångar hette 1.4.0-proto) är nu spelets enda matte, med samma utfall.
   // 1.6.0 (2026-10-28): Kingz & Queenz med volatilitet 3/5, laviner när grundspelets småhjul öppnas och tre nya småhjul
   // per frispinn i mellanbonusen (sparade omgångar från 1.5.0 kan inte spelas upp igen; insatsen betalas tillbaka).
-  var ENGINE_VERSION = '1.6.0';
+  // 1.7.0 (2026-10-29): x500 och x1000 på bonusarnas småhjul, som gångrar multin, och en egen vinsttabell för KingzBonus
+  // (sparade omgångar från 1.6.0 kan inte spelas upp igen; insatsen betalas tillbaka).
+  var ENGINE_VERSION = '1.7.0';
   // Grundspelet: grundremsorna, inga multis, och guldbomben kan komma.
   function baseOpts(extra) { var o = { fs: false, plain: true, goldCheck: true }; for (var k in extra) o[k] = extra[k]; return o; }
   function emptyGrid() { var g = []; for (var r = 0; r < REELS; r++) { var c = []; for (var y = 0; y < ROWS; y++) c.push(-1); g.push(c); } return g; }
@@ -2985,27 +2987,35 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   //     fem hjulens torn. Köpt Bonus eller Guldbonus: ett startbräde med exakt 3 Troner (royalBuy), i Guldbonusen är den
   //     sista guld. I Bonusen (mellanbonusen) öppnas lika många nya hjul efter varje frispinn (royalBonus); bonushjulen har
   //     inga Troner.
-  //   Ett småhjul ger LAYER n, en multi (x2–x50) eller tomt (SR.w). Ett hjul får högst ett LAYER per snurr: har det övre
-  //     småhjulet gett LAYER kan det undre inte göra det (SR_W_NL).
+  //   Ett småhjul ger LAYER n, en multi (x2–x50, och i bonusarna sällan x500 eller x1000) eller tomt (SR.w i Bonusen,
+  //     SR.goldW i KingzBonus). Ett hjul får högst ett LAYER per snurr: har det övre småhjulet gett LAYER kan det undre inte
+  //     göra det (SR_W_NL).
   //   LAYER n: hjulet kan hämta en symbol som saknas upp till n lager bakåt i snurret (närmaste lager först), som i C&T. Ett
   //     hjul utan LAYER har bara brädet.
   //   Multin: småhjulens multis läggs på bonusens multi innan brädet snurrar. Den börjar på 0 (ingen multi; vinsterna
   //     betalas då x1) och nollställs aldrig. Efter varje vinststeg växer den med lagrens siffror i vinsterna (LAYER 3 =
-  //     +3), som i C&T.
+  //     +3), som i C&T. x500 och x1000 (times) gångrar multin i stället (srMultAfter).
   // Lagren: SR.layers bräden från grundhjulen (utan Troner) när bonusen startar; efter varje frispinn blir sista brädet
   // LAYER 1 och det äldsta försvinner. Lagerrutor som har använts i en vinst förbrukas. Hela omgången är högst TIME.maxX.
   // Inställningarna (SR) är modulens egna, så att funktionen kan flyttas till plattformen som en egen del.
   var SR_ICONS = [{ k: 'blank' }, { k: 'layer', n: 1 }, { k: 'layer', n: 2 }, { k: 'layer', n: 3 }, { k: 'layer', n: 4 }, { k: 'layer', n: 5 },
-    { k: 'multi', n: 2 }, { k: 'multi', n: 3 }, { k: 'multi', n: 5 }, { k: 'multi', n: 10 }, { k: 'multi', n: 20 }, { k: 'multi', n: 25 }, { k: 'multi', n: 50 }];
-  // w: vikterna per småhjul (SR_ICONS i ordning). vis: remsan som syns medan småhjulen snurrar (bara utseendet; vad som
-  // landar avgörs av w). spins: frispinn. layers: lager bakåt. pay: bonusens vinsttabell (gånger den vanliga, oberoende av
-  // grundspelets TIME.scale). buy och goldBuy: priserna för en köpt Bonus och KingzBonus (gånger insatsen). goldP: chansen
-  // att den sista av 3–4 Troner blir guld. baseTrons: Tronblock per hjul på grundhjulen. wilds: wildblock (Narren) per hjul,
-  // på grundhjulen och bonushjulen (användaren 2026-10-27: "lägg till en passande wildsymbol"); hjul 1 har ingen, som i C&T.
+    { k: 'multi', n: 2 }, { k: 'multi', n: 3 }, { k: 'multi', n: 5 }, { k: 'multi', n: 10 }, { k: 'multi', n: 20 }, { k: 'multi', n: 25 }, { k: 'multi', n: 50 },
+    { k: 'multi', n: 500, times: true }, { k: 'multi', n: 1000, times: true }];
+  // w: vikterna per småhjul (SR_ICONS i ordning) i Bonusen, goldW i KingzBonus. vis: remsan som syns medan småhjulen
+  // snurrar (bara utseendet; vad som landar avgörs av vikterna; x500 och x1000 syns bara i bonusen där de kan landa).
+  // spins: frispinn. layers: lager bakåt. pay och goldPay: Bonusens och KingzBonus vinsttabell (gånger den vanliga,
+  // oberoende av grundspelets TIME.scale). buy och goldBuy: priserna för en köpt Bonus och KingzBonus (gånger insatsen).
+  // goldP: chansen att den sista av 3–4 Troner blir guld. baseTrons: Tronblock per hjul på grundhjulen. wilds: wildblock
+  // (Narren) per hjul, på grundhjulen och bonushjulen (användaren 2026-10-27: "lägg till en passande wildsymbol"); hjul 1
+  // har ingen, som i C&T.
+  // x500 och x1000 (användaren 2026-10-29: "1000x ska finnas med på hjulet i maniac bonusen och 500x i vanliga bonusen så
+  // man kan vinna maxvinst enklare"; han valde att de gångrar multin och att KingzBonus har båda): x500 i båda bonusarna,
+  // x1000 bara i KingzBonus. De är mycket sällsynta (vikterna 0,0003–0,0006 av cirka 1 020).
   var SR = {
-    w: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5],
-    vis: [10, 4, 4, 3, 3, 2, 4, 3, 3, 2, 2, 1, 1],
-    spins: 10, layers: 5, pay: 0.1235, buy: 48, goldBuy: 151, goldP: 0.15, baseTrons: [1, 1, 2, 1, 1], wilds: [0, 1, 1, 1, 1]
+    w: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.0006, 0],
+    goldW: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.0003, 0.0006],
+    vis: [10, 4, 4, 3, 3, 2, 4, 3, 3, 2, 2, 1, 1, 1, 1],
+    spins: 10, layers: 5, pay: 0.12274, goldPay: 0.12273, buy: 48, goldBuy: 151, goldP: 0.15, baseTrons: [1, 1, 2, 1, 1], wilds: [0, 1, 1, 1, 1]
   };
   // köpmenyn (C&T:s, buy.js): Bonusen för BUY_X (state.js) och Guldbonusen i Maniacs plats
   TIME.fsBuy = SR.buy; TIME.maniacBuy = SR.goldBuy; TIME.maniacSpins = SR.spins;
@@ -3023,19 +3033,28 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   //   - Bonusen kommer oftare med mindre vinster (en Tron färre på hjul 2 och 4, pay halverad).
   // Kort simulering (2026-10-28, 24 M omgångar och 400 000 köp av varje, scale 3,29, inte kalibrerat): hela spelet 96,36 %
   // ±0,31, SD 7,85 (Medel 3/5), vinst i 45,9 % av snurren (minst insatsen 13,1 %). Vanliga snurr 40,3 %, småhjulen 24,3 %
-  // (var 10:e snurr, vinst i 60 % av dem, laviner i 27 %, i snitt 2,4x), Bonusen 22,3 % (var 201:a snurr inklusive
+  // (var 10:e snurr, vinst i 60 % av dem, laviner i 27 %, i snitt 2,4x), Bonusen 22,3 % (var 201:a snurr, utan
   // KingzBonus, i snitt 44,9x) och KingzBonus 9,5 % (var 1 526:e, i snitt 145,6x). Störst 2 096x; 1 000x eller mer cirka 1
   // på 500 000. Köpt Bonus i snitt 46,2x (48x: 96,3 %), köpt KingzBonus i snitt 145,3x (151x: cirka 96,2 %). scale 3,27
   // drar ner hela spelet cirka 0,4 procentenheter.
   // (Förut, 2026-10-27, Hög 4/5: lång kontroll med 160 M omgångar 96,43 %, SD 13,6; scale 3,03, pay 0,2416, köp 68x och 214x.)
+  // x500 och x1000 (2026-10-29, kort simulering: 100 M grundsnurr plus viktad simulering av 7,2 M bonusar, där x500 och x1000
+  // dras oftare och vikten rättar till det): förut nåddes maxvinsten i stort sett aldrig. Bonusen kommer var 201:a snurr och
+  // KingzBonus var 1 508:e (båda var 177:e). x500 landar i cirka 1 av 26 500 Bonusar (maxvinst i 26 % av dem, i snitt
+  // 5 000x), i KingzBonus x500 i 1 av 31 000 (67 %, 8 200x) och x1000 i 1 av 15 500 (81 %, 8 900x). Maxvinst cirka 1 på
+  // 10 M snurr, hela spelet 96,11 %, SD 8,61 (fortfarande Medel 3/5). pay 0,12274 och goldPay 0,12273 (var 0,1235 för båda):
+  // köpt Bonus 96,24 % ±0,11 och köpt KingzBonus 96,22 % ±0,11. Medianen per bonus är som förut (cirka 31x och 117x).
+  // Lagda till multin (i stället för att gångra) gav x1000 i snitt bara cirka 800x och ingen maxvinst, eftersom bonusens
+  // vinster före multin är små (cirka 0,07x per frispinn i Bonusen och 0,12x i KingzBonus).
   var SR_W_NL = SR.w.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
+  var SR_GW_NL = SR.goldW.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
   // Grundspelet (användaren 2026-10-27: "helt RNG kan olika många småhjul öppnas och leverera ett layer eller en
   // multiplier"). baseP: chansen per grundsnurr att småhjul öppnas. baseOpen: vikterna för 1, 2, 3, 4 och 5 öppna småhjul
   // (vilka av de tio slumpas). baseW: vikterna för ikonerna (SR_ICONS) i grundspelet: LAYER 1–3 (väggen har de tre senaste
   // brädena) och multi x2–x5, aldrig tomt. Ett hjul får högst ett LAYER. En multi gäller vinster som går genom hjulet
   // (användaren 2026-10-27), och går vinsten genom flera multis läggs de ihop (srAdd); ett hjul med LAYER n kan hämta en
   // symbol som saknas upp till n snurr bakåt.
-  SR.baseP = 0.1; SR.baseOpen = [55, 28, 12, 4, 1]; SR.baseW = [0, 30, 22, 14, 0, 0, 12, 4, 1, 0, 0, 0, 0];
+  SR.baseP = 0.1; SR.baseOpen = [55, 28, 12, 4, 1]; SR.baseW = [0, 30, 22, 14, 0, 0, 12, 4, 1, 0, 0, 0, 0, 0, 0];
   TIME.srAdd = true;
   var SR_BASE_NL = SR.baseW.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
   // Vilka småhjul som öppnas och vad de ger: cells[r] = [övre, undre] (ikonens nummer, -1 = stängt), depth[r] (hjulets
@@ -3080,13 +3099,16 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   applyTime();
   // bonushjulen: utan Troner (i bonusen öppnar ingen Tron något; vilka småhjul som är öppna avgör royalBonus)
   STRIPS.fs = buildStrips(srBlocks([0, 0, 0, 0, 0]), 0x7A0E5);
-  // remsan som småhjulen visar i farten: ikonerna blandade med ett fast frö
-  var SR_STRIP = (function () {
+  // remsan som småhjulen visar i farten: ikonerna blandade med ett fast frö. x500 och x1000 är bara med på remsan i den
+  // bonus där de kan landa (W: bonusens vikter; grundspelets remsa har dem inte): SR_STRIP i grundspelet, SR_STRIP_FS i
+  // Bonusen och SR_STRIP_GOLD i KingzBonus.
+  function srStripOf(W) {
     var list = [], rnd = mulberry32(0xD3E9B0);
-    SR.vis.forEach(function (w, i) { for (var k = 0; k < w; k++) list.push(i); });
+    SR.vis.forEach(function (w, i) { if (SR_ICONS[i].times && !(W && W[i] > 0)) return; for (var k = 0; k < w; k++) list.push(i); });
     for (var j = list.length - 1; j > 0; j--) { var q = Math.floor(rnd() * (j + 1)), t = list[j]; list[j] = list[q]; list[q] = t; }
     return list;
-  })();
+  }
+  var SR_STRIP = srStripOf(null), SR_STRIP_FS = srStripOf(SR.w), SR_STRIP_GOLD = srStripOf(SR.goldW);
   function srPick(rng, W) {
     var sum = 0, k;
     for (k = 0; k < W.length; k++) sum += W[k];
@@ -3094,17 +3116,26 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     for (k = 0; k < W.length; k++) { u -= W[k]; if (u < 0) return k; }
     return 0;
   }
-  // Ett snurr på småhjulen. open[r]: hjulets småhjul är öppna. Ger cells[r] = [övre, undre] (ikonens nummer i SR_ICONS,
-  // -1 = stängt), depth[r] (hjulets LAYER, 0 = inget) och add (summan av multis).
-  function srDraw(rng, open) {
-    var cells = [], depth = [], add = 0;
+  // Ett snurr på småhjulen. open[r]: hjulets småhjul är öppna, gold: KingzBonus (goldW). Ger cells[r] = [övre, undre]
+  // (ikonens nummer i SR_ICONS, -1 = stängt), depth[r] (hjulets LAYER, 0 = inget) och add (summan av multis x2–x50).
+  function srDraw(rng, open, gold) {
+    var cells = [], depth = [], add = 0, WT = gold ? SR.goldW : SR.w, WN = gold ? SR_GW_NL : SR_W_NL;
     for (var r = 0; r < REELS; r++) {
       if (!open[r]) { cells.push([-1, -1]); depth.push(0); continue; }
-      var t = srPick(rng, SR.w), b = srPick(rng, SR_ICONS[t].k === 'layer' ? SR_W_NL : SR.w), d = 0;
-      [t, b].forEach(function (i) { var ic = SR_ICONS[i]; if (ic.k === 'layer') d = ic.n; else if (ic.k === 'multi') add += ic.n; });
+      var t = srPick(rng, WT), b = srPick(rng, SR_ICONS[t].k === 'layer' ? WN : WT), d = 0;
+      [t, b].forEach(function (i) { var ic = SR_ICONS[i]; if (ic.k === 'layer') d = ic.n; else if (ic.k === 'multi' && !ic.times) add += ic.n; });
       cells.push([t, b]); depth.push(d);
     }
     return { cells: cells, depth: depth, add: add };
+  }
+  // Bonusens multi efter småhjulen: ikonerna räknas i den ordning de landar (övre raden först, sedan den undre, från vänster
+  // till höger). x2–x50 läggs till; x500 och x1000 gångrar multin (som är minst 1 när den gångras: utan multi blir det x500).
+  function srMultAfter(multi, cells) {
+    for (var row = 0; row < 2; row++) for (var r = 0; r < REELS; r++) {
+      var ic = cells[r][row] >= 0 ? SR_ICONS[cells[r][row]] : null;
+      if (ic && ic.k === 'multi') multi = ic.times ? Math.max(1, multi) * ic.n : multi + ic.n;
+    }
+    return multi;
   }
   // Vinsterna i ett frispinn: ways från vänster, minst 3 hjul. Saknas symbolen på ett hjul får hjulet hämta den från sina
   // lager, högst depth[r] bakåt, närmaste lager först (en ruta, som C&T:s tråd). Samma form som C&T:s lagervinster, så att
@@ -3146,13 +3177,13 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
   // Ett frispinn på bonushjulen med laviner. multi: bonusens multi när brädet snurrar. Varje steg betalar x max(1, multi)
   // (mult) och har multin före steget (m0); efter steget växer den med stegets deep. layers ändras (förbrukade lagerrutor
-  // blir -1).
-  function dbSpin(rng, layers, depth, multi, x0) {
+  // blir -1). scale: bonusens vinsttabell (SR.pay eller SR.goldPay).
+  function dbSpin(rng, layers, depth, multi, x0, scale) {
     var strips = STRIPS.fs, stops = [], grid = [];
     for (var r = 0; r < REELS; r++) { var st = Math.floor(rng() * strips[r].length); stops.push(st); grid.push(windowAt(strips, r, st)); }
     var steps = [], x = 0, startGrid = grid;
     for (;;) {
-      var ev = dbEvaluate(grid, layers, depth);
+      var ev = dbEvaluate(grid, layers, depth, scale);
       if (!ev.wins.length) break;
       var removed = noneRemoved(), layFill = [], m = Math.max(1, multi), grow = 0;
       ev.wins.forEach(function (w) {
@@ -3189,11 +3220,11 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var layers0 = layers.map(copyGrid), spins = [], x = 0, multi = 0;
     for (var n = 0; n < SR.spins && x0_ + x < TIME.maxX; n++) {
       if (n > 0 && nOpen < REELS) open = srOpenDraw(rng, nOpen);
-      var openIn = open.slice(), sr = srDraw(rng, open);
-      multi += sr.add;
+      var openIn = open.slice(), sr = srDraw(rng, open, gold);
+      multi = srMultAfter(multi, sr.cells);
       var ghostIn = layers[0].map(function (col, q) { return col.map(function (v) { return sr.depth[q] > 0 ? v : -1; }); });
       var layersIn = layers.map(copyGrid);
-      var sp = dbSpin(rng, layers, sr.depth, multi, x0_ + x);
+      var sp = dbSpin(rng, layers, sr.depth, multi, x0_ + x, gold ? SR.goldPay : SR.pay);
       sp.sr = sr; sp.openIn = openIn; sp.multIn = multi; sp.ghostIn = ghostIn; sp.layersIn = layersIn;
       multi = sp.fsMult;
       spins.push(sp); x += sp.x;
@@ -3229,7 +3260,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
 
   root.CTMath = {
     // Kingz & Queenz: småhjulen och den kungliga bonusen
-    SR: SR, SR_ICONS: SR_ICONS, SR_STRIP: SR_STRIP, srDraw: srDraw, royalBonus: royalBonus, royalBuy: royalBuy,
+    SR: SR, SR_ICONS: SR_ICONS, SR_STRIP: SR_STRIP, SR_STRIP_FS: SR_STRIP_FS, SR_STRIP_GOLD: SR_STRIP_GOLD, srDraw: srDraw, srMultAfter: srMultAfter, royalBonus: royalBonus, royalBuy: royalBuy,
     REELS: REELS, ROWS: ROWS, W: W, S: S, NAMES: NAMES, PAY: PAY, FS_RETRIGGER: FS_RETRIGGER, STRIPS: STRIPS,
     PAYING: PAYING, WX2: WX2, WX3: WX3, WX5: WX5, CASH0: CASH0, COLLECT: COLLECT, WILD_MULT: WILD_MULT,
     CAN: CAN, GOLD: GOLD, isWild: isWild,
@@ -3458,6 +3489,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'Väl kämpat!': 'Well fought!',
     'Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.':
       'Mini reels: sometimes one or more mini reels above and below the board open while it spins. LAYER n lets the reel fetch a missing symbol from up to n spins back. A multiplier applies to wins that pass through its reel, and a win through several reels with multipliers adds them together. While the mini reels are open, wins cascade: winning symbols disappear and new ones fall in until there are no more wins, and a multiplier that was part of a win grows by its own value (x2 becomes x4) for the next cascade.',
+    'Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Multisarna 2x–50x läggs på bonusens multi, som aldrig nollställs. Rubinen 500x (i båda bonusarna) och guldkronan 1000x (bara i KingzBonus) gångrar multin i stället. Hela spelomgången ger högst {m}x insatsen.':
+      'The bonuses: 3 Thrones give the Bonus and the gold Throne gives KingzBonus, with {n} free spins. Before every free spin the open mini reels spin and give LAYER, a multiplier or nothing. The 2x–50x multipliers are added to the bonus multiplier, which never resets. The 500x ruby (in both bonuses) and the 1000x gold crown (KingzBonus only) multiply it instead. A whole game round pays at most {m}x the bet.',
     '+1 MILJON': '+1 MILLION',
     '<b>Narren</b> är wild. Den finns på hjul 2–5 och ersätter alla symboler utom Tronen.': '<b>The Jester</b> is wild. It appears on reels 2–5 and substitutes for all symbols except the Throne.',
     'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.': 'If the symbol is missing on the next reel, the previous spin\'s symbol in the torn corner can fill the gap, and the win continues.',
@@ -3551,8 +3584,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.':
       'Earlier boards stay behind as layers. If the symbol is missing on a reel with LAYER, it can be fetched from the layers, and the win continues.',
     'Bonus & KingzBonus': 'Bonus & KingzBonus',
-    '3 Troner ger Bonusen: {n} frispinn med 3 nya öppna hjul varje snurr och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.':
-      '3 Thrones give the Bonus: {n} free spins with 3 new open reels every spin and a growing multi. The gold Throne gives KingzBonus with all open. Buy: Bonus {a}x, KingzBonus {b}x.',
+    '3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Rubinen 500x (och i KingzBonus kronan 1000x) gångrar multin. Köp: Bonus {a}x, KingzBonus {b}x.':
+      '3 Thrones give the Bonus: {n} free spins with 3 new reels each spin. The gold Throne gives KingzBonus, all open. The 500x ruby (and in KingzBonus the 1000x crown) multiplies the multi. Buy: Bonus {a}x, KingzBonus {b}x.',
 
     // ---- studiointrot
     'TRYCK FÖR ATT STARTA': 'TAP TO START',
@@ -4223,7 +4256,51 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     spark(cx + R * 0.7, cy - R * 0.62, size * 0.06);
     if (t >= 2) spark(cx - R * 0.75, cy + R * 0.5, size * 0.045);
   }
+  // x500 och x1000 (användaren 2026-10-29; de gångrar multin): större och kungligare än juvelerna, med strålar bakom.
+  // x500: en stor rubin i guldinfattning på kunglig purpur. x1000: en guldkrona med talet under på guld (guld =
+  // KingzBonus, som guldtronen). Båda har en guldram innanför bläckkanten.
+  function drawSrTimes(g, ic, x0, y0, w, h, r, lw, size, cx, cy) {
+    var top = ic.n >= 1000, i, bg = g.createRadialGradient(cx, y0 + h * 0.4, w * 0.05, cx, cy, w * 0.78);
+    if (top) { bg.addColorStop(0, '#fff6c0'); bg.addColorStop(0.5, '#ffcc33'); bg.addColorStop(1, '#b86e00'); }
+    else { bg.addColorStop(0, '#7a3cc8'); bg.addColorStop(0.55, '#3b1466'); bg.addColorStop(1, '#1a0830'); }
+    g.fillStyle = bg; rr(g, x0, y0, w, h, r); g.fill();
+    g.save(); rr(g, x0, y0, w, h, r); g.clip();
+    g.fillStyle = top ? 'rgba(255,255,255,0.4)' : 'rgba(255,204,51,0.22)';
+    for (i = 0; i < 12; i++) {
+      var a0 = i * Math.PI / 6, a1 = a0 + Math.PI / 13;
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a0) * w, cy + Math.sin(a0) * w); g.lineTo(cx + Math.cos(a1) * w, cy + Math.sin(a1) * w); g.closePath(); g.fill();
+    }
+    halftone(g, x0, y0, w, h, size, top ? 'rgba(140,70,0,0.14)' : 'rgba(10,4,20,0.16)');
+    g.fillStyle = 'rgba(255,255,255,0.3)'; g.beginPath(); g.ellipse(x0 + w * 0.3, y0 + h * 0.15, w * 0.36, h * 0.1, -0.35, 0, Math.PI * 2); g.fill();
+    g.restore();
+    g.lineWidth = lw * 0.9; g.strokeStyle = top ? '#fff1a8' : KQ_GOLD; rr(g, x0 + lw * 1.1, y0 + lw * 1.1, w - lw * 2.2, h - lw * 2.2, r * 0.8); g.stroke();
+    g.lineWidth = lw; g.strokeStyle = INK; rr(g, x0, y0, w, h, r); g.stroke();
+    if (top) {
+      kqBox(g, cx, y0 + h * 0.5, w * 0.78, lw * 0.6, function (shape, circle, shade) { kqCrown(shape, circle, shade, 0, -2, 58, '#e0284a'); });
+      outlinedText(g, ic.n + 'x', cx, y0 + h * 0.74, Math.round(size * 0.27) + 'px ' + DISPLAY, '#ffffff', size * 0.065);
+      return;
+    }
+    // rubinen: en åttakantig slipad sten i en tjock guldinfattning
+    var R = w * 0.38, pts = [], inner = [];
+    for (i = 0; i < 8; i++) { var a = -Math.PI / 2 + Math.PI / 8 + i * Math.PI / 4; pts.push([cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.86]); inner.push([cx + Math.cos(a) * R * 0.58, cy + Math.sin(a) * R * 0.5]); }
+    function poly(list) { g.beginPath(); list.forEach(function (p, k) { if (k) g.lineTo(p[0], p[1]); else g.moveTo(p[0], p[1]); }); g.closePath(); }
+    // skenet stannar innanför brickan
+    g.save(); rr(g, x0 + lw, y0 + lw, w - lw * 2, h - lw * 2, r * 0.8); g.clip(); g.shadowColor = '#ff2d4f'; g.shadowBlur = size * 0.16;
+    poly(pts); g.lineJoin = 'round'; g.lineWidth = size * 0.1; g.strokeStyle = INK; g.stroke();
+    g.lineWidth = size * 0.07; g.strokeStyle = KQ_GOLD; g.stroke(); g.restore();
+    poly(pts); var gr = g.createLinearGradient(cx - R, cy - R, cx + R, cy + R); gr.addColorStop(0, '#ff8aa2'); gr.addColorStop(0.5, '#e0284a'); gr.addColorStop(1, '#7a0c24');
+    g.fillStyle = gr; g.fill();
+    g.lineWidth = Math.max(1, size * 0.012); g.strokeStyle = 'rgba(255,255,255,0.55)';
+    for (i = 0; i < 8; i++) { g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(inner[i][0], inner[i][1]); g.stroke(); }
+    poly(inner); g.fillStyle = 'rgba(255,255,255,0.22)'; g.fill(); g.stroke();
+    poly(pts); g.lineWidth = Math.max(1.5, size * 0.025); g.strokeStyle = INK; g.stroke();
+    outlinedText(g, ic.n + 'x', cx, cy + size * 0.02, Math.round(size * 0.28) + 'px ' + DISPLAY, '#ffffff', size * 0.065);
+    [[0.8, -0.72, 0.065], [-0.86, 0.56, 0.05], [0.88, 0.66, 0.04]].forEach(function (p) {
+      starPath(g, cx + R * p[0], cy + R * p[1], size * p[2], size * p[2] * 0.3, 4, 0); g.fillStyle = '#ffffff'; g.fill(); g.lineWidth = size * p[2] * 0.18; g.strokeStyle = INK; g.stroke();
+    });
+  }
   function drawSrTile(g, ic, x0, y0, w, h, r, lw, size, cx, cy) {
+    if (ic.times) { drawSrTimes(g, ic, x0, y0, w, h, r, lw, size, cx, cy); return; }
     var base = ic.k === 'layer' ? LAYER_TILE[ic.n - 1] : '#241a3c', light = ic.k === 'layer' ? '#ffffff' : '#3e2f66';
     var bg = g.createRadialGradient(cx, y0 + h * 0.36, w * 0.04, cx, cy, w * 0.78);
     bg.addColorStop(0, ic.k === 'layer' ? 'rgba(255,255,255,0.55)' : light); bg.addColorStop(ic.k === 'layer' ? 0.45 : 1, base);
@@ -6294,7 +6371,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var fast = state.turbo || state.hurry, gap = fast ? 40 : 50, fly = fast ? 340 : 360;
     // m0: multin före steget när den kan vara under x1 (Kingz & Queenz börjar på 0 och betalar då x1)
     var val = st.m0 != null ? st.m0 : st.mult;
-    el.fsMult.textContent = 'x' + Math.max(1, val); fitNum(el.fsMult);
+    el.fsMult.textContent = 'x' + num(Math.max(1, val)); fitNum(el.fsMult);
     chips.forEach(function (q, i) { val += q.d; flyToMulti(q.c, q.y, q.d, i * gap, fly, i, val); flyToLayer(q.c, q.y, q.d, i * gap, fly); });
     await wait(showTime((gap * (chips.length - 1) + fly + 120) / 1000));
   }
@@ -6315,7 +6392,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       { duration: dur || 750, easing: 'cubic-bezier(.4, 0, .7, 1)', delay: delay == null ? 250 : delay, fill: 'backwards' });
     a.onfinish = function () {
       chip.remove();
-      if (!Sound.fx('multi_up', { rate: Sound.semi(Math.min(12, i || 0)) })) Sound.tone(520 * Math.pow(1.06, Math.min(12, i || 0)), 0.12, { type: 'triangle', vol: 0.09 }); if (!state.fs) return; var cur = parseInt(target.textContent.slice(1), 10) || 0; target.textContent = 'x' + (val != null ? Math.max(cur, val) : cur + d); fitNum(target); target.classList.remove('pump'); void target.offsetWidth; target.classList.add('pump'); };
+      if (!Sound.fx('multi_up', { rate: Sound.semi(Math.min(12, i || 0)) })) Sound.tone(520 * Math.pow(1.06, Math.min(12, i || 0)), 0.12, { type: 'triangle', vol: 0.09 }); if (!state.fs) return; var cur = parseInt(target.textContent.replace(/D/g, ''), 10) || 0; target.textContent = 'x' + num(val != null ? Math.max(cur, val) : cur + d); fitNum(target); target.classList.remove('pump'); void target.offsetWidth; target.classList.add('pump'); };
   }
   // ...och samtidigt delar sig "+n" på rutan: lagrets siffra flyger hem till sin egen färg i LAYER SPINS-raden, som i
   // grundspelet (landHome i win-ball.js: studs, sken och gnistor i lagrets färg). Utan raden blinkar lagret som förut.
@@ -7932,11 +8009,12 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     if (!Sound.fx('layer_home', { rate: Sound.semi(d * 3) })) Sound.tone(660 * Sound.semi(d * 3), 0.12, { type: 'triangle', vol: 0.07 });
     setTimeout(function () { home.classList.remove('home-hit'); }, 750);
   }
-  // En siffra som inte får plats i sin ruta krymper i stället för att göra rutan bredare.
+  // En siffra som inte får plats i sin ruta krymper i stället för att göra rutan bredare. Raden behåller sin höjd, så att
+  // rutan inte blir lägre och inget under den flyttar sig (Kingz & Queenz: multin kan bli x1 031 000 med x500 och x1000).
   function fitNum(b) {
-    b.style.fontSize = '';
-    var room = b.parentNode.clientWidth - 16;
-    if (room > 0 && b.offsetWidth > room) b.style.fontSize = Math.max(12, Math.floor(parseFloat(getComputedStyle(b).fontSize) * room / b.offsetWidth)) + 'px';
+    b.style.fontSize = ''; b.style.lineHeight = '';
+    var room = b.parentNode.clientWidth - 16, h = b.offsetHeight;
+    if (room > 0 && b.offsetWidth > room) { b.style.fontSize = Math.max(12, Math.floor(parseFloat(getComputedStyle(b).fontSize) * room / b.offsetWidth)) + 'px'; b.style.lineHeight = h + 'px'; }
   }
   // Grundspelets LAYER SPINS-panel: n lager, och hur många som är tända när inget har kastats in (C&T: 3 lager, 1 tänt;
   // Kingz & Queenz: 5 lager och inget tänt, för grundspelet har inga lager, mode-setup.js)
@@ -7958,8 +8036,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     } else if (bl) bl.hidden = true;
     if (fs) {
       el.fsLeft.textContent = fs.left;
-      // multin betalar minst x1 (Kingz & Queenz börjar på 0)
-      el.fsMult.textContent = 'x' + Math.max(1, fs.mult);
+      // multin betalar minst x1 (Kingz & Queenz börjar på 0); stora tal med mellanrum (x1 031 000, Kingz & Queenz x500 och x1000)
+      el.fsMult.textContent = 'x' + num(Math.max(1, fs.mult));
       var multLabel = el.fsMult.parentNode.querySelector('.meter-label');
       if (multLabel) multLabel.textContent = 'Multi';
       // bonusarna: panelen med tidslagren, ett per snurr bakåt (Bonusspel 3, Maniac 5); de fylls på de första snurren
@@ -8566,7 +8644,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     if (state.fs && step.mult > 1 && !step.maxed) {
       // multin som vinsten betalades med (beloppet under är det som betalas ut)
       var fm = document.createElement('div'); fm.className = 'form';
-      fm.textContent = 'x' + step.mult;
+      fm.textContent = 'x' + num(step.mult);
       shape.appendChild(fm);
     }
     // ordet (TIDSVÄG x3!) står ovanför beloppet, bredvid symbolerna
@@ -10216,7 +10294,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     SRR.push([0, 1].map(function (row) { var rl = new Reel(sri, 1); rl.row = row; rl.setGrid([SR0]); rl.onLand = srLanded; return rl; }));
     srOpen.push(false); srRowOpen.push([false, false]); srFlash.push([-1, -1]);
   }
-  var SR_STRIP_SYM = M.SR_STRIP.map(function (i) { return SR0 + i; });
+  // remsorna i farten: grundspelets, Bonusens (med x500) och KingzBonus (med x500 och x1000)
+  var SR_STRIP_SYM = M.SR_STRIP.map(function (i) { return SR0 + i; }), SR_STRIP_FS_SYM = M.SR_STRIP_FS.map(function (i) { return SR0 + i; }), SR_STRIP_GOLD_SYM = M.SR_STRIP_GOLD.map(function (i) { return SR0 + i; });
   // ---------------------------------------------------------------- utseendet
   // Användaren 2026-10-26: "inte alls säker på att det ska vara borgar som är småhjulen och med den inramningen". Varje
   // småhjul är ett eget litet hjulfönster i en guldram med en rubin överst (frameImg), på ett band av röd sammet (bandImg),
@@ -10615,6 +10694,15 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     thud: function () { Sound.tone(130, 0.12, { to: 80, vol: 0.08 }); },
     // ett stort värde: en trumpetslinga uppåt, en djup puka och cymbal
     big: function () { var t = kqNow(); [69, 74, 78, 81].forEach(function (m, i) { Sound.horn([kqHz(m)], t + i * 0.07, 0.4, 0.028); }); Sound.timp(kqHz(38), t, 0.4, Sound.sfx, 1); Sound.cymbal(t + 0.1, 0.05); },
+    // x500 eller x1000 landar: två pukslag, en trumpetfanfar i full ackord som stiger (högre för x1000) och cymbal
+    times: function (n) {
+      var t = kqNow(), up = n >= 1000 ? 2 : 0;
+      Sound.timp(kqHz(36), t, 0.5, Sound.sfx, 1.2); Sound.timp(kqHz(36), t + 0.18, 0.5, Sound.sfx, 1.2);
+      [[69, 73, 76], [71, 74, 78], [74, 78, 81]].forEach(function (c, i) { Sound.horn(c.map(function (m) { return kqHz(m + up); }), t + 0.3 + i * 0.16, i === 2 ? 0.9 : 0.24, 0.03); });
+      Sound.cymbal(t + 0.62, 0.08);
+    },
+    // multin gångras (x500 eller x1000 har flugit in i multin): en tung puka och ett klockspel uppåt
+    slam: function () { var t = kqNow(); Sound.timp(kqHz(34), t, 0.6, Sound.sfx, 1.3); [81, 86, 88, 93].forEach(function (m, i) { Sound.glock(kqHz(m), t + 0.05 + i * 0.05, 0.08, Sound.sfx, 0.6); }); Sound.cymbal(t, 0.06); },
     fold: function () { Sound.hiss(0.6, { f: 1600, to: 500, q: 0.8, vol: 0.05 }); Sound.tone(220, 0.6, { to: 90, type: 'triangle', vol: 0.05 }); Sound.tone(70, 0.4, { to: 40, vol: 0.16, when: 0.55 }); },
     // svarta bilden: ett mörkt sus, en djup puka när kronan kommer och två klara klockor
     veil: function () { var t = kqNow(); Sound.hiss(0.5, { f: 300, to: 1200, q: 0.7, vol: 0.05 }); Sound.timp(kqHz(38), t + 0.12, 0.35, Sound.sfx, 1.2); },
@@ -10624,6 +10712,13 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   function srScreenFlash(gold, soft) {
     var f = document.createElement('div'); f.className = 'sr-flash' + (gold ? ' gold' : '') + (soft ? ' soft' : '');
     document.body.appendChild(f); setTimeout(function () { f.remove(); }, 900);
+  }
+  // multin har gångrats (x500 eller x1000): talet blir stort och lyser i guld och slår sedan ner på sin plats (bara
+  // transform och filter, så att inget i bonusrutan flyttar sig)
+  function srMultSlam() {
+    var e = el.fsMult; if (!e || !e.animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    e.animate([{ transform: 'scale(2.3)', filter: 'brightness(1.9) drop-shadow(0 0 12px #ffcc33)' }, { transform: 'scale(.9)', filter: 'brightness(1.3) drop-shadow(0 0 8px #ffcc33)', offset: 0.55 }, { transform: 'none', filter: 'none' }],
+      { duration: 700, easing: 'cubic-bezier(.2, 1.6, .4, 1)' });
   }
   // facklorna i tronsalen flammar upp en kort stund (kq-scene.js, proto.css); flammar de redan förlängs det bara (sidan
   // räknas inte om mitt i, det laggade när många torn rasade efter varandra)
@@ -10725,6 +10820,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var ic = M.SR_ICONS[rl.target[0] - SR0];
     if (ic.k === 'blank') { srSnd.thud(); return; }
     srFlash[rl.i][rl.row] = 0;
+    // x500 och x1000 (gångrar multin, användaren 2026-10-29): ett eget kort ögonblick med guldblixt, fanfar och massor av
+    // gnistor (efter landningen, så att inget avslöjar den innan)
+    if (ic.times) { srSnd.times(ic.n); srScreenFlash(true); preFlare(); srSparks(rl.i, rl.row, 70, '#ffcc33'); srSparks(rl.i, rl.row, 30, ic.n >= 1000 ? '#fff1a8' : '#ff2d4f'); return; }
     var big = (ic.k === 'layer' && ic.n >= 4) || (ic.k === 'multi' && ic.n >= 20);
     if (ic.k === 'layer') srSnd.layer(ic.n); else srSnd.multi(ic.n);
     if (big) { srSnd.big(); preFlare(); }
@@ -10771,7 +10869,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       rl.requestStop([SR0 + t.icon]);
       await waitFor(function () { return rl.landed; });
       rl.speed = 0.75;
-      if (!fast()) await wait(ic.k === 'blank' ? hold * 0.4 : hold, true);
+      // x500 och x1000 står kvar förstorade en stund (även i turbo, kortare)
+      if (ic.times) await wait(fast() ? 0.35 : 1.1, true);
+      else if (!fast()) await wait(ic.k === 'blank' ? hold * 0.4 : hold, true);
       if (srBig) srBig = { r: q, row: row, from: 1, to: 0, t0: clock, dur: 0.12 };
       srActive = null;
       if (ic.k === 'layer') { srLayerRow[q] = row; flights.push(toLayer(t, ic.n)); }
@@ -10830,7 +10930,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     if (srSup) { srDimTo = 1; srDirty = true; }
     var fast = function () { return state.turbo || state.slam || srFast; };
     for (row = 0; row < 2; row++) live.forEach(function (q) { list.push({ r: q, row: row, icon: cells[q][row] }); });
-    live.forEach(function (q) { SRR[q].forEach(function (rl) { rl.speed = 0.75; rl.start(rl.row * 0.04, SR_STRIP_SYM); }); });
+    var strip = srGold ? SR_STRIP_GOLD_SYM : SR_STRIP_FS_SYM;
+    live.forEach(function (q) { SRR[q].forEach(function (rl) { rl.speed = 0.75; rl.start(rl.row * 0.04, strip); }); });
     await wait(fast() ? 0.2 : 0.4, true);
     await srStopList(list, fast, function (t, n) {
       var home = document.querySelector('.fs-layers .l' + n);
@@ -10841,8 +10942,12 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         landHome(document.querySelector('.fs-layers .l' + n) || home, n, to.x, to.y);
       });
     }, function (t, n) {
+      // x500 och x1000 gångrar multin (minst x1 när den gångras), de andra läggs till; i samma ordning som spelmotorn
+      // (M.srMultAfter: i den ordning de landar)
+      var times = M.SR_ICONS[t.icon].times;
       return srFlyTo(t.r, t.row, SR0 + t.icon, srCenter(el.fsMult), fast()).then(function () {
-        state.fs.mult = (state.fs.mult || 0) + n; renderMeter(true);
+        state.fs.mult = times ? Math.max(1, state.fs.mult || 0) * n : (state.fs.mult || 0) + n; renderMeter(true);
+        if (times) { srSnd.slam(); srScreenFlash(true, true); srMultSlam(); return; }
         if (!Sound.fx('multi_up', { rate: Sound.semi(Math.min(12, n / 4)) })) Sound.tone(520 * Math.pow(1.06, Math.min(12, n / 4)), 0.14, { type: 'triangle', vol: 0.1 });
       });
     });
@@ -12005,7 +12110,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       '<div class="bs-hero"><div class="ov-big bs-amt bs-in">' + money(o.counted ? o.total : 0) + '</div><i class="bs-x">x' + xs + '</i></div>' +
       '<div class="bs-stats">' +
       '<i class="bs-st"><b>' + (st.extra ? (st.spins - st.extra) + '+' + st.extra : st.spins) + '</b><span>' + txl('frispinn') + '</span></i>' +
-      '<i class="bs-st"><b>x' + st.mult + ('</b><span>' + txl('högsta multi') + '</span></i>') +
+      '<i class="bs-st"><b>x' + num(st.mult) + ('</b><span>' + txl('högsta multi') + '</span></i>') +
       '<i class="bs-st"><b>' + money(st.best) + ('</b><span>' + txl('bästa snurr') + '</span></i></div>') +
       (lay ? '<div class="cv-layers bs-lay">' + lay + '</div>' : '') +
       (o.note ? '<p class="ov-text bs-note">' + o.note + '</p>' : '') +
@@ -12228,6 +12333,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       '<li>' + txl('Vanliga snurr: vinsterna betalas och brädet står kvar till nästa snurr.') + '</li>' +
       // Kingz & Queenz: grundspelets småhjul (small-reels.js, M.SR.baseP)
       (M.SR && M.SR.baseP ? '<li>' + txl('Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.') + '</li>' : '') +
+      // Kingz & Queenz: bonusarnas småhjul, med x500 och x1000 som gångrar multin (M.SR.goldW, användaren 2026-10-29)
+      (M.SR && M.SR.goldW ? '<li>' + txl('Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Multisarna 2x–50x läggs på bonusens multi, som aldrig nollställs. Rubinen 500x (i båda bonusarna) och guldkronan 1000x (bara i KingzBonus) gångrar multin i stället. Hela spelomgången ger högst {m}x insatsen.', { n: M.SR.spins, m: fmtX(M.TIME.maxX) }) + '</li>' : '') +
       '<li>' + txl('Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.') + '</li>' +
       '<li>' + txl('Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.') + '</li></ul></section>' +
       '<section><h3>' + txl('Kontroller') + '</h3><ul>' +
@@ -13350,12 +13457,13 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   }
 
   // ---------------------------------------------------------------- rutorna
-  // Texterna beskriver vad som händer, aldrig hur ofta eller vad man minst vinner (användaren 2026-10-20).
+  // Texterna beskriver vad som händer, aldrig hur ofta eller vad man minst vinner (användaren 2026-10-20). Den längsta
+  // rutan bestämmer affischens höjd: en ny text får inte bli fler rader än förut (prövat i alla storlekar, båda språken).
   GUIDE = [
     { t: txl('Vinstvägar'), x: txl('{h} hjul, {r} rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Narren är wild på hjul 2–5 och ersätter alla symboler utom Tronen.', { h: M.REELS, r: M.ROWS, w: num(Math.pow(M.ROWS, M.REELS)) }), demo: kgDemoWays },
     { t: txl('Småhjulen'), x: txl('Ibland öppnas småhjul ovanför och under brädet. Då blir det laviner, och en multi som vinner växer till nästa lavin. Flera multis läggs ihop. LAYER n hämtar en saknad symbol upp till n snurr bakåt.'), demo: kgDemoSmall },
     { t: 'Layerspins', x: txl('Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.'), demo: kgDemoLayers },
-    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn med 3 nya öppna hjul varje snurr och multi som växer. Guldtronen ger KingzBonus med alla öppna. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
+    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Rubinen 500x (och i KingzBonus kronan 1000x) gångrar multin. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
   ];
   // Varje knapp väljer ett slumpat snurr som visar funktionen (flow.js nxPick; köpt Maniac via buyGame). Bara i prototypen
   // (mode-setup.js: nxTestTab). Nya funktioner läggs till här när de byggs.
