@@ -1921,6 +1921,100 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 :root:not(.portrait) body.fs .g-left { justify-content: flex-start; padding-top: 28px; padding-bottom: 0; }
 :root:not(.portrait) .meter-fs:not(.base-lag) > .fs-layers { width: 150px; align-self: center; transform: rotate(-2deg); }
 :root:not(.portrait) .meter-fs:not(.base-lag) > .fs-layers.deep .ly { padding: 6px 12px 5px; }
+/* Infinity (labb): INFINITY som sjätte, fristående bricka (svart med krom-ring och vitt ∞) som ligger ovanpå panelen, så
+   att LAYER 1–5 och brädet står exakt som förut; nästa låsta bricka som fylls med lagrets färg, blixten när ett lager
+   öppnas, talet som flyger in i beloppet, lappen bredvid beloppet och INFINITY på bonusaffischen */
+.inf-sy { font-family: system-ui, "Segoe UI Symbol", sans-serif !important; font-weight: 900; }
+.fs-layers .ly.linf { background: #0d0d16; border-color: #dfe6ee; box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55), inset 0 0 0 2px #8f99a5; color: #fff; }
+.fs-layers .ly.linf.on { background: radial-gradient(circle at 30% 20%, #34384a, #07070d 72%); box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55), inset 0 0 0 2px #eef2f6, 0 0 16px 4px rgba(230, 235, 242, .6); }
+/* datorn: under LAYER 5 med en lucka (brickorna står i en lutad kolumn, som blir brickans ram) */
+:root:not(.portrait) .fs-layers .ly.l6 { position: absolute; left: 0; right: 0; top: calc(100% + 14px); transform: rotate(1.5deg); justify-content: center; }
+:root:not(.portrait) .fs-layers .ly.linf span { font-size: 24px; }
+:root:not(.portrait) .fs-layers .ly.linf em { font-size: 30px; line-height: .8; }
+/* telefonen: mitt under raden med LAYER 1–5, ovanpå brädets ram (panelen ligger över maskinen) */
+.portrait body.fs .g-left .meter { z-index: 4; }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.l6 { position: absolute; left: 50%; top: calc(100% + 1px); width: auto; flex: none; translate: -50% 0; transform: rotate(-2deg);
+  display: flex; align-items: center; gap: 4px; padding: 2px 12px 2px; }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.linf span { font-size: 13px; letter-spacing: .02em; }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.linf em { font-size: 17px; line-height: 1; }
+
+/* nästa låsta bricka: mörk, och lagrets färg fyller den från vänster, en tredjedel per lagervinst (--fill 0 till 1)
+   (de låsta brickorna är gråtonade i spelet: den som fylls har full färg) */
+.fs-layers .l1 { --lc: #2fb4ff; } .fs-layers .l2 { --lc: #3ccf6e; } .fs-layers .l3 { --lc: #ff2d4f; } .fs-layers .l4 { --lc: #d23cff; } .fs-layers .l5 { --lc: #ffd21f; }
+.fs-layers .l6 { --lc: linear-gradient(90deg, #ffffff, #c4ccd6 40%, #8b95a1 72%, #e8edf3); }
+.fs-layers .ly.next { opacity: 1 !important; filter: none !important; background: #2a2236 !important; }
+.fs-layers .ly.next::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--fill, 0) * 100%); border-radius: 9px; background: var(--lc);
+  transition: width .45s cubic-bezier(.3, 1.3, .5, 1); }
+.fs-layers .ly.next > * { position: relative; z-index: 1; }
+
+/* INFINITY öppnas */
+.fs-layers .ly.inf-open { animation: infOpen 1.2s cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes infOpen { 0% { scale: 1; filter: brightness(3); } 22% { scale: 1.32; filter: brightness(2.2); box-shadow: inset 0 0 0 2px #fff, 0 0 34px 16px rgba(255, 255, 255, .85); } 100% { scale: 1; filter: none; } }
+
+/* talet och ∞ som flyger */
+.fly-chip.inf { z-index: 46; font-size: 44px; padding: 5px 14px 2px; color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill;
+  background: #0d0d16; box-shadow: inset 0 0 0 3px #d6dde5, 3px 3px 0 var(--ink), 0 0 24px 8px rgba(230, 235, 242, .7); }
+.fly-chip.home.d6 { background: #0d0d16; color: #fff; font-family: system-ui, "Segoe UI Symbol", sans-serif; font-weight: 900; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill;
+  box-shadow: inset 0 0 0 3px #d6dde5, 0 0 20px 7px rgba(230, 235, 242, .75); }
+.fly-chip.home.d6.inf { font-size: 36px; padding: 5px 13px 2px; }
+.portrait .fly-chip.inf { font-size: 30px; padding: 4px 10px 1px; -webkit-text-stroke-width: 1.5px; }
+.portrait .fly-chip.home.d6.inf { font-size: 26px; padding: 4px 10px 1px; }
+
+/* lappen bredvid beloppet */
+.pop.sweep .inf-tag { position: absolute; left: 100%; top: 50%; translate: 4px -60%; padding: .1em .32em 0; white-space: nowrap;
+  font: 400 calc(var(--cell) * .42)/1 var(--display); color: #fff; -webkit-text-stroke: .1em var(--ink); paint-order: stroke fill; letter-spacing: .02em;
+  background: #0d0d16; border: 3px solid var(--ink); border-radius: 12px; box-shadow: inset 0 0 0 3px #d6dde5, 3px 3px 0 var(--ink), 0 0 20px 6px rgba(230, 235, 242, .7); transform: rotate(7deg); }
+.pop.sweep .inf-tag.left { left: auto; right: 100%; translate: -4px -60%; transform: rotate(-7deg); }
+.pop.sweep .inf-tag.out { opacity: 0; scale: .6; transition: opacity .25s, scale .25s; }
+.pop.sweep .inf-tag.hit { animation: infTagHit .45s cubic-bezier(.3, 1.8, .5, 1); }
+@keyframes infTagHit { 0% { scale: .3; } 60% { scale: 1.3; } 100% { scale: 1; } }
+
+/* bonusaffischen */
+.cv-layers .linf { background: #0d0d16; color: #fff; box-shadow: inset 0 0 0 3px #d6dde5, 3px 3px 0 #000, 0 0 16px 4px rgba(230, 235, 242, .5); }
+.cv-facts .inf-word { background: #0d0d16; color: #fff !important; padding: 0 .25em; border-radius: 4px; box-shadow: inset 0 0 0 2px #cfd6de; }
+
+/* TEST: lappen medan testet letas fram */
+.inf-note { position: fixed; left: 50%; top: 12px; translate: -50% 0; z-index: 90; padding: 6px 14px; border-radius: 10px; background: #0d0d16; color: #fff;
+  font: 600 14px/1.2 system-ui, sans-serif; box-shadow: inset 0 0 0 2px #cfd6de, 0 4px 14px rgba(0, 0, 0, .5); pointer-events: none; }
+/* 1. INFINITY öppnas: spolningen över brädet och den vita blixten */
+.inf-portal { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; border-radius: 11px; }
+.inf-flash { position: fixed; inset: 0; z-index: 80; pointer-events: none; background: #fff; animation: infFlash .7s ease-out forwards; }
+@keyframes infFlash { from { opacity: var(--a, .85); } to { opacity: 0; } }
+/* 3. sista steget: INFINITY pulserar när en lagervinst är kvar */
+.fs-layers .ly.l6.next.near { animation: infNear 1.05s ease-in-out infinite; }
+@keyframes infNear { 0%, 100% { scale: 1; box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55), 0 0 0 0 rgba(255, 255, 255, 0); }
+  50% { scale: 1.06; box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55), 0 0 18px 6px rgba(255, 255, 255, .7); } }
+/* 5. x500 och x1000: talet flyger stort, och beloppet växer medan det räknas upp */
+.fly-chip.inf.huge { font-size: 72px; padding: 8px 20px 3px; box-shadow: inset 0 0 0 4px #e6ebf2, 4px 4px 0 var(--ink), 0 0 40px 16px rgba(255, 255, 255, .85); }
+.portrait .fly-chip.inf.huge { font-size: 46px; padding: 6px 14px 2px; }
+.pop.sweep.inf-huge .shape { scale: 1.28; transition: scale .5s cubic-bezier(.3, 1.6, .5, 1); }
+
+/* 2. INFINITY är öppen: en krom-ring som glänser runt brädet och krom-kant på MULTI resten av bonusen (bara skuggor,
+   inget flyttas) */
+body.inf-mode .stage { box-shadow: 0 0 0 3px #dfe6ee, 0 0 0 5px var(--ink), 0 0 26px 10px rgba(230, 235, 242, .4); animation: infGlow 2.6s ease-in-out infinite; }
+@keyframes infGlow { 50% { box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--ink), 0 0 36px 16px rgba(255, 255, 255, .6); } }
+body.inf-mode .meter-fs .fs-mult { box-shadow: 4px 4px 0 var(--ink), inset 0 0 0 3px #dfe6ee, 0 0 18px 5px rgba(230, 235, 242, .65); }
+
+/* B. ODD HEAD GAMES-loggan (Huvan, bara huvudet) i stället för ∞: på INFINITY-brickan, på affischen och på brickan som
+   flyger hem (en tunn vit kant så att huvan syns mot svart) */
+.ly.linf .inf-logo { position: relative; z-index: 1; vertical-align: middle; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff); }
+:root:not(.portrait) .fs-layers .ly.linf .inf-logo { width: 40px; height: 40px; margin: -10px 0 -10px 4px; }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.linf .inf-logo { width: 22px; height: 22px; margin: -6px 0 -6px 2px; }
+.cv-layers .linf .inf-logo { width: 32px; height: 32px; margin: -9px 0 -9px 6px; }
+.fly-chip.home.d6 .inf-logo-chip { display: block; width: 40px; height: 40px; filter: drop-shadow(0 0 1px #fff); }
+.portrait .fly-chip.home.d6 .inf-logo-chip { width: 28px; height: 28px; }
+
+/* INFINITY-ögonblicket ut: loggan som flyger hem till brickan, och skenet när krom-ringen runt brädet tänds */
+.inf-fly-logo { position: fixed; z-index: 85; transform: translate(-50%, -50%); pointer-events: none;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px rgba(255, 255, 255, .8)); }
+body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
+@keyframes infRingIn { 0% { box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--ink), 0 0 70px 34px rgba(255, 255, 255, .9); }
+  100% { box-shadow: 0 0 0 3px #dfe6ee, 0 0 0 5px var(--ink), 0 0 26px 10px rgba(230, 235, 242, .4); } }
+
+/* x500 och x1000: svartljuset över brädet (allt utom rutan med talet tonas till mörkt lila) */
+.inf-uv { position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 11px; opacity: 0; transition: opacity .4s ease-out;
+  background: radial-gradient(circle at var(--ux) var(--uy), rgba(20, 0, 40, 0) 0, rgba(20, 0, 40, 0) 9%, rgba(28, 6, 58, .72) 19%, rgba(16, 2, 34, .82) 100%); }
+.inf-uv.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   body::before, .bigwin::before, .buy::before { animation: none; }
   .pop .shape, .pop .word, .pop .mul, .pop.shine .shape::after { animation: none; }
@@ -1978,7 +2072,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         </div>
       </section>
       <div class="g-msg" id="winbar" aria-live="polite"></div>
-      <button class="buy-poster" id="btnBuy" type="button" aria-label="Köp bonus: 10 frispinn i Maniac Mode">
+      <button class="buy-poster" id="btnBuy" type="button" aria-label="Köp bonus: 10 frispinn i Infinity-bonusen">
         <span class="bp-paper">
           <span class="bp-kicker">KÖP BONUS</span>
           <span class="bp-title">MANIAC<br>MODE</span>
@@ -2316,6 +2410,22 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     fsPrefill: true, fsLayersDraw: { v: [1, 2, 3], w: [45, 35, 20] }, fsStartDraw: { v: [3, 6, 9], w: [1, 1, 1], seq: true },
     maniacPrefill: true, maniacStartDraw: { v: [6, 12, 18, 24, 30], w: [1, 1, 1, 1, 1], seq: true }, maniacLayersDraw: { v: [2, 3, 4, 5], w: [35, 30, 25, 10] }
   });
+  // INFINITY-bonusen (1.6.0, 2026-10-29; hette Maniac): lagren låses upp i en stege, och efter LAYER 5 kommer INFINITY.
+  // Kassetten låser upp så många lager som den spolar (2–5). Tre vinster som hämtar en symbol ur det översta upplåsta lagret
+  // (ladTop) öppnar nästa lager från nästa lavinsteg (ladX vinster per steg), och tre vinster ur LAYER 5 öppnar INFINITY
+  // (infAt: steget efter LAYER 5; kassetten når aldrig dit). INFINITY är bonusens riktiga historik: varje bräde som faller av
+  // bakom LAYER 5 hamnar där, nyast först. Saknas symbolen i alla upplåsta lager letar hjulet vidare genom INFINITY, en ruta
+  // som i lagren. När ett bräde faller in får infP av rutorna ett tal ur infVals (vikter infW), som gångrar vinsten; flera tal
+  // i samma vinst läggs ihop (infMode 'add'). En ruta ur INFINITY ger infGrow (0) i multi, och en använd ruta förbrukas.
+  // Simulering 2026-10-29 (W1, 200 000 köpta bonusar, kalibrerat mot 96 % på köpet för 500x): median 231x, maxvinsten cirka
+  // 1 per 64 M snurr (med 1 bonus per 41 874 snurr), INFINITY nås i 7,8 % av bonusarna (47 % när kassetten spolar alla 5
+  // lager). maniacScale är 0,20833 × 1,1120. Kontroll med tools/sim-cert.js samma dag: hela spelet 96,03 % ±0,48, SD 10,96
+  // (fortfarande 4/5; 20 M snurr), köpt INFINITY 96,39 % ±0,71 och köpt Bonusspel 96,28 % ±0,50 (300 000 köp var), maxvinsten
+  // 1 per 1 546 köpta INFINITY. Inte certifierat.
+  Object.assign(TIME, {
+    infVals: [2, 3, 5, 10, 25, 50, 100, 500, 1000], infW: [30, 25, 20, 13, 7, 3, 1.5, 0.4, 0.1], infP: 0.3, infMode: 'add',
+    infAt: 6, ladX: 3, ladTop: true, infGrow: 0, maniacScale: 0.23166
+  });
   function matchAt(g, s) { return g === s || (g === GOLD && s === CAN); }
   function scanReel(board, r, s, out) {
     for (var y = 0; y < ROWS; y++) {
@@ -2383,27 +2493,42 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     return { wins: wins, x: total };
   }
 
-  // Maniac: vinster med flera lager bakåt. depth[r] = vilket lager hjul r hämtades från (0 = brädet), deep = summan.
+  // INFINITY-bonusen (playBonus sätter dem medan bonusen räknas fram): INFB = INFINITY-brädena (nyast först), INFV = talet i
+  // varje ruta (0 = ingen), LADU = upplåsta lager (infAt = INFINITY; 99 = alla, utanför INFINITY-bonusen), LADC =
+  // lagervinster mot nästa lager, LADX = hur många lagervinster ett steg kräver (0 = ingen stege).
+  var INFB = null, INFV = null, LADU = 99, LADC = 0, LADX = 0;
+  function ladNeed(u) { return Array.isArray(LADX) ? LADX[Math.min(u, LADX.length) - 1] : LADX; }
+  // talen i ett bräde som faller in i INFINITY: infP av rutorna får ett tal ur infVals (två slumptal per ruta som får tal)
+  function infDraw(rng) { return function (col) { return col.map(function () { return !TIME.infP || rng() < TIME.infP ? drawW(rng, { v: TIME.infVals, w: TIME.infW }) : 0; }); }; }
+  // Maniac: vinster med flera lager bakåt. depth[r] = vilket lager hjul r hämtades från (0 = brädet; mer än antalet lager =
+  // INFINITY), deep = summan. I INFINITY-bonusen bara de upplåsta lagren, och sist INFINITY när den är upplåst; inf = talen
+  // ur INFINITY som vinsten gångras med ({ k, cells: [{ r, y, v }] }).
   function evaluateDeep(grid, layers) {
     var wins = [], total = 0, PT = TIME.payT || PAY;
     for (var s = 2; s < PAYING; s++) {
-      var ways = 1, len = 0, cols = [], gcols = [], depth = [], gsym = [], boost = 1, timeAt = -1, from = 0, deep = 0;
+      var ways = 1, len = 0, cols = [], gcols = [], depth = [], gsym = [], boost = 1, timeAt = -1, from = 0, deep = 0, icl = [];
       for (var r = 0; r < REELS; r++) {
         var hit = { rows: [], weight: 0, top: 1 }, d = 0;
         scanReel(grid, r, s, hit);
         if (!hit.rows.length && r >= TIME.minCur) {
-          for (var k = 0; k < layers.length && !hit.rows.length; k++) { threadCell(layers[k], r, s, from, hit); if (hit.rows.length) d = k + 1; }
+          for (var k = 0; k < Math.min(layers.length, LADU) && !hit.rows.length; k++) { threadCell(layers[k], r, s, from, hit); if (hit.rows.length) d = k + 1; }
+          if (!hit.rows.length && INFB && LADU >= (TIME.infAt || 6)) for (var ib = 0; ib < INFB.length && !hit.rows.length; ib++) {
+            threadCell(INFB[ib], r, s, from, hit);
+            if (hit.rows.length) { d = layers.length + 1 + ib; var iv = INFV[ib][r][hit.rows[0]]; if (iv > 0) icl.push({ r: r, y: hit.rows[0], v: iv }); }
+          }
         }
         if (!hit.rows.length) break;
-        if (d) { cols.push([]); gcols.push(hit.rows); if (timeAt < 0) timeAt = r; deep += d; } else { cols.push(hit.rows); gcols.push([]); }
-        depth.push(d); gsym.push(d ? layers[d - 1][r][hit.rows[0]] : -1);
+        if (d) { cols.push([]); gcols.push(hit.rows); if (timeAt < 0) timeAt = r; deep += d > layers.length ? (TIME.infGrow || 0) : d; } else { cols.push(hit.rows); gcols.push([]); }
+        depth.push(d); gsym.push(d ? (layers[d - 1] || INFB[d - layers.length - 1])[r][hit.rows[0]] : -1);
         from = hit.rows.reduce(function (a, b) { return a + b; }, 0) / hit.rows.length;
         ways *= hit.weight; len++; boost *= hit.top;
       }
       if (timeAt >= 0 && len <= timeAt) timeAt = -1;
       if (len >= 3 && PT[s][len - 3] > 0) {
         var pay = PT[s][len - 3] * PAY_SCALE * TIME.scale * ways;
-        wins.push({ sym: s, len: len, ways: ways, x: pay, cols: cols, gcols: timeAt >= 0 ? gcols : null, depth: depth, gsym: gsym, deep: timeAt >= 0 ? deep : 0, timeAt: timeAt, boost: boost, tmult: 1, hops: timeAt >= 0 ? deep : 0 });
+        var ik = !icl.length ? 1 : TIME.infMode === 'mul' ? icl.reduce(function (a, q) { return a * q.v; }, 1) : icl.reduce(function (a, q) { return a + q.v; }, 0);
+        pay *= ik;
+        wins.push({ sym: s, len: len, ways: ways, x: pay, cols: cols, gcols: timeAt >= 0 ? gcols : null, depth: depth, gsym: gsym, deep: timeAt >= 0 ? deep : 0, inf: icl.length ? { k: ik, cells: icl } : null, timeAt: timeAt, boost: boost, tmult: 1, hops: timeAt >= 0 ? deep : 0 });
         total += pay;
       }
     }
@@ -2492,7 +2617,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       if (ghost) ev.wins.forEach(function (wn) {
         if (!wn.gcols) return;
         wn.gcols.forEach(function (rows, gr2) { rows.forEach(function (gy2) {
-          var L = layers ? layers[(wn.depth[gr2] || 1) - 1] : ghost, dep = layers ? (wn.depth[gr2] || 1) : 1;
+          var L = layers ? (layers[(wn.depth[gr2] || 1) - 1] || INFB[wn.depth[gr2] - layers.length - 1]) : ghost, dep = layers ? (wn.depth[gr2] || 1) : 1;
           if (L[gr2][gy2] >= 0) { ghostUsed.push({ r: gr2, y: gy2, sym: L[gr2][gy2], depth: dep }); L[gr2][gy2] = -1; }
         }); });
       });
@@ -2502,6 +2627,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       grid = t.grid; stops = t.stops;
       // bonusarna: multin växer med summan av lagrens siffror i vinsterna (LAYER 3 = +3)
       if (opts.fs && layers) ev.wins.forEach(function (w) { fsMult += w.deep || 0; });
+      // INFINITY-bonusens stege: en vinst ur det översta upplåsta lagret fyller räknaren (ladTop; annars räknas alla
+      // lagervinster), och efter ladX vinster öppnas nästa lager (från nästa lavinsteg). Steget får lad { u, c } efteråt.
+      if (LADX && opts.fs && layers) {
+        ev.wins.forEach(function (w) { if (w.timeAt >= 0 && LADU < (TIME.infAt || 6) && (!TIME.ladTop || (w.depth || []).indexOf(LADU) >= 0)) { LADC++; if (LADC >= ladNeed(LADU)) { LADC = 0; LADU++; } } });
+        steps[steps.length - 1].lad = { u: LADU, c: LADC };
+      }
     }
     // guldbomben: med 4 eller fler bomber när hjulen landar kan den sista (längst till höger) landa i guld och starta Maniac
     var scN = countScatters(startGrid), gold = null;
@@ -2521,7 +2652,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // rng (den certifierade generatorn), i en fast ordning. Utbetalningen är x gånger insatsen, avrundad till hela ören en
   // gång per spelomgång (payout).
   // 1.5.0 (2026-10-24): prototypens matte (sparade omgångar hette 1.4.0-proto) är nu spelets enda matte, med samma utfall.
-  var ENGINE_VERSION = '1.5.0';
+  // 1.6.0 (2026-10-29): Maniac är INFINITY-bonusen (stegen och INFINITY, se TIME ovan). Grundspelet och Bonusspelet är
+  // som i 1.5.0.
+  var ENGINE_VERSION = '1.6.0';
   // Grundspelet: grundremsorna, inga multis, och guldbomben kan komma.
   function baseOpts(extra) { var o = { fs: false, plain: true, goldCheck: true }; for (var k in extra) o[k] = extra[k]; return o; }
   function emptyGrid() { var g = []; for (var r = 0; r < REELS; r++) g.push([-1, -1, -1, -1, -1, -1]); return g; }
@@ -2553,7 +2686,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   function randBoard(rng) { var g = []; for (var r = 0; r < REELS; r++) g.push(windowAt(STRIPS.base, r, Math.floor(rng() * STRIPS.base[r].length))); return g; }
   function drawW(rng, d) { var t = 0, i; for (i = 0; i < d.w.length; i++) t += d.w[i]; var u = rng() * t; for (i = 0; i < d.w.length; i++) { u -= d.w[i]; if (u < 0) return d.v[i]; } return d.v[d.v.length - 1]; }
   function playBonus(rng, maniac, startGrid, scatters, x0) {
-    var depth = maniac ? TIME.maniacDepth : TIME.fsDepth, scale = maniac ? TIME.maniacScale : TIME.fsScale;
+    var depth = maniac && TIME.infVals && TIME.infDepth ? TIME.infDepth : maniac ? TIME.maniacDepth : TIME.fsDepth, scale = maniac ? TIME.maniacScale : TIME.fsScale;
     var awarded = maniac ? TIME.maniacSpins : (TIME.fsAward[Math.min(scatters, 6)] || 0), more = maniac ? 3 : FS_RETRIGGER;
     var left = awarded, mult = maniac ? TIME.maniacStart : TIME.fsStart, layers = [startGrid], spins = [], x = 0, draws = null;
     // hur många lager kassetten spolar tillbaka när Maniac startar: slumpat (TIME.maniacLayersDraw), annars alla; bara de
@@ -2563,15 +2696,22 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var nL = LD ? drawW(rng, LD) : depth;
     if (maniac ? TIME.maniacPrefill : TIME.fsPrefill) while (layers.length < nL) layers.push(randBoard(rng));
     if (SD) { draws = []; mult = 0; for (var q = 0; q < nL; q++) { draws.push(SD.seq ? SD.v[Math.min(q, SD.v.length - 1)] : drawW(rng, SD)); mult += draws[q]; } }
+    // INFINITY-bonusen: tom INFINITY, och stegen börjar på så många lager som kassetten spolade (lad0)
+    INFB = maniac && TIME.infVals ? [] : null; INFV = INFB ? [] : null; LADX = INFB && TIME.ladX ? TIME.ladX : 0; LADU = LADX ? Math.max(1, nL) : 99; LADC = 0; var lad0 = LADU;
+    while (INFB && layers.length > depth) { INFB.push(layers.pop()); INFV.push(INFB[INFB.length - 1].map(infDraw(rng))); }
     var startMult = mult, layers0 = layers.slice();
     while (left > 0 && x0 + x < TIME.maxX) {
       left--;
+      var ladIn = LADX ? { u: LADU, c: LADC } : null;
       var f = playRound(rng, { fs: true, fsMult: mult, layers: layers, depth: depth, payScale: scale });
-      f.retrigger = f.scatters >= 3 ? more : 0;
+      f.retrigger = f.scatters >= 3 ? more : 0; f.ladIn = ladIn;
+      // brädet som faller av bakom det sista lagret hamnar i INFINITY, och talen i det dras
+      if (INFB && f.layersUsed && f.layersUsed.length >= depth) { INFB.unshift(copyGrid(f.layersUsed[depth - 1])); INFV.unshift(INFB[0].map(infDraw(rng))); }
       left += f.retrigger;
       spins.push(f); x += f.x; layers = f.layersOut; mult = f.fsMult;
     }
-    return { maniac: maniac, awarded: awarded, spins: spins, x: x, finalGrid: layers[0], startMult: startMult, startDraws: draws, layers0: layers0 };
+    var ladEnd = LADX ? LADU : 0, ladS = LADX ? lad0 : 0; INFB = null; INFV = null; LADU = 99; LADX = 0;
+    return { lad: ladEnd, ladStart: ladS, maniac: maniac, awarded: awarded, spins: spins, x: x, finalGrid: layers[0], startMult: startMult, startDraws: draws, layers0: layers0 };
   }
   // Väggen efteråt: sista brädet (efter bonusen om det blev en), sedan de två närmaste lagren från förut. Rutor som har
   // använts i en vinst i grundsnurret är borta (-1), så en symbol från väggen kan bara användas en gång.
@@ -2711,7 +2851,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     'Helskärm': 'Full screen',
     'Frispinn kvar': 'Free spins left',
     'Bonusvinst': 'Bonus win',
-    'Köp bonus: 10 frispinn i Maniac Mode': 'Buy bonus: 10 free spins in Maniac Mode',
+    'Köp bonus: 10 frispinn i Infinity-bonusen': 'Buy bonus: 10 free spins in the Infinity Bonus',
     'Köp bonus: {n} frispinn i Bonusspelet': 'Buy bonus: {n} free spins in the Bonus Game',
     'KÖP BONUS': 'BUY BONUS',
     '10 frispinn direkt': '10 free spins now',
@@ -2783,12 +2923,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // ---- bonusarna
     'Bonusen fortsätter': 'The bonus continues',
     'Köpt bonus': 'Bought bonus',
-    'MANIACBONUS': 'MANIAC BONUS',
     'BONUSSPEL': 'BONUS GAME',
     'Bonusspel': 'Bonus Game',
     'BONUS<br>SPEL': 'BONUS<br>GAME',
     'Bonusspelet': 'the Bonus Game',
-    'Maniacbonus': 'Maniac Bonus',
+    'Infinitybonus': 'Infinity Bonus',
     '{n} frispinn kvar': '{n} free spins left',
     '{n} frispinn': '{n} free spins',
     '<p>Kassetten spolar fram <b>{n} LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × {x}</b> i MULTI, och allt läggs ihop</p>':
@@ -2801,7 +2940,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     '+{n} FRISPINN!': '+{n} FREE SPINS!',
     'Maxvinsten är nådd, så bonusen avslutades med {n} frispinn kvar.': 'Max win reached, so the bonus ended with {n} free spins left.',
     'Maxvinsten är nådd.': 'Max win reached.',
-    'Maniac klart': 'Maniac complete',
+    'Infinity klart': 'Infinity complete',
     'Bonusspel klart': 'Bonus Game complete',
     'bakåt': 'back',
     'frispinn': 'free spins',
@@ -2847,7 +2986,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     'Fakta om spelet': 'Game facts',
     'Återbetalning (RTP)': 'Return to player (RTP)',
     'RTP köpt Bonusspel': 'RTP bought Bonus Game',
-    'RTP köpt Maniac': 'RTP bought Maniac',
+    'RTP köpt Infinity': 'RTP bought Infinity',
     'Maxvinst': 'Max win',
     'Volatilitet': 'Volatility',
     'Vinstvägar': 'Ways to win',
@@ -2867,18 +3006,18 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     'Belopp per vinstväg vid insatsen {b}. Lika symboler räknas från hjulet längst till vänster, på hjul i rad, på vilken rad som helst.': 'Amount per way at the bet {b}. Matching symbols count from the leftmost reel, on adjacent reels, on any row.',
     'Symbol': 'Symbol',
     '<b>Wild</b> finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.': '<b>Wild</b> appears on reels 2–6 and substitutes for all symbols except the bonus bomb.',
-    '<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.':
-      '<b>The bonus bomb</b>: 3 or more bombs anywhere on the board when the cascades are over give {n} free spins. If one of the bombs turns gold, the Maniac Bonus starts instead. 3 or more bombs in a free spin give {r} more free spins.',
+    '<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Infinity-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.':
+      '<b>The bonus bomb</b>: 3 or more bombs anywhere on the board when the cascades are over give {n} free spins. If one of the bombs turns gold, the Infinity Bonus starts instead. 3 or more bombs in a free spin give {r} more free spins.',
     'Väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).': 'The wall has {d} layers back. If the symbol is missing on the board, it is taken from the nearest layer back that has it (the number at the corner shows how far back).',
     'I Bonusspelet är vinsterna vinsttabellen gånger {s}, och sedan gånger multin.': 'In the Bonus Game, wins are the paytable times {s}, then times the multi.',
     'Köp: {n} frispinn direkt för {x} gånger insatsen. Köpt Bonusspel ger i snitt {p} tillbaka.': 'Buy: {n} free spins now for {x} times the bet. A bought Bonus Game returns {p} on average.',
-    'Maniac-bonus': 'Maniac Bonus',
-    'Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Maniac-bonusen med {n} frispinn.':
-      'The gold bomb: if 5 or more bombs land when the reels stop, the last bomb turns gold. If exactly 4 land, the last one turns gold in {p} of cases. The gold bomb starts the Maniac Bonus with {n} free spins.',
+    'Infinity-bonus': 'Infinity Bonus',
+    'Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Infinity-bonusen med {n} frispinn.':
+      'The gold bomb: if 5 or more bombs land when the reels stop, the last bomb turns gold. If exactly 4 land, the last one turns gold in {p} of cases. The gold bomb starts the Infinity Bonus with {n} free spins.',
     'Djupare tid: väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till {d} snurr (siffran vid hörnet visar hur långt bakåt).':
       'Deeper time: the wall has {d} layers back. If the symbol is missing on the board, it is taken from the nearest layer back that has it, up to {d} spins (the number at the corner shows how far back).',
-    'I Maniac är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.': 'In Maniac, wins are the paytable times {s}, then times the multi. 3 or more bombs give 3 more free spins.',
-    'Köp: Maniac för {x} gånger insatsen. Köpt Maniac ger i snitt {p} tillbaka.': 'Buy: Maniac for {x} times the bet. A bought Maniac returns {p} on average.',
+    'I Infinity-bonusen är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.': 'In the Infinity Bonus, wins are the paytable times {s}, then times the multi. 3 or more bombs give 3 more free spins.',
+    'Köp: Infinity-bonusen för {x} gånger insatsen. Köpt Infinity-bonus ger i snitt {p} tillbaka.': 'Buy: the Infinity Bonus for {x} times the bet. A bought Infinity Bonus returns {p} on average.',
     'Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.':
       'The multi applies to the whole win step. After the step it grows for every corner in the wins: +1 for one spin back, +2 for two and +3 for three. It never resets during the bonus.',
     'Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.': 'After every win step the multi grows by as much as the corners lie back, from +1 to +{d}. The multi never resets.',
@@ -2911,12 +3050,12 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       'Under every symbol, the previous spin\'s symbol shows in a torn corner. If the symbol is missing on the next reel, the corner can fill the gap, and the win continues.',
     'Kassetten': 'The cassette',
     'Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.': 'Sometimes the cassette rewinds before the spin, 2 or 3 spins back. Then wins can take symbols from the layers back.',
-    'Bonusspel & Maniac': 'Bonus Game & Maniac',
+    'Bonusspel & Infinity': 'Bonus Game & Infinity',
     '3 bomber ger Bonusspelet: {n} frispinn och {l} lager med multi.': '3 bombs give the Bonus Game: {n} free spins and {l} layers with multi.',
     '3 bomber ger Bonusspelet: {n} frispinn där multin växer och aldrig nollställs.': '3 bombs give the Bonus Game: {n} free spins where the multi grows and never resets.',
-    'Guldbomben startar Maniac med {n} frispinn och {l} lager med multi.': 'The gold bomb starts Maniac with {n} free spins and {l} layers with multi.',
-    'Blir en bomb guld startar Maniac med {n} frispinn och {d} lager bakåt.': 'If a bomb turns gold, Maniac starts with {n} free spins and {d} layers back.',
-    'Köp: Bonusspel {a}x, Maniac {b}x.': 'Buy: Bonus Game {a}x, Maniac {b}x.',
+    'Guldbomben startar Infinity-bonusen med {n} frispinn och {l} lager med multi.': 'The gold bomb starts the Infinity Bonus with {n} free spins and {l} layers with multi.',
+    'Blir en bomb guld startar Infinity-bonusen med {n} frispinn och {d} lager bakåt.': 'If a bomb turns gold, the Infinity Bonus starts with {n} free spins and {d} layers back.',
+    'Köp: Bonusspel {a}x, Infinity {b}x.': 'Buy: Bonus Game {a}x, Infinity {b}x.',
     'ruta': 'slide',
     '{i} av {n}: {t}': '{i} of {n}: {t}',
     'Ruta {i}: {t}': 'Slide {i}: {t}',
@@ -3282,7 +3421,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     g.fillStyle = '#ffffff'; g.beginPath(); g.arc(fx1, fy1, w * 0.02, 0, Math.PI * 2); g.fill();
     // BONUS i gula bubbelbokstäver tvärs över bomben, med två droppar
     g.save(); g.translate(bx, by + R * 0.12); g.rotate(-0.14);
-    var label = gold ? 'MANIAC' : 'BONUS', lcol = gold ? '#e8202e' : '#ffd21f';
+    var label = gold ? 'INFINITY' : 'BONUS', lcol = gold ? '#e8202e' : '#ffd21f';
     var font = fitFont(g, label, w * 0.84, Math.round(size * (gold ? 0.18 : 0.22)), '"Titan One", ' + DISPLAY);
     g.font = font; var tw = g.measureText(label).width;
     [[-0.22, 0.2], [0.18, 0.3]].forEach(function (dp) {
@@ -4757,7 +4896,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Visar tidsvägarna i en vinst. Ger tillbaka alla rutor vinsten använder (brädet och spöklagret), så att
   // vinstsmällen kan placeras utan att täcka dem.
   // Den tidsväg som visas steg för steg: högst tidsmulti, sedan flest hjul.
-  function bestTime(tw) {
+  function bestTime(tw) { var ib0 = infBest(tw); if (ib0) return ib0;
     return tw.reduce(function (b, w) { return !b || (w.tmult || 1) > (b.tmult || 1) || ((w.tmult || 1) === (b.tmult || 1) && w.len > b.len) ? w : b; }, null);
   }
   // Tidsmultin efter k hjul i förra snurret (samma regel som M.evaluateTime).
@@ -4814,7 +4953,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       if (!past) { w.cols[c].forEach(function (y) { part[c][y] = true; }); markCells(part); }
       // i bonusen ger hjulet +n i multi (n = hur många snurr bakåt), en gång per hjul; "+n" visas på hörnet och flyger
       // till multin när vinsten är visad (growMulti)
-      if (past && state.fs) {
+      if (past && state.fs && !infOn()) {
         var dp = (w.depth && w.depth[c]) || 1;
         parts.push({ kind: 'tlabel', x: c * cell + cell / 2, y: w.gcols[c][0] * cell + cell * 0.35, text: '+' + dp, c: DEPTH_COL[dp], sticker: true, life: 0, max: 1.4 });
       }
@@ -4825,7 +4964,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         if (!tiny) { Sound.slam(c - w.timeAt); shakeBoard(Math.min(2.5, 1.2 + 0.4 * (c - w.timeAt))); }
       }
       Sound.timeStep(c - w.timeAt + 1);
-      await wait(showTime(c === w.timeAt ? pace[2] : pace[3]), true);
+      await wait(showTime((c === w.timeAt ? pace[2] : pace[3]) + infPause(w, c)), true);
     }
     if (tier === 2) {
       wallReact();
@@ -4852,7 +4991,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var fast = state.turbo || state.hurry, gap = fast ? 40 : 50, fly = fast ? 340 : 360;
     el.fsMult.textContent = 'x' + st.mult; fitNum(el.fsMult);
     var val = st.mult;
-    chips.forEach(function (q, i) { val += q.d; flyToMulti(q.c, q.y, q.d, i * gap, fly, i, val); flyToLayer(q.c, q.y, q.d, i * gap, fly); });
+    chips.forEach(function (q, i) { if (infOn() && q.d >= infD()) { infFlyHome(q.c, q.y, i * gap, fly); return; } val += q.d; flyToMulti(q.c, q.y, q.d, i * gap, fly, i, val); flyToLayer(q.c, q.y, q.d, i * gap, fly); });
     await wait(showTime((gap * (chips.length - 1) + fly + 120) / 1000));
   }
   // Ett "+n" i lagrets färg poppar upp på rutan och flyger i en båge in i multin. När det landar räknas multin upp, den
@@ -4894,7 +5033,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     a.onfinish = function () { chip.remove(); if (state.fs) landHome(home, d, ex, ey); };
   }
   // Maniac: ett hörn från två eller tre snurr bakåt visar den symbolen (och djupet) i stället för förra snurrets.
-  function deepCell(w, r, y) {
+  function deepCell(w, r, y) { if (infOn() && ghostView && w.depth && w.depth[r] >= infD()) { ghostView.over = ghostView.over || {}; var o0 = ghostView.over[r + ',' + y]; if (!(o0 && o0.inf)) { var iq = infCellOf(w, r, y); ghostView.over[r + ',' + y] = { sym: w.gsym[r], d: 6, inf: true, v: iq ? iq.v : 0 }; } return; }
     if (!ghostView || !w.depth || !(w.depth[r] > 1)) return;
     ghostView.over = ghostView.over || {};
     ghostView.over[r + ',' + y] = { sym: w.gsym[r], d: w.depth[r] };
@@ -5046,7 +5185,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
           }
           g.globalAlpha = fade;
           // lagret: förra snurret blått, i bonusarna även 2–5 snurr bakåt
-          var dd = ov && ov.d > 1 ? ov.d : 1, x0 = r * cell, y0 = y * cell;
+          var dd = ov && ov.d > 1 ? ov.d : 1, x0 = r * cell, y0 = y * cell; if (ov && ov.inf) { infTile(g, r, y, sym, ov, le, lit[r][y]); g.restore(); continue; }
           drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, 0.5, true);
           if (le >= 1) {
             // en ton och en tjock ram i lagrets färg runt rutan (ramen betyder "från lagret": blått 1, grönt 2, rött 3,
@@ -5095,8 +5234,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Färdigritade sken: oskärpa är dyr att rita varje bildruta, så skenet ritas en gång per storlek och klistras in.
   var glowCache = {};
   // lagrens färger i bonusarna, en värmeskala: 1 snurr bakåt blått, 2 grönt, 3 rött, 4 lila, 5 guld (0 = förra snurret, lila)
-  var DEPTH_COL = [GHOST, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
-  var DEPTH_TINT = ['rgba(180, 92, 255, 0.16)', 'rgba(47, 180, 255, 0.2)', 'rgba(60, 207, 110, 0.24)', 'rgba(255, 45, 79, 0.24)', 'rgba(210, 60, 255, 0.24)', 'rgba(255, 210, 31, 0.28)'];
+  var DEPTH_COL = [GHOST, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f']; for (var dci = 6; dci < 64; dci++) DEPTH_COL[dci] = '#e6ebf2';
+  var DEPTH_TINT = ['rgba(180, 92, 255, 0.16)', 'rgba(47, 180, 255, 0.2)', 'rgba(60, 207, 110, 0.24)', 'rgba(255, 45, 79, 0.24)', 'rgba(210, 60, 255, 0.24)', 'rgba(255, 210, 31, 0.28)']; for (var dti = 6; dti < 64; dti++) DEPTH_TINT[dti] = 'rgba(12, 12, 22, 0.32)';
   function glowTile(kind) {
     var pr = Math.min(2, window.devicePixelRatio || 1), key = kind + ':' + Math.round(cell) + ':' + pr;
     if (glowCache[key]) return glowCache[key];
@@ -6201,8 +6340,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }
     var spinning = state.phase === 'spinning';
     // När spelet snurrar av sig själv är knappen en stoppknapp hela tiden, röd med fyrkanten (användaren 2026-10-27):
-    // autospelet (AUTO under; ett tryck stoppar autospelet, events-1.js spinPress) och bonusen (BONUS under; ett tryck
-    // stoppar hjulen snabbare och hoppar fram i vinsterna, men bonusen fortsätter). Den byter inte till gul mellan snurren.
+    // autospelet (ett tryck stoppar autospelet, events-1.js spinPress) och bonusen (ett tryck stoppar hjulen snabbare och
+    // hoppar fram i vinsterna, men bonusen fortsätter). Den byter inte till gul mellan snurren. Ingen text under fyrkanten
+    // (förut AUTO och BONUS): röd färg och fyrkanten räcker (användaren 2026-10-29).
     var fsLook = !!state.fs, autoLook = state.auto > 0 && !fsLook, stopLook = spinning || autoLook || fsLook;
     el.spinWrap.classList.toggle('spinning', spinning);
     el.spin.classList.toggle('stop', stopLook);
@@ -6211,7 +6351,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     el.icoSpin.toggleAttribute('hidden', stopLook);
     el.icoStop.toggleAttribute('hidden', !stopLook);
     el.spinCount.hidden = true;
-    el.spinSub.textContent = autoLook ? 'AUTO' : fsLook ? 'BONUS' : '';
+    el.spinSub.textContent = '';
     el.spin.setAttribute('aria-label', autoLook ? txl('Stoppa autospel') : spinning || fsLook ? txl('Stoppa hjulen') : txl('Snurra'));
     el.auto.setAttribute('aria-pressed', state.auto > 0 ? 'true' : 'false');
     el.autoBadge.hidden = !(state.auto > 0);
@@ -6450,7 +6590,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Layerspins i grundspelet: när kulan når ett hörn lyfter lagrets siffra (1–3 snurr bakåt, i lagrets färg) från hörnet
   // och flyger i en båge hem till sin ruta på LAYER SPINS-affischen. Rutan tar emot den med en studs, ett sken och gnistor
   // i samma färg, så att man ser vilket lager vinsten kom ifrån.
-  var HOME_COLS = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
+  var HOME_COLS = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f', '#e6ebf2'];
   function flyHome(ph) {
     var d = Math.max(1, Math.min(3, ph.d || 1)), home = document.querySelector('#baseLag .l' + d);
     if (!home || !document.body.animate) return;
@@ -6485,7 +6625,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   }
   function renderMeter(pump) {
     var fs = state.fs;
-    el.meterFs.hidden = !fs;
+    el.meterFs.hidden = !fs; if (!fs) document.body.classList.remove('inf-mode');
     // grundspelet: LAYER SPINS, en affisch på väggen med tidslagren (samma lager som i bonusarna). 1 bakåt är alltid tänd;
     // Ted och Carla tänder 2 och 3 bakåt när de kastar in lager (baseLag).
     var bl = document.getElementById('baseLag');
@@ -6510,16 +6650,17 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
         lyBox = document.createElement('div'); lyBox.className = 'fs-layers' + (nD > 3 ? ' deep' : ''); lyBox.dataset.n = nD;
         var lyHtml = lsTitleHtml();
         for (var lk = 1; lk <= nD; lk++) lyHtml += '<i class="ly l' + lk + '"><span>layer</span><em>' + lk + '</em></i>';
+        if (infOn()) lyHtml += infChipHtml();
         lyBox.innerHTML = lyHtml;
         el.meterFs.appendChild(lyBox);
       }
       if (nD) {
         var nL = fs.layers ? fs.layers.length : 1;
         for (var li = 1; li <= nD; li++) {
-          var lyc = lyBox.querySelector('.l' + li), lon = li <= nL;
+          var lyc = lyBox.querySelector('.l' + li), lon = li <= (infOn() && fs.ladU != null ? fs.ladU : nL);
           lyc.classList.toggle('on', lon);
         }
-        lyBox.dataset.ready = '1';
+        lyBox.dataset.ready = '1'; infPaint(lyBox);
       }
       el.fsTotal.textContent = money(state.roundWin);
       fitNum(el.fsMult); fitNum(el.fsTotal);
@@ -6562,9 +6703,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // Storvinst i mitten i serietidningsstil (förebild Hacksaw): en lutande serieruta i nivåns färg med tjock rubrik och
   // beloppet på en svart skylt. Räknaren tar en nivå i taget: den räknar fort och saktar in mot nästa nivå, så att man
   // tror att den stannar. Är vinsten större smäller rubriken upp och räknaren sätter fart igen. Mot det slutliga
-  // beloppet saktar den in och landar. Större vinster passerar fler nivåer. MANIAC WIN är bara maxvinsten (maxed).
+  // beloppet saktar den in och landar. Större vinster passerar fler nivåer. INFINITY WIN är bara maxvinsten (maxed).
   var BIGWIN = [{ x: 0, t: 'BIG WIN', c: 'big' }, { x: 20, t: 'EPIC WIN', c: 'epic' }, { x: 50, t: 'MEGA WIN', c: 'mega' }, { x: 150, t: 'SUPER WIN', c: 'super' },
-    { x: 500, t: 'ULTRA WIN', c: 'ultra' }, { x: 2000, t: 'INSANE WIN', c: 'insane' }, { t: 'MANIAC WIN', c: 'maniac' }];
+    { x: 500, t: 'ULTRA WIN', c: 'ultra' }, { x: 2000, t: 'INSANE WIN', c: 'insane' }, { t: 'INFINITY WIN', c: 'maniac' }];
   // mätaren under beloppet fylls mot nästa nivå i den nivåns färg (MANIAC WIN i guld)
   var BIGWIN_COL = ['#7a5cff', '#ff903b', '#2fb4ff', '#ffb31f', '#3ccf6e', '#e8202e', '#ffd21f'];
   var WINSHOW_X = 20; // storvinsten tar över mitt i lavinen (bigHit) från så många gånger insatsen (efter en bonus visas den alltid)
@@ -7974,6 +8115,655 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (depth <= 1) Array.prototype.forEach.call(box.querySelectorAll('.ly'), function (e) { e.classList.remove('glow'); });
   }
   function hideBaseLayers() { baseLag(1); }
+  // { s: fröet till sfc32, j: frispinnet testet hoppar in på }; infinity.js räknar fram bonusen och kontrollerar att den passar
+  var INF_TESTS = {"nInf":[{"s":[3084604757,2048320096,1875128155,72301364],"j":0},{"s":[1977834859,526286013,4120846921,2573247434],"j":0},{"s":[1302954234,3542054128,4210114935,833432660],"j":0}],"nInfUp":[{"s":[517605366,3930894817,815797010,2945743585],"j":0},{"s":[1654410312,16159452,504430765,2248985320],"j":0},{"s":[3788084009,1538413178,1320806721,678705735],"j":0}],"nInfBig":[{"s":[614178412,660045957,1968141954,886868021],"j":8},{"s":[3225807160,528533819,165378658,3632155194],"j":7},{"s":[1499775729,4233864648,2544973061,799252336],"j":3}]};
+  // ODD HEAD GAMES: Huvan, bara huvudet (från designduken "ODD HEAD GAMES: logga och intro", Huvan.dc.html, still och
+  // beskuren som "huvud"), som ikon för INFINITY i stället för ∞: i panelen, på rutorna, på skylten och när INFINITY öppnas.
+  var INF_LOGO_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"112 78 296 296\"><defs><clipPath id=\"ohSh\"><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\"/><\/clipPath><clipPath id=\"ohHood\"><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\"/><\/clipPath><clipPath id=\"ohFace\"><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\"/><\/clipPath><clipPath id=\"ohBand\"><path d=\"M172 254C206 268 294 268 328 254C334 286 314 312 286 318L250 352L214 318C186 312 166 286 172 254Z\"/><\/clipPath><pattern id=\"ohHt\" width=\"20\" height=\"20\" patternUnits=\"userSpaceOnUse\"><circle cx=\"6\" cy=\"6\" r=\"3.4\" fill=\"#15111F\" opacity=\".16\"/><\/pattern><\/defs><g stroke=\"#15111F\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><g transform=\"translate(14 14)\" fill=\"#15111F\" stroke-width=\"20\"><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\"/><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\"/><\/g><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\" fill=\"#3A2A6B\" stroke-width=\"20\"/><g clip-path=\"url(#ohSh)\" stroke=\"none\"><ellipse cx=\"420\" cy=\"500\" rx=\"150\" ry=\"170\" fill=\"#2B1E4F\"/><rect x=\"310\" y=\"380\" width=\"200\" height=\"240\" fill=\"url(#ohHt)\"/><ellipse cx=\"160\" cy=\"420\" rx=\"40\" ry=\"14\" fill=\"#fff\" opacity=\".2\" transform=\"rotate(-40 160 420)\"/><\/g><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\" fill=\"#3A2A6B\" stroke-width=\"20\"/><g clip-path=\"url(#ohHood)\" stroke=\"none\"><ellipse cx=\"372\" cy=\"300\" rx=\"120\" ry=\"210\" fill=\"#2B1E4F\"/><ellipse cx=\"190\" cy=\"124\" rx=\"54\" ry=\"18\" fill=\"#fff\" opacity=\".28\" transform=\"rotate(-38 190 124)\"/><\/g><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"none\" stroke-width=\"36\"/><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"none\" stroke=\"#5B4A99\" stroke-width=\"24\"/><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"#9B78FF\" stroke-width=\"8\"/><g clip-path=\"url(#ohFace)\" stroke=\"none\"><ellipse cx=\"250\" cy=\"150\" rx=\"106\" ry=\"40\" fill=\"#6E52D9\"/><ellipse cx=\"330\" cy=\"270\" rx=\"44\" ry=\"90\" fill=\"#15111F\" opacity=\".1\"/><\/g><path d=\"M190 208C204 200 222 200 238 210\" fill=\"none\" stroke-width=\"13\"/><path d=\"M264 206L282 199M291 196L310 188\" fill=\"none\" stroke-width=\"13\"/><ellipse cx=\"216\" cy=\"240\" rx=\"23\" ry=\"15\" fill=\"#fff\" stroke-width=\"8\"/><ellipse cx=\"286\" cy=\"238\" rx=\"23\" ry=\"15\" fill=\"#fff\" stroke-width=\"8\"/><circle cx=\"220\" cy=\"244\" r=\"9\" fill=\"#B5F23D\" stroke-width=\"3\"/><circle cx=\"221\" cy=\"245\" r=\"4.5\" fill=\"#15111F\" stroke=\"none\"/><circle cx=\"290\" cy=\"242\" r=\"9\" fill=\"#B5F23D\" stroke-width=\"3\"/><circle cx=\"291\" cy=\"243\" r=\"4.5\" fill=\"#15111F\" stroke=\"none\"/><path d=\"M192 241C195 220 238 220 241 241Z\" fill=\"#8466E6\" stroke-width=\"8\"/><path d=\"M262 239C265 218 308 218 311 239Z\" fill=\"#8466E6\" stroke-width=\"8\"/><path d=\"M172 254C206 268 294 268 328 254C334 286 314 312 286 318L250 352L214 318C186 312 166 286 172 254Z\" fill=\"#FF5FA2\" stroke-width=\"10\"/><g clip-path=\"url(#ohBand)\" stroke=\"none\"><ellipse cx=\"312\" cy=\"322\" rx=\"84\" ry=\"54\" fill=\"#D9457F\"/><\/g><path d=\"M175 263C208 277 292 277 325 263\" fill=\"none\" stroke=\"#B83470\" stroke-width=\"5\"/><g fill=\"#fff\" stroke=\"none\"><circle cx=\"206\" cy=\"286\" r=\"5\"/><circle cx=\"250\" cy=\"298\" r=\"5\"/><circle cx=\"294\" cy=\"286\" r=\"5\"/><circle cx=\"232\" cy=\"318\" r=\"4\"/><circle cx=\"270\" cy=\"318\" r=\"4\"/><\/g><path d=\"M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392\" fill=\"none\" stroke-width=\"14\"/><path d=\"M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392\" fill=\"none\" stroke=\"#fff\" stroke-width=\"6\"/><\/g><\/svg>";
+  var INF_LOGO_URL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(INF_LOGO_SVG);
+  var INF_LOGO = new Image(); INF_LOGO.src = INF_LOGO_URL;
+  function infLogoHtml(cls) { return '<img class="' + (cls || 'inf-logo') + '" src="' + INF_LOGO_URL + '" alt="">'; }
+  // INFINITY-brickan (panelen och bonusaffischen)
+  function infChipHtml() { return '<i class="ly l6 linf"><span>infinity</span>' + infLogoHtml() + '</i>'; }
+  // loggan på brädet: centrerad i (x, y), s = halva bredden (som infSign), med en tunn vit kant så att den syns på svart
+  function infLogo(g, x, y, s) {
+    if (!INF_LOGO.complete || !INF_LOGO.naturalWidth) { infSign(g, x, y, s); return; }
+    g.save();
+    g.shadowColor = 'rgba(255, 255, 255, 0.9)'; g.shadowBlur = s * 0.12;
+    g.drawImage(INF_LOGO, x - s, y - s, s * 2, s * 2);
+    g.restore();
+  }
+
+  // ---------------------------------------------------------------- Infinity (labb): visningen i Maniac
+  // LAYER 1–5 som förut, och INFINITY är en sjätte, fristående bricka (svart och krom, ∞): allt som har fallit av bakom LAYER 5. Lagren
+  // (ikonen är ODD HEAD GAMES-loggan, logo.js) låses upp i en stege: kassetten låser upp så många som den spolar (högst LAYER 5), sedan fylls nästa låsta bricka en
+  // tredjedel för varje lagervinst och öppnas vid den tredje (sist INFINITY, som alltid måste vinnas). En ruta ur Infinity har
+  // krom-ram och ∞; vissa rutor har ett tal (x2 till x1000) som vänds fram ur ∞, flyger in i beloppet och gångrar vinsten.
+  // Multin växer med LAYER 1–5 som förut (INFINITY ger +0).
+  function infOn() { return !!(state.fs && state.fs.maniac && M.TIME.infVals); }
+  function infMn(mn) { return !!mn && !!M.TIME.infVals; }
+  // INFINITY är steget efter LAYER 5 (M.TIME.infAt), och en ruta därifrån har djupet 6 eller mer
+  function infD() { return M.TIME.infAt || 6; }
+  function infCellOf(w, r, y) {
+    if (!w.inf) return null;
+    for (var i = 0; i < w.inf.cells.length; i++) { var q = w.inf.cells[i]; if (q.r === r && q.y === y) return q; }
+    return null;
+  }
+  function infReelHasNum(w, c) { return !!(w.inf && w.inf.cells.some(function (q) { return q.r === c; })); }
+  // tidsvägen som visas steg för steg: helst en vinst med ett Infinity-tal (den med störst tal)
+  function infBest(tw) {
+    if (!infOn()) return null;
+    return tw.reduce(function (b, w) { return w.inf && (!b || w.inf.k > b.inf.k) ? w : b; }, null);
+  }
+  // ett hjul ur Infinity står lite längre, och längst när rutan har ett tal
+  function infPause(w, c) { return infOn() && w.depth && w.depth[c] >= infD() ? (infReelHasNum(w, c) ? 0.5 : 0.12) : 0; }
+  // symbolen i krom, som en staty (ljusheten i varje punkt blir en silverton), bara på rutor med tal
+  var infSprites = [], INF_RAMP = [[24, 26, 34], [70, 76, 88], [140, 148, 160], [205, 212, 222], [255, 255, 255]];
+  function infSprite(sym) {
+    if (!infSprites[sym]) {
+      var src = sprites[sym], c = document.createElement('canvas');
+      c.width = src.width; c.height = src.height;
+      var q = c.getContext('2d');
+      q.drawImage(src, 0, 0);
+      try {
+        var im = q.getImageData(0, 0, c.width, c.height), d = im.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var l = (0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]) / 255 * 4, k = Math.min(3, Math.floor(l)), f = l - k, a = INF_RAMP[k], b = INF_RAMP[k + 1];
+          d[i] = a[0] + (b[0] - a[0]) * f; d[i + 1] = a[1] + (b[1] - a[1]) * f; d[i + 2] = a[2] + (b[2] - a[2]) * f;
+        }
+        q.putImageData(im, 0, 0);
+      } catch (e) { q.globalCompositeOperation = 'source-atop'; q.fillStyle = 'rgba(220, 228, 236, 0.5)'; q.fillRect(0, 0, c.width, c.height); }
+      infSprites[sym] = c;
+    }
+    return infSprites[sym];
+  }
+  function chromeGrad(g, x, y, w, h) {
+    var gr = g.createLinearGradient(x, y, x + w, y + h);
+    gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.28, '#c4ccd6'); gr.addColorStop(0.5, '#6f7884'); gr.addColorStop(0.72, '#e8edf3'); gr.addColorStop(1, '#a3acb7');
+    return gr;
+  }
+  function infStar(g, x, y, s) {
+    g.beginPath();
+    for (var i = 0; i < 8; i++) { var a = i * Math.PI / 4, rad = i % 2 ? s * 0.28 : s; g.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad); }
+    g.closePath(); g.fill();
+  }
+  // en ruta ur Infinity: affischen rivs av som för lagren, sedan krom-ramen och ∞; med tal en kromstaty och skylten där ∞
+  // vänds till talet
+  function infTile(g, r, y, sym, ov, le, t0) {
+    var x0 = r * cell, y0 = y * cell, ke = le * le * (3 - 2 * le), age = clock - t0 - 0.45, num = ov.v > 0;
+    drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, 0.5, true);
+    if (le < 1) return;
+    if (!ov.fx) {
+      ov.fx = true;
+      var cx = x0 + cell / 2, cy = y0 + cell / 2;
+      parts.push({ kind: 'ring', x: cx, y: cy, life: 0, max: 0.5, c: '#e6ebf2' });
+      if (num) {
+        parts.push({ kind: 'ring', x: cx, y: cy, life: 0, max: 0.4, c: '#ffffff', delay: 0.08 });
+        for (var i = 0; i < 12; i++) sparkle(cx + (Math.random() - 0.5) * cell * 1.3, cy + (Math.random() - 0.5) * cell * 1.3);
+      }
+      infChime(num ? 1 : 0, !num);
+    }
+    g.fillStyle = 'rgba(12, 12, 22, 0.34)';
+    rr(g, x0 + cell * 0.05, y0 + cell * 0.05, cell * 0.9, cell * 0.9, cell * 0.18); g.fill();
+    drawGlowTile(g, 'ghost6', x0, y0);
+    if (num) {
+      g.save();
+      rr(g, x0 + cell * 0.07, y0 + cell * 0.07, cell * 0.86, cell * 0.86, cell * 0.16); g.clip();
+      g.drawImage(infSprite(sym), x0 + cell * 0.07, y0 + cell * 0.07, cell * 0.86, cell * 0.86);
+      // glimten som sveper över
+      var sw = ((age * 0.75) % 1.6) - 0.3;
+      if (sw < 1.3) {
+        var gx = x0 + sw * cell, sg = g.createLinearGradient(gx - cell * 0.25, y0, gx + cell * 0.25, y0);
+        sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(0.5, 'rgba(255,255,255,0.6)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+        g.fillStyle = sg;
+        g.beginPath(); g.moveTo(gx - cell * 0.25, y0 + cell); g.lineTo(gx + cell * 0.05, y0); g.lineTo(gx + cell * 0.45, y0); g.lineTo(gx + cell * 0.15, y0 + cell); g.closePath(); g.fill();
+      }
+      g.restore();
+    }
+    // tjock krom-ram
+    rr(g, x0 + cell * 0.065, y0 + cell * 0.065, cell * 0.87, cell * 0.87, cell * 0.17);
+    g.lineWidth = cell * 0.14; g.strokeStyle = INK; g.stroke();
+    g.lineWidth = cell * 0.09; g.strokeStyle = chromeGrad(g, x0, y0, cell, cell); g.stroke();
+    if (ov.v >= 500 && ov.rev) infNeonTile(g, x0, y0, ov);
+    if (num) {
+      g.fillStyle = '#ffffff';
+      [[0.14, 0.12, 0], [0.9, 0.2, 1.7], [0.86, 0.6, 3.1]].forEach(function (s) {
+        var tw = Math.max(0, Math.sin(age * 4.2 + s[2]));
+        if (tw > 0.05) infStar(g, x0 + cell * s[0], y0 + cell * s[1], cell * 0.09 * tw);
+      });
+    }
+    // ∞ i en svart bricka med krom-ring i övre vänstra hörnet (där lagren har sin siffra)
+    var bp = Math.min(1, (clock - t0 - 0.27) / 0.28), bs = bp <= 0 ? 0 : (1 - Math.pow(1 - bp, 3)) * (1 + 0.3 * Math.sin(bp * Math.PI));
+    if (bs > 0) {
+      var dx2 = x0 + cell * 0.25, dy2 = y0 + cell * 0.25, dr = cell * 0.25 * bs;
+      g.fillStyle = INK; g.beginPath(); g.arc(dx2, dy2, dr + cell * 0.03, 0, Math.PI * 2); g.fill();
+      g.fillStyle = chromeGrad(g, dx2 - dr, dy2 - dr, dr * 2, dr * 2); g.beginPath(); g.arc(dx2, dy2, dr, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#f1ecff'; g.beginPath(); g.arc(dx2, dy2, dr * 0.82, 0, Math.PI * 2); g.fill();
+      g.save(); g.beginPath(); g.arc(dx2, dy2, dr * 0.82, 0, Math.PI * 2); g.clip(); infLogo(g, dx2, dy2 + dr * 0.08, dr * 0.9); g.restore();
+    }
+    if (!num) return;
+    // skylten: ∞ vänds till talet (en flip på höjden), poppar upp längst ner i rutan
+    var pp = Math.min(1, Math.max(0, age / 0.3)), ps = pp <= 0 ? 0 : (1 - Math.pow(1 - pp, 3)) * (1 + 0.35 * Math.sin(pp * Math.PI));
+    if (ps <= 0) return;
+    var ft = Math.min(1, Math.max(0, (age - 0.35) / 0.32)), flip = Math.abs(1 - 2 * ft), showNum = ft >= 0.5;
+    var txt = 'x' + ov.v, fz = cell * (txt.length > 4 ? 0.3 : txt.length > 3 ? 0.36 : 0.44);
+    g.save();
+    g.translate(x0 + cell * 0.5, y0 + cell * 0.76); g.scale(ps, ps * Math.max(0.04, flip)); g.rotate(-0.06);
+    g.font = Math.round(fz) + 'px ' + DISPLAY; g.textAlign = 'center'; g.textBaseline = 'middle';
+    var tw2 = g.measureText(txt).width, pw = Math.min(cell * 0.96, Math.max(cell * 0.66, tw2 + cell * 0.22)), ph = cell * 0.46;
+    g.fillStyle = INK; rr(g, -pw / 2 + cell * 0.025, -ph / 2 + cell * 0.03, pw, ph, ph / 2); g.fill();
+    g.fillStyle = '#0d0d16'; rr(g, -pw / 2, -ph / 2, pw, ph, ph / 2); g.fill();
+    var huge = showNum && ov.v >= 500 && ov.rev, nn = huge ? infNeon(ov) : 0;
+    if (huge) { g.save(); g.shadowColor = INF_NEON; g.shadowBlur = cell * 0.35 * nn; g.lineWidth = cell * 0.055; g.strokeStyle = nn > 0.3 ? INF_NEON : '#33421a'; g.stroke(); g.restore(); }
+    else { g.lineWidth = cell * 0.05; g.strokeStyle = chromeGrad(g, -pw / 2, -ph / 2, pw, ph); g.stroke(); }
+    if (showNum && huge) {
+      // neonröret: vit-lime kärna med lime sken, flimrar när det tänds
+      g.save(); g.lineJoin = 'round'; g.lineWidth = fz * 0.2; g.strokeStyle = INK; g.strokeText(txt, 0, fz * 0.06);
+      g.shadowColor = INF_NEON; g.shadowBlur = cell * 0.45 * nn; g.fillStyle = nn > 0.3 ? '#f4ffd6' : '#4a5a26'; g.fillText(txt, 0, fz * 0.06); g.restore();
+    } else if (showNum) {
+      g.lineJoin = 'round'; g.lineWidth = fz * 0.2; g.strokeStyle = INK; g.strokeText(txt, 0, fz * 0.06);
+      g.fillStyle = '#ffffff'; g.fillText(txt, 0, fz * 0.06);
+    } else infLogo(g, 0, 0, ph * 0.5);
+    if (showNum && !ov.rev) { ov.rev = true; ov.revT = clock; infReveal(r, y, ov.v); }
+    g.restore();
+  }
+  // talet vänds fram: större tal ger mer, och först när talet syns. x25 och mer: en ring, gnistor och ett ackord; x100 och
+  // mer dessutom en liten skakning och bas; x500 och mer en vit blixt och ett stigande sus
+  function infReveal(r, y, v) {
+    var cx = r * cell + cell / 2, cy = y * cell + cell * 0.76;
+    Sound.tone(660 * Sound.semi(Math.min(14, Math.round(Math.log(v) / Math.LN2 * 1.5))), 0.12, { type: 'triangle', vol: 0.08 });
+    if (v < 25) return;
+    parts.push({ kind: 'ring', x: cx, y: cy, life: 0, max: 0.5, c: '#ffffff' });
+    for (var i = 0; i < (v >= 500 ? 26 : v >= 100 ? 16 : 10); i++) sparkle(cx + (Math.random() - 0.5) * cell * 2, cy + (Math.random() - 0.5) * cell * 1.6);
+    infChime(v >= 500 ? 4 : v >= 100 ? 3 : 2);
+    if (v >= 100) { shakeBoard(2); Sound.tone(70, 0.5, { type: 'sine', to: 35, vol: 0.35 }); }
+    if (v >= 500) infUvOn(r, y);
+  }
+  // x500 och x1000: UV-neon i graffitistil (studions lime, ODD HEAD GAMES). Resten av brädet släcks till svartljus (infUvOn),
+  // talet blir en neonskylt som flimrar när röret tänds och sedan surrar och pulserar, rutan får en neonram och färgen droppar
+  // ner från skylten. Sedan kommer storvinst-rutan direkt (infHugeShow) i stället för att beloppet räknas upp i smällen.
+  var INF_NEON = '#B5F23D', INF_FLICK = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1];
+  function infNeon(ov) {
+    var t = clock - (ov.revT || clock);
+    if (t < 0.9) return INF_FLICK[Math.floor(t * 22) % INF_FLICK.length] ? 1 : 0.08;
+    return 0.82 + 0.18 * Math.sin(clock * 7);
+  }
+  function infNeonTile(g, x0, y0, ov) {
+    var nn = infNeon(ov), dt = Math.min(1, (clock - ov.revT) / 1.4);
+    g.save(); g.shadowColor = INF_NEON; g.shadowBlur = cell * 0.45 * nn;
+    rr(g, x0 + cell * 0.065, y0 + cell * 0.065, cell * 0.87, cell * 0.87, cell * 0.17);
+    g.lineWidth = cell * 0.05; g.strokeStyle = nn > 0.3 ? INF_NEON : '#33421a'; g.stroke(); g.restore();
+    // färg som droppar ner från skylten och över kanten
+    g.save(); g.fillStyle = INF_NEON; g.strokeStyle = INK; g.lineWidth = cell * 0.02;
+    [[0.3, 0.9], [0.52, 1.3], [0.7, 0.7]].forEach(function (d) {
+      var len = cell * 0.22 * d[1] * dt, x = x0 + cell * d[0], yy = y0 + cell * 0.95;
+      if (len <= 0) return;
+      rr(g, x - cell * 0.028, yy - cell * 0.02, cell * 0.056, len + cell * 0.03, cell * 0.028); g.fill(); g.stroke();
+      g.beginPath(); g.arc(x, yy + len + cell * 0.015, cell * 0.042, 0, Math.PI * 2); g.fill(); g.stroke();
+    });
+    g.restore();
+  }
+  // svartljuset: allt på brädet utom rutan tonas till mörkt lila, och neonröret surrar (flimmerklick när det tänds)
+  function infUvOn(r, y) {
+    infUvOff(true);
+    var uv = document.createElement('div'); uv.className = 'inf-uv';
+    uv.style.setProperty('--ux', ((r + 0.5) / REELS * 100).toFixed(1) + '%'); uv.style.setProperty('--uy', ((y + 0.5) / ROWS * 100).toFixed(1) + '%');
+    stageEl.appendChild(uv); void uv.offsetWidth; uv.classList.add('on');
+    if (state.fs) state.fs.uv = uv;
+    Sound.tone(100, 2.2, { type: 'sawtooth', vol: 0.022 }); Sound.tone(50, 2.2, { type: 'square', vol: 0.012 });
+    INF_FLICK.forEach(function (on, i) { if (on && i % 2 === 0) setTimeout(function () { Sound.tone(1800 + Math.random() * 900, 0.02, { type: 'square', vol: 0.03 }); }, i * 45); });
+  }
+  function infUvOff(now) {
+    var uv = state.fs && state.fs.uv; if (!uv) return;
+    state.fs.uv = null;
+    if (now) { uv.remove(); return; }
+    uv.classList.remove('on'); setTimeout(function () { uv.remove(); }, 450);
+  }
+  function infHuge(st) { return infOn() && st.wins.some(function (w) { return !!w.inf && w.inf.cells.some(function (q) { return q.v >= 500; }); }); }
+  // neonskylten surrar en stund, ett stigande sus, och sedan tar storvinst-rutan över med stegets vinst (ingen siffertext i
+  // smällen); storvinst-rutan för hela frispinnet hoppas sedan över (state.fs.hugeRes)
+  async function infHugeShow(st, amount) {
+    await waitFor(function () { return !winBall || !!winBall.end || state.hurry; });
+    var up = showTime(state.turbo ? 0.6 : 1.6);
+    if (Sound.hiss) Sound.hiss(up, { f: 300, to: 7000, q: 0.9, vol: 0.09 });
+    Sound.tone(110, up, { type: 'sawtooth', to: 440, vol: 0.04 });
+    await wait(up, true);
+    infUvOff();
+    Sound.tone(55, 0.6, { type: 'sine', to: 30, vol: 0.45 });
+    if (state.fs) state.fs.hugeRes = state.fs.cur;
+    await winShow(amount, false);
+    roundShown = amount;
+  }
+  // ∞ som en ritad slinga (reserv om loggan inte har laddats)
+  function infSign(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.beginPath();
+    for (var i = 0; i <= 48; i++) { var t = i / 48 * Math.PI * 2, d = 1 + Math.sin(t) * Math.sin(t); g.lineTo(s * 0.62 * Math.cos(t) / d, s * 0.62 * Math.sin(t) * Math.cos(t) / d); }
+    g.closePath();
+    g.lineJoin = 'round'; g.lineWidth = s * 0.34; g.strokeStyle = INK; g.stroke();
+    g.lineWidth = s * 0.18; g.strokeStyle = '#ffffff'; g.stroke();
+    g.restore();
+  }
+  // ljuset när Infinity används: en mjuk glasklang, och med tal en stigande treklang (n: hur många tal som har landat)
+  function infChime(n, soft) {
+    var b = 880 * Sound.semi(Math.min(12, n * 2));
+    (soft ? [0, 7] : [0, 4, 7, 12]).forEach(function (s, i) { setTimeout(function () { Sound.tone(b * Sound.semi(s), soft ? 0.12 : 0.16, { type: 'sine', vol: soft ? 0.05 : 0.07 }); }, i * 55); });
+  }
+  // Infinity-vinsten i steget: vinsterna med samma Infinity-tal (en wild med tal kan ge talet åt flera symboler), den
+  // största gruppen. base: vad de vinsterna betalar utan talet, part: med talet (exakt base × k), resten läggs på efteråt.
+  function infSplit(st, amount) {
+    if (!infOn()) return null;
+    var groups = {}, sx = 0, best = null;
+    st.wins.forEach(function (w) {
+      sx += w.x;
+      if (!w.inf) return;
+      var key = w.inf.cells.map(function (q) { return q.r + ',' + q.y; }).join('|');
+      var gp = groups[key] || (groups[key] = { k: w.inf.k, cells: w.inf.cells, x: 0 });
+      gp.x += w.x;
+    });
+    Object.keys(groups).forEach(function (key) { if (!best || groups[key].x > best.x) best = groups[key]; });
+    if (!best || !(sx > 0)) return null;
+    var base = Math.max(1, Math.round(amount * best.x / sx / best.k));
+    return { k: best.k, cells: best.cells, base: base, part: Math.min(amount, base * best.k) };
+  }
+  function infBase(st, amount) { var sp = infSplit(st, amount); return sp ? sp.base : amount; }
+  function infCount(p, amt, from, to, dur) {
+    var t0 = clock, last = -1;
+    return waitFor(function () {
+      if (popEl !== p) return true;
+      var k = Math.min(1, (clock - t0) / dur);
+      amt.textContent = money(Math.round(from + (to - from) * (1 - Math.pow(1 - k, 2.5))));
+      var tick = Math.floor((clock - t0) * 14);
+      if (tick !== last && k < 1) { last = tick; Sound.coin(); punch(amt); }
+      if (k >= 1 || state.hurry) { amt.textContent = money(to); return true; }
+      return false;
+    });
+  }
+  // talet flyger från rutan in i beloppet
+  // big: x500 och x1000 flyger större (class huge)
+  function infFly(q, target, delay, dur, big) {
+    return new Promise(function (done) {
+      if (!document.body.animate) { done(); return; }
+      var br = canvas.getBoundingClientRect(), k = br.width / boardPx, tr = target.getBoundingClientRect();
+      var sx = br.left + (q.r + 0.5) * cell * k, sy = br.top + (q.y + 0.8) * cell * k, ex = tr.left + tr.width / 2, ey = tr.top + tr.height / 2;
+      var chip = document.createElement('span');
+      chip.className = 'fly-chip inf' + (big ? ' huge' : ''); chip.textContent = 'x' + q.v;
+      chip.style.left = sx + 'px'; chip.style.top = sy + 'px';
+      document.body.appendChild(chip);
+      var lift = Math.min(120, 50 + Math.abs(ex - sx) * 0.25);
+      var a = chip.animate([
+        { transform: 'translate(-50%, -50%) scale(.5) rotate(-6deg)', opacity: 0 },
+        { transform: 'translate(-50%, -50%) scale(1.35) rotate(4deg)', opacity: 1, offset: 0.2 },
+        { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - lift) + 'px)) scale(1.15) rotate(-8deg)', opacity: 1, offset: 0.6 },
+        { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.8) rotate(-4deg)', opacity: 1 }
+      ], { duration: dur, delay: delay, easing: 'cubic-bezier(.45, 0, .6, 1)', fill: 'backwards' });
+      a.onfinish = function () { chip.remove(); done(); };
+    });
+  }
+  // en vit blixt över hela skärmen (a: hur stark)
+  function infFlash(a) {
+    var fl = document.createElement('div'); fl.className = 'inf-flash'; fl.style.setProperty('--a', String(a || 0.85)); document.body.appendChild(fl);
+    setTimeout(function () { fl.remove(); }, 800);
+  }
+  // krom-skärvor som sprutar ur beloppet
+  function infShards(p, n) {
+    var r = p.getBoundingClientRect(), cols = ['#ffffff', '#e6ebf2', '#c4ccd6', '#8b95a1'];
+    for (var i = 0; i < n; i++) emberPart(r.left + r.width * (0.1 + Math.random() * 0.8), r.top + r.height * (0.1 + Math.random() * 0.8), cols[i % cols.length]);
+  }
+  // det stora beloppet ska rymmas på brädet: smällen (och lappen bredvid) flyttas in från kanten innan det räknas upp
+  function infFit(p, amt, tag, text) {
+    var old = amt.textContent; amt.textContent = text;
+    var sr = stageEl.getBoundingClientRect(), pr = p.getBoundingClientRect(), tw = tag ? tag.getBoundingClientRect().width + 8 : 0;
+    amt.textContent = old;
+    var pad = sr.width * 0.02, lo = sr.left + pad + (tag && tag.classList.contains('left') ? tw : 0), hi = sr.right - pad - (tag && !tag.classList.contains('left') ? tw : 0), dx = 0;
+    if (pr.right > hi) dx = hi - pr.right; else if (pr.left < lo) dx = lo - pr.left;
+    if (!dx || !sr.width) return;
+    p.style.transition = 'left .3s cubic-bezier(.3, 1.4, .5, 1)';
+    p.style.left = (parseFloat(p.style.left) + dx / sr.width * 100) + '%';
+  }
+  // När kulan har gått genom vinsten och beloppet utan talet har smällt fram: talen flyger in i beloppet, ett i taget
+  // (lappen bredvid beloppet visar talet, flera läggs ihop), och beloppet räknas upp till exakt base × talet. Har steget fler
+  // vinster tonar lappen bort och resten läggs på. Lappen hamnar på den sida av beloppet som har plats.
+  async function infMultiply(st, amount) {
+    if (infHuge(st)) { await infHugeShow(st, amount); return; }
+    var sp = popEl && infSplit(st, amount);
+    if (!sp) return;
+    var p = popEl;
+    await waitFor(function () { return !winBall || !!winBall.end || state.hurry; });
+    await wait(showTime(0.3), true);
+    if (popEl !== p) return;
+    var amt = p.querySelector('.amt'), shape = p.querySelector('.shape');
+    var tag = document.createElement('div'); tag.className = 'inf-tag' + (parseFloat(p.style.left) > 50 ? ' left' : ''); tag.style.visibility = 'hidden'; shape.appendChild(tag);
+    p.dataset.total = amount;
+    // 5. festen följer talet (efter att det har visats på rutan): x2–x10 som förut, x25–x100 fanfar och krom-skärvor, x500
+    // och x1000 mörkt runt brädet, talet flyger långsamt och stort, vit blixt när det landar och en lång uppräkning
+    var tier = sp.k >= 500 ? 2 : sp.k >= 25 ? 1 : 0;
+    if (tier === 2 && !winDimEl) winDimEl = winDim();
+    var fast = state.turbo || state.hurry, gap = fast ? 160 : 340, fly = fast ? 380 : tier === 2 ? 1150 : 640, sum = 0;
+    await Promise.all(sp.cells.map(function (q, i) {
+      return infFly(q, amt, i * gap, fly, tier === 2 && q.v >= 500).then(function () {
+        if (tier === 2 && q.v >= 500) infFlash(0.9);
+        sum += q.v;
+        tag.textContent = 'x' + sum; tag.style.visibility = '';
+        tag.classList.remove('hit'); void tag.offsetWidth; tag.classList.add('hit');
+        punch(amt);
+        infChime(i + 2);
+        var cx = parseFloat(p.style.left) / 100 * boardPx, cy = parseFloat(p.style.top) / 100 * boardPx;
+        for (var s = 0; s < 6; s++) sparkle(cx + (Math.random() - 0.5) * cell * 2, cy + (Math.random() - 0.5) * cell * 1.2);
+      });
+    }));
+    if (popEl !== p) return;
+    infFit(p, amt, tag, money(amount));
+    p.classList.remove('shine');
+    if (tier === 2) p.classList.add('inf-huge');
+    var cnt = infCount(p, amt, sp.base, sp.part, fast ? 0.3 : tier === 2 ? 2.6 : 0.8 + 0.25 * Math.log(sp.k) / Math.LN10);
+    // under den långa uppräkningen sprutar mynt ur beloppet
+    if (tier === 2 && !fast) { var spray = setInterval(function () { if (popEl !== p) { clearInterval(spray); return; } popCoins(5); }, 320); cnt.then(function () { clearInterval(spray); }); }
+    await cnt;
+    if (popEl !== p) return;
+    punch(amt, true);
+    void p.offsetWidth; p.classList.add('shine');
+    popCoins([8, 14, 22][tier]);
+    var cx2 = parseFloat(p.style.left) / 100 * boardPx, cy2 = parseFloat(p.style.top) / 100 * boardPx;
+    for (var j = 0; j < [10, 18, 32][tier]; j++) sparkle(cx2 + (Math.random() - 0.5) * cell * 3, cy2 + (Math.random() - 0.5) * cell * 2);
+    if (tier >= 1) { Sound.fanfare(); infShards(p, tier === 2 ? 40 : 22); }
+    if (tier === 2) { infFlash(0.7); infChime(4); }
+    if (sp.part < amount) {
+      await wait(showTime(0.45), true);
+      if (popEl !== p) return;
+      tag.classList.add('out');
+      await infCount(p, amt, sp.part, amount, fast ? 0.2 : 0.5);
+      if (popEl !== p) return;
+      punch(amt, true);
+    }
+    roundShown = amount;
+    await wait(showTime(0.35), true);
+  }
+  // ∞ flyger hem till INFINITY-brickan (som lagrens siffror till sina brickor), utan något i multin
+  function infFlyHome(r, y, delay, dur) {
+    var home = document.querySelector('.fs-layers .l6'), tr = home && home.getBoundingClientRect();
+    if (!home || !tr.width || !document.body.animate) return;
+    var br = canvas.getBoundingClientRect(), k = br.width / boardPx;
+    var sx = br.left + (r + 0.5) * cell * k, sy = br.top + (y + 0.5) * cell * k, ex = tr.left + tr.width / 2, ey = tr.top + tr.height / 2;
+    var chip = document.createElement('span');
+    chip.className = 'fly-chip home d6 inf'; chip.innerHTML = infLogoHtml('inf-logo-chip');
+    chip.style.left = sx + 'px'; chip.style.top = sy + 'px';
+    document.body.appendChild(chip);
+    var a = chip.animate([
+      { transform: 'translate(-50%, -50%) scale(.6) rotate(-6deg)', opacity: 0 },
+      { transform: 'translate(calc(-50% + 14px), -50%) scale(1.15) rotate(-6deg)', opacity: 1, offset: 0.25 },
+      { transform: 'translate(calc(-50% + ' + ((ex - sx) * 0.5 + 14) + 'px), calc(-50% + ' + ((ey - sy) * 0.5 - 70) + 'px)) scale(1.05) rotate(-6deg)', opacity: 1, offset: 0.62 },
+      { transform: 'translate(calc(-50% + ' + (ex - sx) + 'px), calc(-50% + ' + (ey - sy) + 'px)) scale(.7) rotate(-6deg)', opacity: 1 }
+    ], { duration: dur || 750, easing: 'cubic-bezier(.4, 0, .7, 1)', delay: delay == null ? 250 : delay, fill: 'backwards' });
+    a.onfinish = function () { chip.remove(); if (state.fs) landHome(home, 6, ex, ey); };
+  }
+  // ---- stegen i panelen
+  // brickorna: tända = upplåsta (state.fs.ladU), nästa låsta fylls med lagrets färg (state.fs.ladC av M.TIME.ladX)
+  function infPaint(lyBox) {
+    var fs = state.fs, on = infOn() && fs && fs.ladU != null, need = M.TIME.ladX || 3;
+    for (var li = 1; li <= 6; li++) {
+      var ch = lyBox.querySelector('.l' + li); if (!ch) continue;
+      var nx = on && li === fs.ladU + 1;
+      ch.classList.toggle('next', nx);
+      ch.style.setProperty('--fill', nx ? String(Math.min(1, (fs.ladC || 0) / need)) : '0');
+      // LAYER 1–5 tänds i renderMeter, INFINITY här (och pulserar när en lagervinst är kvar)
+      if (li === 6) { ch.classList.toggle('on', on && fs.ladU >= infD()); ch.classList.toggle('near', nx && infNear()); }
+    }
+    // 2. INFINITY är öppen: krom på brädet och MULTI resten av bonusen
+    document.body.classList.toggle('inf-mode', !!on && fs.ladU >= infD());
+  }
+  // efter ett lavinsteg: brickan fylls till det matten säger, och ett lager som öppnas smäller till (INFINITY mest)
+  async function ladShow(st) {
+    if (!infOn() || !st.lad || !state.fs) return;
+    var fs = state.fs, u1 = st.lad.u, c1 = st.lad.c, need = M.TIME.ladX || 3;
+    if (fs.ladU == null) { fs.ladU = u1; fs.ladC = c1; renderMeter(); return; }
+    while (fs.ladU < u1) {
+      fs.ladC = need; renderMeter(); ladTick(need);
+      await wait(showTime(0.45), true);
+      fs.ladU++; fs.ladC = 0;
+      if (fs.ladU >= infD()) { await infPortal(); continue; }
+      renderMeter(); ladOpen(fs.ladU);
+      await wait(showTime(0.55), true);
+    }
+    if (c1 !== fs.ladC) { fs.ladC = c1; renderMeter(); if (c1) ladTick(c1); if (infNear()) infHeart(); }
+  }
+  // 3. sista steget: INFINITY är fylld till två tredjedelar (en lagervinst kvar). Brickan pulserar (infPaint), och ett
+  // hjärtslag hörs när det händer och när varje frispinn börjar så länge det är så. Det visar bara läget.
+  function infNear() { var fs = state.fs; return infOn() && !!fs && fs.ladU === infD() - 1 && (fs.ladC || 0) === (M.TIME.ladX || 3) - 1; }
+  function infHeart() {
+    if (!Sound.ctx) return;
+    var t = Sound.ctx.currentTime + 0.01;
+    for (var hb = 0; hb < 2; hb++) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb * 0.5 }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb * 0.5 + 0.17 }); }
+  }
+  // 1. INFINITY öppnas: spelet stannar upp, brädet mörknar och VHS-spolningen rusar bakåt genom brädena från bonusens
+  // snurr (det spelaren har sett, nyast först, till sist kassettens lager), snabbare och snabbare med ◀◀ i hörnet; ∞ växer
+  // fram mitt på brädet, en vit blixt, och INFINITY-brickan smäller in. Högst en gång per bonus (cirka 1,8 s, turbo hälften).
+  async function infPortal() {
+    var fs = state.fs, plan = fs && fs.plan, hist = [];
+    if (plan) {
+      var upto = fs.cur ? plan.spins.indexOf(fs.cur) : -1;
+      for (var i = (upto < 0 ? 0 : upto) - 1; i >= 0; i--) hist.push(plan.spins[i].finalGrid);
+      (plan.layers0 || []).forEach(function (b) { hist.push(b); });
+    }
+    // vinstbeloppet göms medan det pågår (det kommer tillbaka efteråt)
+    var pp = popEl; if (pp) pp.style.visibility = 'hidden';
+    var cv = document.createElement('canvas'); cv.className = 'inf-portal'; cv.width = canvas.width; cv.height = canvas.height;
+    stageEl.appendChild(cv);
+    var g = cv.getContext('2d'), k = canvas.width / boardPx, dur = showTime(state.turbo ? 0.9 : 1.8), t0 = performance.now();
+    Sound.rewind(dur * 0.72);
+    await new Promise(function (done) {
+      function frame(now) {
+        var t = Math.min(1, (now - t0) / 1000 / Math.max(0.05, dur));
+        g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); g.setTransform(k, 0, 0, k, 0, 0);
+        g.fillStyle = 'rgba(6, 4, 16, ' + Math.min(0.86, t * 3.2) + ')'; g.fillRect(0, 0, boardPx, boardPx);
+        // brädena bakåt, allt snabbare
+        if (t < 0.72 && hist.length) {
+          var b = hist[Math.min(hist.length - 1, Math.floor(Math.pow(t / 0.72, 0.55) * hist.length))], jx = (Math.random() - 0.5) * cell * 0.08;
+          g.globalAlpha = 0.6;
+          for (var r = 0; r < REELS; r++) for (var y = 0; y < ROWS; y++) { var s = b[r][y]; if (s != null && s >= 0 && sprites[s]) g.drawImage(ghostSprite(s, false), r * cell + cell * 0.08 + jx, y * cell + cell * 0.08, cell * 0.84, cell * 0.84); }
+          g.globalAlpha = 1;
+        }
+        // sveplinjer och ett spårningsband som rusar uppåt
+        for (var l = 0; l < 7; l++) { g.fillStyle = 'rgba(255, 255, 255, ' + (0.06 + Math.random() * 0.12) + ')'; g.fillRect(0, Math.random() * boardPx, boardPx, 1.5 + Math.random() * 3); }
+        g.fillStyle = 'rgba(230, 235, 242, 0.13)'; g.fillRect(0, boardPx * (1 - ((t * 3.4) % 1)), boardPx, cell * 0.55);
+        // ◀◀ uppe till vänster, som på ett videoband
+        if (t < 0.72 && Math.floor(now / 160) % 2 === 0) {
+          g.font = Math.round(cell * 0.34) + 'px ' + DISPLAY; g.textAlign = 'left'; g.textBaseline = 'top';
+          g.lineJoin = 'round'; g.lineWidth = cell * 0.06; g.strokeStyle = INK; g.strokeText('◀◀', cell * 0.25, cell * 0.22); g.fillStyle = '#ffffff'; g.fillText('◀◀', cell * 0.25, cell * 0.22);
+        }
+        // ∞ växer fram mitt på brädet
+        if (t > 0.62) {
+          var q = Math.min(1, (t - 0.62) / 0.38), e = 1 - Math.pow(1 - q, 3);
+          g.save(); g.shadowColor = '#ffffff'; g.shadowBlur = cell * 0.6 * e; infLogo(g, boardPx / 2, boardPx / 2, cell * (0.45 + 1.55 * e)); g.restore();
+        }
+        if (t < 1) requestAnimationFrame(frame); else done();
+      }
+      requestAnimationFrame(frame);
+    });
+    // Ut (användaren 2026-10-29: "Flyger hem till brickan"): loggan pulserar en gång, sedan krymper den och flyger i en båge
+    // hem till INFINITY-brickan medan mörkret öppnar sig mjukt från mitten; brickan smäller in när loggan landar och
+    // krom-ringen runt brädet tänds med ett sken. Ingen vit blixt.
+    var L = cell * 2, fast = state.turbo || state.hurry, pulse = showTime(fast ? 0.12 : 0.26), open = showTime(fast ? 0.35 : 0.7);
+    function darkness(hole) {
+      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); g.setTransform(k, 0, 0, k, 0, 0);
+      g.fillStyle = 'rgba(6, 4, 16, 0.86)'; g.fillRect(0, 0, boardPx, boardPx);
+      if (hole > 0) {
+        // hålet i mörkret: en mjuk cirkel från mitten och utåt
+        g.save(); g.globalCompositeOperation = 'destination-out';
+        var hr = g.createRadialGradient(boardPx / 2, boardPx / 2, hole * 0.6, boardPx / 2, boardPx / 2, hole);
+        hr.addColorStop(0, 'rgba(0,0,0,1)'); hr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = hr; g.fillRect(0, 0, boardPx, boardPx); g.restore();
+      }
+    }
+    // 1. pulsen
+    var t1 = performance.now();
+    await new Promise(function (done) {
+      function beat(now) {
+        var q = Math.min(1, (now - t1) / 1000 / Math.max(0.05, pulse));
+        darkness(0);
+        g.save(); g.shadowColor = '#ffffff'; g.shadowBlur = cell * 0.6; infLogo(g, boardPx / 2, boardPx / 2, L * (1 + 0.12 * Math.sin(Math.PI * q))); g.restore();
+        if (q < 1) requestAnimationFrame(beat); else done();
+      }
+      requestAnimationFrame(beat);
+    });
+    // 2. loggan blir en bild ovanpå sidan som flyger hem, och mörkret öppnar sig under tiden
+    var br = cv.getBoundingClientRect(), px = br.width / boardPx, size = L * 2 * px;
+    var home = el.meterFs && (el.meterFs.querySelector('.fs-layers .l6 .inf-logo') || el.meterFs.querySelector('.fs-layers .l6'));
+    var hr2 = home ? home.getBoundingClientRect() : null;
+    var im = document.createElement('img'); im.src = INF_LOGO_URL; im.className = 'inf-fly-logo'; im.alt = '';
+    var sx = br.left + br.width / 2, sy = br.top + br.height / 2;
+    im.style.left = sx + 'px'; im.style.top = sy + 'px'; im.style.width = size + 'px'; im.style.height = size + 'px';
+    document.body.appendChild(im);
+    var t2 = performance.now(), flown = new Promise(function (done) {
+      if (!hr2 || !hr2.width || !im.animate) { done(); return; }
+      var dx = hr2.left + hr2.width / 2 - sx, dy = hr2.top + hr2.height / 2 - sy, ks = Math.max(0.05, Math.min(hr2.width, hr2.height) / size), lift = Math.min(160, 60 + Math.abs(dx) * 0.2);
+      var a = im.animate([
+        { transform: 'translate(-50%, -50%) scale(1)' },
+        { transform: 'translate(calc(-50% + ' + (dx * 0.45) + 'px), calc(-50% + ' + (dy * 0.45 - lift) + 'px)) scale(' + ((1 + ks) / 2.4) + ') rotate(-8deg)', offset: 0.5 },
+        { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + ks + ')' }
+      ], { duration: open * 1000 * 1.1, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
+      a.onfinish = done;
+    });
+    if (Sound.hiss) Sound.hiss(open, { f: 900, to: 3200, q: 0.8, vol: 0.05 });
+    await new Promise(function (done) {
+      function iris(now) {
+        var q = Math.min(1, (now - t2) / 1000 / Math.max(0.05, open)), e = q * q * (3 - 2 * q);
+        darkness(boardPx * 0.78 * e + 1);
+        if (q < 1) requestAnimationFrame(iris); else done();
+      }
+      requestAnimationFrame(iris);
+    });
+    cv.remove();
+    if (pp) pp.style.visibility = '';
+    await flown;
+    // 3. landningen: brickan tänds och smäller in, krom-ringen runt brädet tänds med ett sken
+    im.remove();
+    renderMeter(); ladOpen(infD());
+    stageEl.classList.remove('inf-glint'); void stageEl.offsetWidth; stageEl.classList.add('inf-glint');
+    setTimeout(function () { stageEl.classList.remove('inf-glint'); }, 1000);
+    await wait(showTime(0.5), true);
+  }
+  function ladTick(c) { Sound.tone(620 * Sound.semi(c * 3), 0.1, { type: 'triangle', vol: 0.07 }); }
+  // ett lager öppnas: brickan studsar och lyser, gnistor i lagrets färg; INFINITY med en vit blixt och en klang
+  function ladOpen(u) {
+    var ly = el.meterFs && el.meterFs.querySelector('.fs-layers .l' + u); if (!ly) return;
+    var cls = u >= infD() ? 'inf-open' : 'home-hit';
+    ly.classList.remove(cls); void ly.offsetWidth; ly.classList.add(cls);
+    setTimeout(function () { ly.classList.remove(cls); }, u >= infD() ? 1300 : 750);
+    var r = ly.getBoundingClientRect(), col = u >= infD() ? '#ffffff' : HOME_COLS[u];
+    for (var s = 0; s < (u >= infD() ? 22 : 12); s++) emberPart(r.left + r.width * Math.random(), r.top + r.height * (0.1 + Math.random() * 0.8), s % 3 ? col : '#e6ebf2');
+    if (u >= infD()) { infChime(3); Sound.fanfare(); } else if (!Sound.fx('multi_up', { rate: Sound.semi(u * 2) })) Sound.tone(520 * Sound.semi(u * 2), 0.14, { type: 'triangle', vol: 0.09 });
+  }
+  // A. storvinst-rutan mitt i bonusen från så många gånger insatsen (ett frispinn)
+  var INF_BIG_X = 500;
+  // ---- reglerna (Regler och vinsttabell) och guiden (Så funkar spelet)
+  function infRuleLadder() {
+    return LANG === 'en' ? 'The layer ladder: the cassette opens as many LAYERS as it rewinds. After that, 3 wins that take a symbol from the topmost open layer open the next LAYER (from the next cascade step). If the symbol is missing on the board, it is taken from the nearest open layer back that has it (the number at the corner shows which).'
+      : 'Stegen: kassetten öppnar så många LAYER som den spolar. Därefter öppnar 3 vinster som hämtar en symbol ur det översta öppna lagret nästa LAYER (från nästa lavinsteg). Saknas symbolen på brädet hämtas den från närmaste öppna lager bakåt som har den (siffran vid hörnet visar vilket).';
+  }
+  function infRulesExtra() {
+    return LANG === 'en' ? '<li>INFINITY: every board that falls off behind LAYER 5 during the bonus goes into INFINITY. INFINITY is opened by 3 wins that take a symbol from LAYER 5, never by the cassette. When it is open and the symbol is missing in all five layers, the reel searches on through INFINITY, from the newest board back.</li>' +
+      '<li>Some tiles in INFINITY have a number from x2 to x1000. The win is multiplied by the number; several numbers in the same win are added together. A tile from INFINITY does not raise the multi, and a used tile disappears.</li>'
+      : '<li>INFINITY: varje bräde som faller av bakom LAYER 5 under bonusen hamnar i INFINITY. INFINITY öppnas av 3 vinster som hämtar en symbol ur LAYER 5, aldrig av kassetten. När den är öppen och symbolen saknas i alla fem lager letar hjulet vidare genom INFINITY, från det nyaste brädet bakåt.</li>' +
+      '<li>Vissa rutor i INFINITY har ett tal mellan x2 och x1000. Vinsten gångras med talet, och flera tal i samma vinst läggs ihop. En ruta från INFINITY höjer inte multin, och en ruta som har använts försvinner.</li>';
+  }
+  function infGuideText() {
+    return LANG === 'en' ? 'In the Infinity Bonus the layers open like a ladder: 3 wins from the topmost open layer open the next. After LAYER 5 comes INFINITY, where wins search any distance back. Some tiles there have a number up to x1000 that multiplies the win.'
+      : 'I Infinity-bonusen öppnas lagren som en stege: 3 vinster ur det översta öppna lagret öppnar nästa. Efter LAYER 5 kommer INFINITY, där vinsterna letar hur långt tillbaka som helst. Vissa rutor där har ett tal upp till x1000 som gångrar vinsten.';
+  }
+  // guidens ruta: LAYER-brickorna fylls i tredjedelar och öppnas en i taget, sist INFINITY med loggan; sedan en ruta ur
+  // INFINITY där loggan vänds till ett tal
+  function demoInfinity(g, u) {
+    u = u % 7.2;
+    var cols = ['#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'], cw = 52, ch = 26, gap = 6, x0 = (GUIDE_W - (6 * cw + 5 * gap)) / 2, y0 = 34;
+    // var steg: fylls i tre tag och öppnas (LAYER 4 vid 0,2–1,6 s, LAYER 5 vid 1,7–3,1 s, INFINITY vid 3,2–4,6 s)
+    function state6(i) { if (i < 3) return { on: 1, fill: 1 }; var a = 0.2 + (i - 3) * 1.5, f = Math.min(3, Math.floor(gSeg(u, a, a + 1.4) * 4)); return { on: u >= a + 1.4 ? 1 : 0, fill: f / 3, next: u >= a - 1.5 && u < a + 1.4 }; }
+    for (var i = 0; i < 6; i++) {
+      var s6 = state6(i), x = x0 + i * (cw + gap), inf = i === 5, pk = s6.on && i >= 3 ? gPop(u, 0.2 + (i - 3) * 1.5 + 1.4) : 1;
+      g.save(); g.translate(x + cw / 2, y0 + ch / 2); g.scale(pk, pk); g.translate(-cw / 2, -ch / 2);
+      g.globalAlpha = s6.on || s6.next ? 1 : 0.35;
+      rr(g, 0, 0, cw, ch, 7); g.fillStyle = s6.on ? (inf ? '#0d0d16' : cols[i]) : '#2a2236'; g.fill();
+      if (!s6.on && s6.next && s6.fill > 0) { g.save(); rr(g, 0, 0, cw, ch, 7); g.clip(); g.fillStyle = inf ? '#dfe6ee' : cols[i]; g.fillRect(0, 0, cw * s6.fill, ch); g.restore(); }
+      g.lineWidth = 2.5; g.strokeStyle = inf ? '#dfe6ee' : '#ffffff'; rr(g, 0, 0, cw, ch, 7); g.stroke();
+      if (inf) { if (INF_LOGO.complete) g.drawImage(INF_LOGO, 2, 2, 22, 22); gText(g, 'INFINITY', cw * 0.62, ch / 2 + 1, 8, '#ffffff', 0, 1); }
+      else gText(g, 'LAYER ' + (i + 1), cw / 2, ch / 2 + 1, 11, '#ffffff', 0, 1);
+      g.restore();
+      if (s6.on && i >= 3) gBurst(g, x + cw / 2, y0 + ch / 2, gSeg(u, 0.2 + (i - 3) * 1.5 + 1.4, 0.2 + (i - 3) * 1.5 + 1.9), 40, [inf ? '#ffffff' : cols[i], PAPER]);
+    }
+    // rutan ur INFINITY: krom-ram, loggan i hörnet och skylten där loggan vänds till x25
+    var a = gSeg(u, 4.8, 5.1), s = 92, tx = GUIDE_W / 2 - s / 2, ty = 86;
+    if (a <= 0) return;
+    g.save(); g.globalAlpha = a * (1 - gSeg(u, 6.8, 7.2));
+    g.drawImage(gSprite(2), tx + s * 0.07, ty + s * 0.07, s * 0.86, s * 0.86);
+    rr(g, tx + s * 0.065, ty + s * 0.065, s * 0.87, s * 0.87, s * 0.17); g.lineWidth = s * 0.14; g.strokeStyle = INK; g.stroke();
+    g.lineWidth = s * 0.09; g.strokeStyle = chromeGrad(g, tx, ty, s, s); g.stroke();
+    g.fillStyle = INK; g.beginPath(); g.arc(tx + s * 0.22, ty + s * 0.22, s * 0.2, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#f1ecff'; g.beginPath(); g.arc(tx + s * 0.22, ty + s * 0.22, s * 0.16, 0, Math.PI * 2); g.fill();
+    if (INF_LOGO.complete) g.drawImage(INF_LOGO, tx + s * 0.08, ty + s * 0.09, s * 0.28, s * 0.28);
+    var ft = gSeg(u, 5.4, 5.75), flip = Math.abs(1 - 2 * ft), pw = s * 0.7, ph = s * 0.34;
+    g.save(); g.translate(tx + s / 2, ty + s * 0.8); g.scale(1, Math.max(0.05, flip));
+    rr(g, -pw / 2, -ph / 2, pw, ph, ph / 2); g.fillStyle = '#0d0d16'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#dfe6ee'; g.stroke();
+    if (ft >= 0.5) gText(g, 'x25', 0, 1, 24, '#ffffff', 0, 1); else if (INF_LOGO.complete) g.drawImage(INF_LOGO, -ph * 0.45, -ph * 0.45, ph * 0.9, ph * 0.9);
+    g.restore(); g.restore();
+    if (ft >= 0.5) gBurst(g, tx + s / 2, ty + s * 0.8, gSeg(u, 5.6, 6.1), 60, ['#ffffff', '#dfe6ee', '#ffd21f']);
+  }
+  // ---- bonusaffischen
+  var INF_LADDER = '<p><b>3 lagervinster</b> öppnar nästa LAYER. Sist öppnas <b class="inf-word">INFINITY</b></p>';
+  var INF_RULE = '<p><b class="inf-word">INFINITY</b> letar hur långt tillbaka som helst. Vissa rutor har ett tal som gångrar vinsten</p>';
+  EN[INF_LADDER] = '<p><b>3 layer wins</b> open the next LAYER. Last to open is <b class="inf-word">INFINITY</b></p>';
+  EN[INF_RULE] = '<p><b class="inf-word">INFINITY</b> searches any distance back. Some tiles have a number that multiplies the win</p>';
+  EN['<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>'] = '<p>A win from a layer raises the multi by the layer number: <b>LAYER 3 = +3</b></p>';
+  EN['<p><b>3 BOMBER</b> = +{n} frispinn</p>'] = '<p><b>3 BOMBS</b> = +{n} free spins</p>';
+  // ---- TEST (fliken Nytt)
+  // Knapparna spelar färdiga bonusar som är framletade i förväg (gen-tests.js: riktiga köpta Maniacs ur samma matte,
+  // ingenting skalat), så att de startar direkt; INFINITY är så sällsynt att en sökning i sidan tog 13–44 s. Saknas de letar
+  // knappen själv i små bitar (spelet fryser inte, en liten lapp visar att testet letas fram).
+  // INF_TESTS (infinity-tests.js): frön till sfc32; bonusen räknas fram ur fröet (samma som tools/infinity-tests.js gjorde)
+  // och används bara om den fortfarande passar testet (pred), annars letar knappen själv
+  function infPick(k, pred) {
+    var a = typeof INF_TESTS !== 'undefined' && INF_TESTS[k];
+    if (!a || !a.length) return null;
+    var t = a[Math.floor(Math.random() * a.length)], r = sfc32(t.s[0], t.s[1], t.s[2], t.s[3]), g = M.buyGame(r, M.newWall(r), true);
+    return g.bonus && pred(g) === t.j ? { g: g, j: t.j } : null;
+  }
+  var infSeeking = false;
+  async function infFind(pred, tries) {
+    if (state.busy || infSeeking) return null;
+    infSeeking = true; state.busy = true;
+    var note = document.createElement('div'); note.className = 'inf-note'; note.textContent = txl('Letar fram testet …');
+    document.body.appendChild(note);
+    try {
+      var t0 = performance.now();
+      for (var i = 0; i < tries; i++) {
+        var g = M.buyGame(rng, curWall(), true), hit = g.bonus ? pred(g) : null;
+        if (hit != null) return { g: g, j: hit };
+        if (performance.now() - t0 > 30) { await new Promise(function (r) { setTimeout(r, 0); }); t0 = performance.now(); }
+      }
+      return null;
+    } finally { infSeeking = false; state.busy = false; note.remove(); }
+  }
+  // spelar en bonus som en köpt Maniac från början (TESTS.maniac, som nxBuyTest), eller hoppar in på frispinn j
+  async function infPlay(f) {
+    if (!f || state.busy) return;
+    if (f.j > 0) { await bonusJumpIn(f.g, true, f.j); return; }
+    var o = M.buyGame; M.buyGame = function () { M.buyGame = o; return f.g; }; TESTS.maniac();
+  }
+  function infNumIn(sp) { return sp.steps.some(function (s) { return s.wins.some(function (w) { return !!w.inf; }); }); }
+  function infMax(sp) { var m = 0; sp.steps.forEach(function (s) { s.wins.forEach(function (w) { if (w.inf) w.inf.cells.forEach(function (q) { if (q.v > m) m = q.v; }); }); }); return m; }
+  // fullt band (5 lager, INFINITY nästa steg) med ett tal i något av de första fyra snurren
+  function infPredUp5(g) { return g.bonus.startDraws && g.bonus.startDraws.length === 5 && g.bonus.spins.slice(0, 4).some(infNumIn) ? 0 : null; }
+  async function infTest() { infPlay(infPick('nInf', infPredUp5) || await infFind(infPredUp5, 40000)); }
+  // kort band (3 lager) som klättrar hela vägen till INFINITY (med 2 lager når nästan ingen bonus dit)
+  function infPredClimb(g) { return g.bonus.startDraws && g.bonus.startDraws.length === 3 && g.bonus.spins.slice(0, 8).some(function (sp) { return sp.steps.some(function (s) { return s.lad && s.lad.u >= infD(); }); }) ? 0 : null; }
+  async function infTestClimb() { infPlay(infPick('nInfUp', infPredClimb) || await infFind(infPredClimb, 40000)); }
+  // hoppar in snurret före ett tal på x1000 (bonusen når inte maxvinsten)
+  function infPredBig(g) {
+    if (g.base.x + g.bonus.x >= M.TIME.maxX) return null;
+    for (var j = 1; j < g.bonus.spins.length; j++) if (infMax(g.bonus.spins[j]) >= 1000) return j;
+    return null;
+  }
+  async function infTestBig() { infPlay(infPick('nInfBig', infPredBig) || await infFind(infPredBig, 40000)); }
+  EN['Letar fram testet …'] = 'Finding the test …';
   // Bara när matten har startmulti per lager (M.TIME.maniacStartDraw, prototypen). Bandspelaren glider upp, Maniac-
   // kassetten (guld med röd rand) hoppar in och spolar bakåt. För varje steg bakåt skjuts en bricka LAYER n upp ur luckan,
   // lagrets startmulti (x1–x5, plan.startDraws) smäller fram under brickan, x4 och x5 hårdare, och flyger in i MULTI, som
@@ -7983,7 +8773,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // turbo cirka hälften, och ett tryck gör det snabbare. Utfallet är redan avgjort (playBonus), det här visar det bara.
   var MT_COL = [null, '#2fb4ff', '#3ccf6e', '#ff2d4f', '#d23cff', '#ffd21f'];
   var MT_CAS = CAS_SVG.replace('fill="#ff8629"/>', 'fill="#e8202e"/>')
-    .replace('font-size="20" letter-spacing="2" fill="#15111f">C&amp;T MIXTAPE', 'font-size="17" letter-spacing="1.5" fill="#15111f">MANIAC MIXTAPE');
+    .replace('font-size="20" letter-spacing="2" fill="#15111f">C&amp;T MIXTAPE', 'font-size="15" letter-spacing="1" fill="#15111f">INFINITY MIXTAPE');
   // texterna (affischerna, reglerna och guiden) och trösklarna; mn: false = Bonusspelet, annars Maniac
   function mtMn(mn) { return mn !== false; }
   function mtLD(mn) { return mtMn(mn) ? M.TIME.maniacLayersDraw : M.TIME.fsLayersDraw; }
@@ -8040,7 +8830,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
   // smäll i sin färg; MULTI får hela summan först när kassetten är klar (maniacTape)
   function mtLand(plan, k, v, sumEl) {
     var fs = state.fs; if (!fs) return;
-    fs.layers = plan.layers0.slice(0, k); renderMeter();
+    fs.layers = plan.layers0.slice(0, k); if (infOn()) { fs.ladU = k; fs.ladC = 0; } renderMeter();
     if (sumEl) {
       sumEl.textContent = 'x' + ((parseInt(sumEl.textContent.slice(1), 10) || 0) + v);
       if (sumEl.animate) sumEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.4) rotate(-5deg)', offset: 0.4 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.3, 1.8, .5, 1)' });
@@ -8270,6 +9060,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // maxvinsten: ingen vanlig visning, den tar över skärmen direkt (maxWin), och rundan är slut
       if (st.maxed) {
         markCells(st.removed);
+        if (infOn() && st.wins.some(function (w) { return !!w.inf; })) { await timeIntro(st, amount / bet(), 1, false); timeShow(st); await wait(showTime(0.9), true); }
         var pre = state.winHold != null ? state.winHold : state.roundWin, panelFrom = state.roundWin;
         total += amount; state.roundWin += amount;
         // panelen (total vinst i bonusen) visar inte maxbeloppet förrän efter vinstpresentationen; i stället rusar den uppåt
@@ -8314,8 +9105,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // nästa smäll efter lavinen på förra vinstens belopp och ser ut som samma vinst en gång till. Totalen står i
       // vinstfältet (och i bonusen i panelen).
       roundShown = 0;
-      if (bigLvl < 0 && amount > 0) popCount(st, roundShown + amount, spot.x, spot.y, st.maxed ? txl('MAXVINST!') : null, [0.35, 0.6, 1.0][cls], cls === 0);
+      if (bigLvl < 0 && amount > 0 && !infHuge(st)) popCount(st, roundShown + infBase(st, amount), spot.x, spot.y, st.maxed ? txl('MAXVINST!') : null, [0.35, 0.6, 1.0][cls], cls === 0);
       ballStart(st, cls, path, acc, fs);
+      await infMultiply(st, amount);
       if (bigLvl >= 0) await bigHit(bigLvl, st.removed);
       // under insatsen: bara ett litet klick, inget jubel (vinster som inte är större än insatsen firas inte)
       if (bigLvl < 1 && amount > 0) { if (cls === 0) Sound.winSmall(winIdx); else if (!(cls === 2 && Sound.fx('win_big_step'))) Sound.win(winIdx, cls === 2); }
@@ -8332,7 +9124,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       // hur länge vinsten står (winShowT), lite längre efter en tidsväg (tTier); i bonusen kortare tillägg
       var showT = winShowT(cls, acc, fs) + (cls === 0 ? 0 : tTier === 2 ? (fs ? 0.4 : 1.0) : tTier >= 0 ? (fs ? 0.15 : 0.3) : 0);
       // flera vinster i samma steg visas en i taget, men inte under insatsen och inte fler än fyra
-      if (st.wins.length > 1 && st.wins.length <= 4 && cls > 0 && !state.turbo && !st.wins.some(function (w) { return w.both; })) {
+      if (st.wins.length > 1 && st.wins.length <= 4 && cls > 0 && !state.turbo && !infSplit(st, 1) && !st.wins.some(function (w) { return w.both; })) {
         var lead = (cls === 2 ? 0.45 : 0.25) * acc, per = (cls === 2 ? 0.55 : 0.35) * acc;
         await wait(showTime(lead), true);
         for (var fw = 0; fw < st.wins.length && !state.hurry; fw++) { focusWin(st, fw); await wait(showTime(per), true); }
@@ -8341,6 +9133,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       } else await wait(showTime(showT), true);
       // bonusen: hörnen från väggens lager flyger in i multin (gäller nästa vinst)
       if (fs && state.fs.layers) await growMulti(st);
+      if (fs) await ladShow(st);
       ballStop();
       hidePop(); clearChips(); sweepFx = null;
       eatGhosts(st.ghostUsed);
@@ -8383,8 +9176,8 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       depth: maniac ? M.TIME.maniacDepth : M.TIME.fsDepth };
     // Maniac med startmulti per lager (prototypen, M.TIME.maniacStartDraw): multin börjar på 0 och inga lager är tända,
     // kassetten fyller lagren och räknar upp multin (maniacTape) före första frispinnet
-    var tape = plan.startDraws;
-    if (tape) { state.fs.mult = 0; state.fs.layers = []; state.fs.m0 = plan.startMult; }
+    var tape = plan.startDraws; state.fs.plan = plan;
+    if (tape) { state.fs.mult = 0; state.fs.layers = []; state.fs.m0 = plan.startMult; if (infOn()) { state.fs.ladU = 0; state.fs.ladC = 0; } }
     var resuming = !!resume, si = resuming ? resume.si : 0;
     if (resuming) {
       // fortsätt där bonusen var: multi, lager, frispinn kvar och vinsten hittills
@@ -8393,23 +9186,24 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       state.fs.left = count + extra - si;
       if (si > 0) { state.fs.mult = plan.spins[si - 1].fsMult; state.fs.layers = plan.spins[si - 1].layersOut; }
       else if (tape) { state.fs.mult = plan.startMult; state.fs.layers = plan.layers0; }
+      if (infOn()) { var lq0 = plan.spins[si] && plan.spins[si].ladIn; state.fs.ladU = lq0 ? lq0.u : plan.ladStart; state.fs.ladC = lq0 ? lq0.c : 0; }
       state.fs.total = resume.total;
     }
     function fsOn() { document.body.classList.add('fs'); document.body.classList.toggle('maniac', !!maniac); drawBackdrop(); renderMeter(); hud(); }
     if (!resuming) roundProgress(0);
     Sound.fx(maniac ? 'maniac_intro' : 'bonus_intro');
     await overlay(
-      '<span class="ov-kicker">' + (resuming ? txl('Bonusen fortsätter') : bought ? txl('Köpt bonus') : 'Bonus') + '</span><h2 class="ov-title">' + (maniac ? txl('MANIACBONUS') : txl('BONUSSPEL')) + '</h2>' +
+      '<span class="ov-kicker">' + (resuming ? txl('Bonusen fortsätter') : bought ? txl('Köpt bonus') : 'Bonus') + '</span><h2 class="ov-title">' + (maniac ? 'INFINITY' : txl('BONUSSPEL')) + '</h2>' +
       '<div class="ov-big">' + (resuming ? txl('{n} frispinn kvar', { n: state.fs.left }) : txl('{n} frispinn', { n: count })) + '</div>' +
       // Tidsvägar: reglerna i korta, stora rader (multin, hur långt bakåt vinsterna når, med lagerbrickorna, och bomberna),
       // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +5 frispinn i Bonusspelet och +3 i Maniac
       // (samma som playBonus i math.js).
       '<div class="cv-facts">' + (tape && !resuming && mtLD(!!maniac) ? txl('<p>Kassetten spolar fram <b>{n} LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × {x}</b> i MULTI, och allt läggs ihop</p>', { n: mtLayersText(!!maniac), x: mtStep(!!maniac) })
         : txl('<p><b>MULTI x{m}</b> nollställs aldrig</p>', { m: tape && !resuming ? mtRange(!!maniac) : state.fs.mult })) +
-        txl('<p>Vinster hämtar symboler <b>upp till {d} snurr bakåt</b></p>', { d: state.fs.depth }) + '</div>' +
+        (infMn(maniac) ? txl(INF_LADDER) : txl('<p>Vinster hämtar symboler <b>upp till {d} snurr bakåt</b></p>', { d: state.fs.depth })) + '</div>' +
       // prototypen (kassetten): under varje LAYER-bricka vad lagret ger i multi (LAYER 1 = x6, LAYER 2 = x12 … i Maniac)
-      (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + '</div>' : '') +
-      '<div class="cv-facts">' + txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: maniac ? 3 : M.FS_RETRIGGER }) + '</div>' +
+      (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + (infMn(maniac) ? infChipHtml() : '') + '</div>' : '') +
+      '<div class="cv-facts">' + (infMn(maniac) ? txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>') + txl(INF_RULE) + txl('<p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: 3 }) : txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: maniac ? 3 : M.FS_RETRIGGER })) + '</div>' +
       // ingen knapp, samma text som överallt (ett klick var som helst startar bonusen, cover-overlay.js)
       ('<p class="ov-tap"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>') + (state.auto > 0 ? ('<span class="ov-auto">' + txl('Startar automatiskt') + '</span>') : ''),
       { autoMs: state.auto > 0 ? 3000 : 0, cover: true, bomb: !resuming && !state.turbo, maniac: !!maniac, under: fsOn, foldCols: maniac ? ['#ffd21f', '#e8202e', '#b45cff', '#fff6e0'] : ['#ff750c', '#b45cff', '#4fd6e8', '#fff6e0'] }
@@ -8421,14 +9215,18 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     roundProgress(si);
     while (si < plan.spins.length) {
       state.fs.left--; renderMeter(); hud(); clearChips();
-      var m0 = maniac ? (state.fs.m0 || M.TIME.maniacStart) : M.TIME.fsStart; Music.heat = state.fs.mult >= m0 * 4 ? 3 : state.fs.mult >= m0 * 2 ? 2 : 1;
+      var m0 = maniac ? (state.fs.m0 || M.TIME.maniacStart) : M.TIME.fsStart; Music.heat = state.fs.mult >= m0 * 4 ? 3 : state.fs.mult >= m0 * 2 ? 2 : 1; if (infOn() && state.fs.ladU >= infD()) Music.heat = Math.min(5, Music.heat + 1);
       state.slam = false; state.hurry = false;
       var res = plan.spins[si++];
-      state.fs.layers = res.layersOut;
+      // INFINITY-bonusen: stegen börjar där matten säger, och ett hjärtslag när INFINITY bara saknar en lagervinst (infinity.js)
+      state.fs.layers = res.layersOut; infUvOff(true); state.fs.cur = res; if (infOn() && res.ladIn) { state.fs.ladU = res.ladIn.u; state.fs.ladC = res.ladIn.c; if (infNear()) infHeart(); }
       await spinReels(res, true);
       // brädet syns en stund innan vinsterna visas
       if (res.steps.length) await wait(showTime(0.15), true);
-      await presentSteps(res, true);
+      // storvinsten mitt i bonusen: ett frispinn som ger minst INF_BIG_X gånger insatsen visas direkt i storvinst-rutan
+      // (inte om x500 eller x1000 redan har visat den i snurret, infHugeShow)
+      var fsWon = await presentSteps(res, true);
+      if (!state.maxShown && fsWon >= bet() * INF_BIG_X && !(state.fs && state.fs.hugeRes === res)) await winShow(fsWon, false);
       state.fs.mult = res.fsMult;
       renderMeter();
       if (state.maxShown) break;
@@ -8450,15 +9248,14 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     // maxvinsten har redan firats i sin egen ruta: inga gnistor eller storvinst-ruta till, men summeringen kommer ändå
     // (med rubriken MAXVINST! och en rad om att bonusen avslutades), så att spelaren ser vad som hände
     var note = maxed ? (leftOver > 0 ? txl('Maxvinsten är nådd, så bonusen avslutades med {n} frispinn kvar.', { n: leftOver }) : txl('Maxvinsten är nådd.')) : '';
-    // Bonusen är klar: pengarna samlas in (bonus-collect.js; samma för Bonusspel och Maniac), och sedan kommer
-    // vinstpresentationen direkt för alla bonusvinster, innan affischen (Bonusspel klart / Maniac klart)
+    // Bonusen är klar: pengarna samlas in (bonus-collect.js; samma för båda bonusarna), och summeringen räknar snabbt ihop
+    // vad bonusen gav (användaren 2026-10-29). Storvinst-rutan kommer inte här längre, utan mitt i bonusen (runFreeSpins).
     if (!maxed) await bonusCollect(total);
-    var shown = !maxed && total > 0;
-    if (shown) await winShow(total, state.roundWin >= capFor());
-    if (!shown && !maxed) confetti(180);
+    var shown = false;
+    if (!maxed) confetti(180);
     // Tidsvägar: summeringen (bonus-summary.js) berättar vad bonusen gav: belopp, gånger insatsen, frispinn, högsta multi,
     // bästa snurr och hörnen per lager. Delarna smälls upp en i taget medan affischen väntar på FORTSÄTT.
-    var kick = state.fs.maniac ? txl('Maniac klart') : txl('Bonusspel klart');
+    var kick = state.fs.maniac ? txl('Infinity klart') : txl('Bonusspel klart');
     var endHtml = bonusSummaryHtml({ kicker: kick, title: endTitle, total: total, counted: shown || maxed, stats: bonusStats(plan, state.fs.depth || 0, si), note: note });
     var endOv = overlay(endHtml,
       { autoMs: state.auto > 0 ? 6500 : 0, cover: true, calm: !wasManiac, maniac: wasManiac, under: fsOff,
@@ -8754,7 +9551,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     }
     return ('<span class="ov-kicker">' + txl('Köp bonus') + '</span><h2 class="ov-title">' + txl('Välj bonus') + '</h2><div class="bm-row">') +
       card('b1', '', txl('Bonusspel'), M.fsAwardTime(3), BUY_X) +
-      card('b2', 'mn', 'MANIAC<small>BONUS</small>', M.TIME.maniacSpins, M.TIME.maniacBuy) +
+      card('b2', 'mn', 'INFINITY<small>BONUS</small>', M.TIME.maniacSpins, M.TIME.maniacBuy) +
       '</div><div class="bm-bet"><span>' + txl('Insats') + ('</span><button type="button" class="bm-down" aria-label="' + txl('Sänk insatsen') + '">−</button><b class="bm-bv">') + money(bet()) + ('</b><button type="button" class="bm-up" aria-label="' + txl('Höj insatsen') + '">+</button></div>') +
       ('<div class="ov-btns"><button class="ov-go alt" type="button" data-v="no">' + txl('STÄNG') + '</button></div>');
   }
@@ -8792,7 +9589,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     if (state.balance < cost) return;
     // säkerhetsfrågan: köpet görs först när man har bekräftat
     var sure = await overlay(
-      ('<span class="ov-kicker">' + txl('Är du säker?') + '</span><h2 class="ov-title">') + (mn ? txl('Maniacbonus') : txl('Bonusspel')) + '</h2>' +
+      ('<span class="ov-kicker">' + txl('Är du säker?') + '</span><h2 class="ov-title">') + (mn ? txl('Infinitybonus') : txl('Bonusspel')) + '</h2>' +
       '<div class="ov-big">' + money(cost) + '</div>' +
       '<div class="bm-x">' + txl('{x}x insatsen', { x: mn ? M.TIME.maniacBuy : BUY_X }) + '</div>' +
       ('<div class="ov-btns"><button class="ov-go" type="button" data-v="yes">' + txl('JA, KÖP') + '</button><button class="ov-go alt" type="button" data-v="no">' + txl('AVBRYT') + '</button></div>')
@@ -8894,12 +9691,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var fsRule = '<li>' + mtRuleText(false) + '</li>' +
       '<li>' + txl('Multin gäller för hela vinststeget. Efter steget ökar den för varje hörn i vinsterna: +1 för ett snurr bakåt, +2 för två och +3 för tre. Den nollställs aldrig under bonusen.') + '</li>';
     var mnGrow = '<li>' + txl('Efter varje vinststeg ökar multin med lika mycket som hörnen ligger bakåt, från +1 till +{d}. Multin nollställs aldrig.', { d: M.TIME.maniacDepth }) + '</li>';
+    if (M.TIME.infVals) mnGrow += infRulesExtra();
     var mnRule = '<li>' + mtRuleText(true) + '</li>' + mnGrow;
     $('#infoBody').innerHTML =
       '<section><h3>' + txl('Fakta om spelet') + '</h3><div class="facts">' +
       '<div class="fact"><span>' + txl('Återbetalning (RTP)') + '</span><b>' + percent(96.0) + '</b></div>' +
       '<div class="fact"><span>' + txl('RTP köpt Bonusspel') + '</span><b>' + BUY_RTP + '</b></div>' +
-      '<div class="fact"><span>' + txl('RTP köpt Maniac') + '</span><b>' + BUY_RTP_MN + '</b></div>' +
+      '<div class="fact"><span>' + txl('RTP köpt Infinity') + '</span><b>' + BUY_RTP_MN + '</b></div>' +
       '<div class="fact"><span>' + txl('Maxvinst') + '</span><b>' + fmtX(M.TIME.maxX) + 'x</b></div>' +
       ('<div class="fact fact-vol"><span>' + txl('Volatilitet') + '</span><div class="fv-row">' + volMeterHtml(VOL_LEVEL).replace('class="vm"', 'class="vm vm-go"') + '<b>' + VOL_NAMES[VOL_LEVEL] + ' ' + VOL_LEVEL + '/5</b></div></div>') +
       '<div class="fact"><span>' + txl('Vinstvägar') + '</span><b>' + num(46656) + '</b></div>' +
@@ -8917,19 +9715,19 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
       '<div class="paytable-wrap"><table class="paytable"><thead><tr><th>' + txl('Symbol') + '</th><th>' + txl('{n} hjul', { n: 3 }) + '</th><th>' + txl('{n} hjul', { n: 4 }) + '</th><th>' + txl('{n} hjul', { n: 5 }) + '</th><th>' + txl('{n} hjul', { n: 6 }) + '</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
       '<section><h3>Wild</h3><div class="sym-rule"><img src="' + icon(WILD) + '" alt=""><p>' + txl('<b>Wild</b> finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.') + '</p></div></section>' +
       '<section><h3>' + txl('Bonusspel') + '</h3>' +
-      '<div class="sym-rule"><img src="' + icon(SCAT) + '" alt=""><p>' + txl('<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Maniac-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.', { n: M.fsAwardTime(3), r: M.FS_RETRIGGER }) + '</p></div><ul style="margin-top:10px">' +
+      '<div class="sym-rule"><img src="' + icon(SCAT) + '" alt=""><p>' + txl('<b>Bonusbomben</b>: 3 eller fler bomber var som helst på brädet när lavinerna är slut ger {n} frispinn. Blir en av bomberna guld startar Infinity-bonusen i stället. 3 bomber eller fler i ett frispinn ger {r} frispinn till.', { n: M.fsAwardTime(3), r: M.FS_RETRIGGER }) + '</p></div><ul style="margin-top:10px">' +
       '<li>' + txl('Väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den (siffran vid hörnet visar hur långt bakåt).', { d: M.TIME.fsDepth }) + '</li>' +
       // prototypen: samma kassett som i Maniac (M.TIME.fsStartDraw)
       fsRule +
       '<li>' + txl('I Bonusspelet är vinsterna vinsttabellen gånger {s}, och sedan gånger multin.', { s: fmtScale(M.TIME.fsScale) }) + '</li>' +
       '<li>' + txl('Köp: {n} frispinn direkt för {x} gånger insatsen. Köpt Bonusspel ger i snitt {p} tillbaka.', { n: M.fsAwardTime(3), x: BUY_X, p: BUY_RTP }) + '</li></ul></section>' +
-      '<section><h3>' + txl('Maniac-bonus') + '</h3><ul>' +
-      '<li>' + txl('Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Maniac-bonusen med {n} frispinn.', { p: percent(M.TIME.goldP * 100), n: M.TIME.maniacSpins }) + '</li>' +
-      '<li>' + txl('Djupare tid: väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till {d} snurr (siffran vid hörnet visar hur långt bakåt).', { d: M.TIME.maniacDepth }) + '</li>' +
+      '<section><h3>' + txl('Infinity-bonus') + '</h3><ul>' +
+      '<li>' + txl('Guldbomben: landar 5 eller fler bomber när hjulen stannar blir den sista bomben guld. Landar exakt 4 blir den sista guld i {p} av fallen. Guldbomben startar Infinity-bonusen med {n} frispinn.', { p: percent(M.TIME.goldP * 100), n: M.TIME.maniacSpins }) + '</li>' +
+      '<li>' + (M.TIME.infVals ? infRuleLadder() : txl('Djupare tid: väggen har {d} lager bakåt. Saknas symbolen på brädet hämtas den från närmaste lager bakåt som har den, upp till {d} snurr (siffran vid hörnet visar hur långt bakåt).', { d: M.TIME.maniacDepth })) + '</li>' +
       // prototypen: alla lager fyllda från start och startmulti per lager (M.TIME.maniacStartDraw)
       mnRule +
-      '<li>' + txl('I Maniac är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.', { s: fmtScale(M.TIME.maniacScale) }) + '</li>' +
-      '<li>' + txl('Köp: Maniac för {x} gånger insatsen. Köpt Maniac ger i snitt {p} tillbaka.', { x: M.TIME.maniacBuy, p: BUY_RTP_MN }) + '</li></ul></section>' +
+      '<li>' + txl('I Infinity-bonusen är vinsterna vinsttabellen gånger {s}, och sedan gånger multin. 3 bomber eller fler ger 3 frispinn till.', { s: fmtScale(M.TIME.maniacScale) }) + '</li>' +
+      '<li>' + txl('Köp: Infinity-bonusen för {x} gånger insatsen. Köpt Infinity-bonus ger i snitt {p} tillbaka.', { x: M.TIME.maniacBuy, p: BUY_RTP_MN }) + '</li></ul></section>' +
       '<section><h3>' + txl('Lavin och multiplikator') + '</h3><ul>' +
       '<li>' + txl('Vinnande symboler sprängs och nya faller ner. Det fortsätter så länge det blir nya vinster.') + '</li>' +
       '<li>' + txl('I grundspelet finns ingen multi: varje vinst betalar som i vinsttabellen. Multin finns i Bonusspelet.') + '</li>' +
@@ -9227,6 +10025,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     nGold: function () { var p = function (g) { return !!g.base.gold; }; p.tries = 500000; nxTest(p); },
     nBs3: function () { nxTest(function (g) { return g.bonus && !g.bonus.maniac && g.bonus.startDraws && g.bonus.startDraws.length === 3; }); },
     nMn5: function () { nxBuyTest(function (g) { return g.bonus && g.bonus.startDraws && g.bonus.startDraws.length === 5; }); },
+    nInf: function () { infTest(); }, nInfUp: function () { infTestClimb(); }, nInfBig: function () { infTestBig(); },
     nMn2: function () { nxBuyTest(function (g) { return g.bonus && g.bonus.startDraws && g.bonus.startDraws.length === 2; }); }
   };
   // studioStatic(opts), cirka 1,1 s, som en gammal tv:
@@ -9361,7 +10160,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     bpT.parentNode.insertBefore(bomb, bpT);
     $('#btnBuy').setAttribute('aria-label', txl('Köp bonus: {n} frispinn i Bonusspelet', { n: M.fsAwardTime(3) }));
     var bpSub = document.querySelector('#btnBuy .bp-sub');
-    if (bpSub) bpSub.textContent = 'Bonusspel & Maniac';
+    if (bpSub) bpSub.textContent = 'Bonusspel & Infinity';
   }
   var fsLbl = document.querySelector('#fsTotal') && document.querySelector('#fsTotal').previousElementSibling;
   if (fsLbl) fsLbl.textContent = txl('Total vinst');
@@ -9394,10 +10193,10 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     tbt('tcassette', 'Kassetten', 'Ett vanligt snurr där kassetten dyker upp och spolar 2 eller 3 snurr bakåt (slumpas, som i spelet).'),
     tbt('big', 'Stor vinst', 'Ett snurr som ger minst 55 gånger insatsen: storvinst-rutan.'),
     tbt('bonus', 'Bonusspel', 'Tre bomber landar och Bonusspelet startar.'),
-    tbt('maniac', 'Maniac-bonus', 'Startar Maniac-bonusen direkt (gratis), med fem lager bakåt.'),
+    tbt('maniac', 'Infinity-bonus', 'Startar Infinity-bonusen direkt (gratis).'),
     tbt('tendB', 'Bonusspel slut', 'En ny slumpad Bonusspel-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
-    tbt('tendM', 'Maniac slut', 'En ny slumpad Maniac-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
-    tbt('tmax', 'Maxvinst', 'En ny slumpad Maniac, två snurr före maxvinsten. Tv:n stängs av och vinstpresentationen slås på.'),
+    tbt('tendM', 'Infinity slut', 'En ny slumpad Infinity-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
+    tbt('tmax', 'Maxvinst', 'En ny slumpad Infinity-bonus, två snurr före maxvinsten. Tv:n stängs av och vinstpresentationen slås på.'),
     tbt('refill', 'Fyll på saldot', 'Sätter tillbaka saldot till startbeloppet.'),
     tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
   ].join('');
@@ -9690,7 +10489,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var fl = gSeg(u, 2.85, 3.25);
     if (fl > 0 && fl < 1) { g.save(); g.globalAlpha = 1 - fl; g.fillStyle = '#fff6c0'; g.beginPath(); g.arc(bx + 2.5 * s, by + 2.5 * s, s * (0.4 + fl * 1.1), 0, Math.PI * 2); g.fill(); g.restore(); }
     if (u >= 1.55 && !gold) gText(g, (txl('BONUSSPEL') + '!'), GUIDE_W / 2, by - 2, 34, '#ff8629', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 1.55, 1.8)));
-    if (gold) gText(g, 'MANIAC!', GUIDE_W / 2, by - 2, 38, '#ffd21f', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 3.0, 3.25)));
+    if (gold) gText(g, 'INFINITY!', GUIDE_W / 2, by - 2, 38, '#ffd21f', -0.07, 2.2 - 1.2 * gOut(gSeg(u, 3.0, 3.25)));
     g.restore();
   }
 
@@ -9700,10 +10499,11 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     { t: txl('Laviner'), x: txl('6 hjul, 6 rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Vinnande symboler sprängs och nya faller in, så länge det blir nya vinster.', { w: num(46656) }), demo: demoCascade },
     { t: 'Layerspins', x: txl('Under varje symbol syns förra snurrets symbol i ett rivet hörn. Saknas symbolen på nästa hjul kan hörnet fylla luckan, och vinsten fortsätter.'), demo: demoTime },
     { t: txl('Kassetten'), x: txl('Ibland spolar kassetten tillbaka före snurret, 2 eller 3 snurr bakåt. Då kan vinster hämta symboler från lagren bakåt.'), demo: demoLayers },
-    { t: txl('Bonusspel & Maniac'), x: (M.TIME.fsLayersDraw ? txl('3 bomber ger Bonusspelet: {n} frispinn och {l} lager med multi.', { n: M.fsAwardTime(3), l: mtLayersText(false) }) : txl('3 bomber ger Bonusspelet: {n} frispinn där multin växer och aldrig nollställs.', { n: M.fsAwardTime(3) })) + ' ' +
-      (M.TIME.maniacLayersDraw ? txl('Guldbomben startar Maniac med {n} frispinn och {l} lager med multi.', { n: M.TIME.maniacSpins, l: mtLayersText() }) : txl('Blir en bomb guld startar Maniac med {n} frispinn och {d} lager bakåt.', { n: M.TIME.maniacSpins, d: M.TIME.maniacDepth })) + ' ' +
-      txl('Köp: Bonusspel {a}x, Maniac {b}x.', { a: BUY_X, b: M.TIME.maniacBuy }), demo: demoBonus }
+    { t: txl('Bonusspel & Infinity'), x: (M.TIME.fsLayersDraw ? txl('3 bomber ger Bonusspelet: {n} frispinn och {l} lager med multi.', { n: M.fsAwardTime(3), l: mtLayersText(false) }) : txl('3 bomber ger Bonusspelet: {n} frispinn där multin växer och aldrig nollställs.', { n: M.fsAwardTime(3) })) + ' ' +
+      (M.TIME.maniacLayersDraw ? txl('Guldbomben startar Infinity-bonusen med {n} frispinn och {l} lager med multi.', { n: M.TIME.maniacSpins, l: mtLayersText() }) : txl('Blir en bomb guld startar Infinity-bonusen med {n} frispinn och {d} lager bakåt.', { n: M.TIME.maniacSpins, d: M.TIME.maniacDepth })) + ' ' +
+      txl('Köp: Bonusspel {a}x, Infinity {b}x.', { a: BUY_X, b: M.TIME.maniacBuy }), demo: demoBonus }
   ];
+  if (M.TIME.infVals) GUIDE.push({ t: 'INFINITY', x: infGuideText(), demo: demoInfinity });
   var GUIDE_MAX = gThousands(M.TIME.maxX) + 'x';
   // Staden bakom tegelväggen, i spelets tecknade stil men utan något från själva spelet: natthimmel med måne, moln och
   // stjärnor, stadssiluetter i tre djup, en högbana med ett tåg som kör förbi, höga hus i kanterna med brandtrappor och en
@@ -10211,10 +11011,13 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
     var news = [
       tbt('nAnt2', 'Väntan: 2 bomber', 'Två bomber har landat: nästa hjul snurrar längre, saktar in och kryper in mot den tredje.'),
       tbt('nAntGold', 'Guldväntan', '3 bomber på hjul 1–3: hjul 4, 5 och 6 väntar i guld, längre för varje hjul. Oftast utan guld.'),
-      tbt('nGold', 'Guldbomben', 'Guldväntan som slutar med guldbomben och Maniac (kan ta några sekunder att hitta).'),
+      tbt('nGold', 'Guldbomben', 'Guldväntan som slutar med guldbomben och Infinity-bonusen (kan ta några sekunder att hitta).'),
       tbt('nBs3', 'Bonusspel: kassetten 3 lager', 'Bonusspelet där kassetten spolar alla 3 lager (x18).'),
-      tbt('nMn5', 'Maniac: kassetten 5 lager', 'Maniac där kassetten spolar alla 5 lager (x90).'),
-      tbt('nMn2', 'Maniac: kassetten stannar tidigt', 'Maniac där bandet stannar efter 2 lager (x18).'),
+      tbt('nMn5', 'Infinity: kassetten 5 lager', 'Infinity-bonusen där kassetten spolar alla 5 lager (x90).'),
+      tbt('nInf', 'Infinity: fullt band', 'Fullt band (5 lager) som öppnar INFINITY och får ett Infinity-tal i något av de första snurren.'),
+      tbt('nInfUp', 'Infinity: klättra till INFINITY', 'Kort band (3 lager) som klättrar hela vägen upp till INFINITY.'),
+      tbt('nInfBig', 'Infinity: x1000', 'Hoppar in snurret före ett Infinity-tal på x1000.'),
+      tbt('nMn2', 'Infinity: kassetten stannar tidigt', 'Infinity-bonusen där bandet stannar efter 2 lager (x18).'),
       tbt('tstudio', 'Introt (CtP-loggan)', 'Studiointrot med den nya loggan.'),
       tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
     ].join('');
