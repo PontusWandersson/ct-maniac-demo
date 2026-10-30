@@ -2021,14 +2021,28 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
 /* INFINITY-brickan som en hemlighet: mörk och dammig som en gammal överspraygad tagg, på brädet och på bonusaffischen.
    Man anar bara ordet och huvans silhuett, som andas långsamt. Färgen (.inf-paint) tonas fram när loggan har skallat
    sönder stängslet och dammet ryker av. */
-.fs-layers .ly.l6.linf:not(.on), .cv-layers .ly.linf { background: linear-gradient(100deg, #221d2b, #15121c 55%, #241e2d) !important;
+.fs-layers .ly.l6.linf:not(.on) { background: linear-gradient(100deg, #221d2b, #15121c 55%, #241e2d) !important;
   border-color: rgba(214, 221, 229, .22); box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55); }
 .fs-layers .ly.l6.linf:not(.on) { opacity: .92 !important; filter: none !important; }
 .fs-layers .ly.l6.linf:not(.on) > span, .cv-layers .ly.linf > span { color: rgba(255, 255, 255, .06) !important; -webkit-text-stroke: 1px rgba(214, 221, 229, .32) !important;
   text-shadow: none !important; filter: blur(.6px); animation: infMyst 4.6s ease-in-out infinite; }
-.fs-layers .ly.l6.linf:not(.on) > .inf-logo, .cv-layers .ly.linf > .inf-logo { filter: brightness(0) drop-shadow(0 0 1px rgba(214, 221, 229, .45)) blur(.4px) !important;
+.fs-layers .ly.l6.linf:not(.on) > .inf-logo { filter: brightness(0) drop-shadow(0 0 1px rgba(214, 221, 229, .45)) blur(.4px) !important;
   opacity: .8; animation: infMyst 4.6s ease-in-out infinite; }
 @keyframes infMyst { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+/* på bonusaffischen: ett klistermärke som de andra brickorna (vit kant, svart ring, skugga och samma lutning), mörkt och
+   dammigt inuti; ordet och huvan anas bara (ingen oskärpa, den blev grötig när affischen skalas), och texten är mindre så
+   att brickan inte blir mycket bredare än de andra (användaren 2026-10-30: "Ser du hur dåligt detta skalar") */
+.cv-layers .ly.linf { align-items: center; background: radial-gradient(circle at 30% 25%, #2d2738, #14111b 72%) !important; border-color: #fff;
+  box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55) !important; }
+.cv-layers .ly.linf > span { font-size: 21px; filter: none; -webkit-text-stroke-color: rgba(214, 221, 229, .42) !important; }
+.cv-layers .ly.linf > .inf-logo { filter: brightness(0) invert(1) !important; opacity: .2; animation: none; }
+.portrait .cv-layers .ly.linf > span { font-size: 14px; }
+.portrait .cv-layers .ly.linf > .inf-logo { width: 22px; height: 22px; margin: -6px 0 -6px 3px; }
+/* datorn: den dolda brickan ligger ensam på raden under lagerbrickorna; den får luft under x-etiketterna (som annars
+   nuddade den) och raden får ingen plats för en etikett under sig, eftersom brickan inte har någon (användaren 2026-10-30:
+   "för stor mellanrum ... mellan text och den dolda infinitybaren"). Telefonen har den i raden med LAYER 4 och 5. */
+:root:not(.portrait) .cv-layers.cv-tape.cv-inf > .ly.linf { margin-top: 14px; }
+:root:not(.portrait) .cv-layers.cv-tape.cv-inf { margin-bottom: 8px; }
 /* nästa att öppnas: samma mörka bricka, och den fylls med ett ljust sken i stället för krom; det syns tydligt genom
    stängslet att stapeln växer (användaren 2026-10-30), men inte vad som står under */
 .fs-layers .ly.l6.linf { --lc: linear-gradient(90deg, rgba(160, 170, 184, .5), rgba(236, 240, 245, .88)); }
@@ -2044,20 +2058,22 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
 .inf-mist { position: fixed; z-index: 86; border-radius: 50%; pointer-events: none; filter: blur(1px); box-shadow: 0 0 5px rgba(255, 255, 255, .6); }
 @media (prefers-reduced-motion: reduce) { .fs-layers .ly.l6.linf:not(.on) > span, .fs-layers .ly.l6.linf:not(.on) > .inf-logo, .cv-layers .ly.linf > * { animation: none; } }
 /* ett litet stängsel (nätstängsel med ram) över den hemliga brickan, så att man undrar "vad är detta"; nätet är tunt och
-   halvgenomskinligt så att man ser stapeln växa bakom det (inget hänglås, användaren 2026-10-30). Loggan skallar sönder
+   halvgenomskinligt så att man ser stapeln växa bakom det (inget hänglås, användaren 2026-10-30); nätet är en vektor (SVG)
+   så att det är skarpt i alla storlekar. Loggan skallar sönder
    det (infRam): sprickorna (.inf-cracks), stjärnan (.inf-pow) och bitarna (.inf-shard) */
 .fs-layers .ly.l6.linf > .inf-fence, .cv-layers .ly.linf > .inf-fence { position: absolute; inset: -5px -7px; z-index: 2; pointer-events: none; --m: 9px;
   border: 2.5px solid rgba(154, 164, 176, .9); border-radius: 4px; box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1px rgba(21, 17, 31, .45);
-  background: repeating-linear-gradient(45deg, transparent 0 calc(var(--m) - 1px), rgba(205, 212, 220, .42) calc(var(--m) - 1px) var(--m)),
-    repeating-linear-gradient(-45deg, transparent 0 calc(var(--m) - 1px), rgba(205, 212, 220, .42) calc(var(--m) - 1px) var(--m)); }
-.portrait .meter-fs:not(.base-lag) .fs-layers .ly.l6.linf > .inf-fence, .portrait .cv-layers .ly.linf > .inf-fence { inset: -4px -5px; --m: 7px; border-width: 2px; }
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M-1 -1L11 11M11 -1L-1 11' stroke='%23d6dde5' stroke-opacity='.5' stroke-width='1.1'/%3E%3C/svg%3E") 0 0 / var(--m) var(--m); }
+/* på affischen sitter nätet innanför klistermärkets vita kant */
+.cv-layers .ly.linf > .inf-fence { inset: 0; border: 0; border-radius: 9px; box-shadow: inset 0 0 0 2px rgba(154, 164, 176, .75); }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.l6.linf > .inf-fence { inset: -4px -5px; --m: 7px; border-width: 2px; }
+.portrait .cv-layers .ly.linf > .inf-fence { --m: 7px; }
 .fs-layers .ly.linf.on > .inf-fence { display: none; }
 .inf-fence > .inf-cracks { position: absolute; inset: -2px; width: calc(100% + 4px); height: calc(100% + 4px); overflow: hidden; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .inf-pow { position: fixed; z-index: 87; pointer-events: none; transform: translate(-50%, -50%); }
 .inf-pow svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .inf-shard { position: fixed; z-index: 86; pointer-events: none; box-sizing: border-box; --m: 9px; border: 2.5px solid rgba(154, 164, 176, .95); border-radius: 4px;
-  background: repeating-linear-gradient(45deg, transparent 0 calc(var(--m) - 1.5px), rgba(214, 221, 229, .8) calc(var(--m) - 1.5px) var(--m)),
-    repeating-linear-gradient(-45deg, transparent 0 calc(var(--m) - 1.5px), rgba(214, 221, 229, .8) calc(var(--m) - 1.5px) var(--m)), rgba(21, 17, 31, .3); }
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M-1 -1L11 11M11 -1L-1 11' stroke='%23d6dde5' stroke-opacity='.85' stroke-width='1.1'/%3E%3C/svg%3E") 0 0 / var(--m) var(--m), rgba(21, 17, 31, .3); }
 .portrait .inf-shard { --m: 7px; border-width: 2px; }
 @media (prefers-reduced-motion: reduce) {
   body::before, .bigwin::before, .buy::before { animation: none; }
@@ -8772,9 +8788,11 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   }
   // ---- bonusaffischen
   var INF_LADDER = '<p><b>3 lagervinster</b> öppnar nästa LAYER. Sist öppnas <b class="inf-word">INFINITY</b></p>';
-  var INF_RULE = '<p><b class="inf-word">INFINITY</b> letar hur långt tillbaka som helst. Vissa rutor har ett tal som gångrar vinsten</p>';
+  // det högsta talet står med (användaren 2026-10-30: "det framgår högsta multin"); {m} = störst i M.TIME.infVals (infTop)
+  var INF_RULE = '<p><b class="inf-word">INFINITY</b> letar hur långt tillbaka som helst. Vissa rutor har ett tal <b>upp till x{m}</b> som gångrar vinsten</p>';
+  function infTop() { return Math.max.apply(null, M.TIME.infVals || [0]); }
   EN[INF_LADDER] = '<p><b>3 layer wins</b> open the next LAYER. Last to open is <b class="inf-word">INFINITY</b></p>';
-  EN[INF_RULE] = '<p><b class="inf-word">INFINITY</b> searches any distance back. Some tiles have a number that multiplies the win</p>';
+  EN[INF_RULE] = '<p><b class="inf-word">INFINITY</b> searches any distance back. Some tiles have a number <b>up to x{m}</b> that multiplies the win</p>';
   EN['<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>'] = '<p>A win from a layer raises the multi by the layer number: <b>LAYER 3 = +3</b></p>';
   EN['<p><b>3 BOMBER</b> = +{n} frispinn</p>'] = '<p><b>3 BOMBS</b> = +{n} free spins</p>';
   // ---- TEST (fliken Nytt)
@@ -9803,8 +9821,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         : txl('<p><b>MULTI x{m}</b> nollställs aldrig</p>', { m: tape && !resuming ? mtRange(!!maniac) : state.fs.mult })) +
         (infMn(maniac) ? txl(INF_LADDER) : txl('<p>Vinster hämtar symboler <b>upp till {d} snurr bakåt</b></p>', { d: state.fs.depth })) + '</div>' +
       // prototypen (kassetten): under varje LAYER-bricka vad lagret ger i multi (LAYER 1 = x6, LAYER 2 = x12 … i Maniac)
-      (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + (infMn(maniac) ? infChipHtml() : '') + '</div>' : '') +
-      '<div class="cv-facts">' + (infMn(maniac) ? txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>') + txl(INF_RULE) + txl('<p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: 3 }) : txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: maniac ? 3 : M.FS_RETRIGGER })) + '</div>' +
+      (state.fs.depth ? '<div class="cv-layers' + (tape && !resuming && mtSeq(!!maniac) ? ' cv-tape' : '') + (infMn(maniac) ? ' cv-inf' : '') + '">' + [1, 2, 3, 4, 5].slice(0, state.fs.depth).map(function (k) { return '<i class="ly l' + k + '"><span>layer</span><em>' + k + '</em>' + (tape && !resuming && mtSeq(!!maniac) ? '<b class="ly-x">x' + mtSD(!!maniac).v[k - 1] + '</b>' : '') + '</i>'; }).join('') + (infMn(maniac) ? infChipHtml() : '') + '</div>' : '') +
+      '<div class="cv-facts">' + (infMn(maniac) ? txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p>') + txl(INF_RULE, { m: infTop() }) + txl('<p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: 3 }) : txl('<p>Vinst från ett lager höjer multin med lagrets siffra: <b>LAYER 3 = +3</b></p><p><b>3 BOMBER</b> = +{n} frispinn</p>', { n: maniac ? 3 : M.FS_RETRIGGER })) + '</div>' +
       // ingen knapp, samma text som överallt (ett klick var som helst startar bonusen, cover-overlay.js)
       ('<p class="ov-tap"><span class="tap-go">' + txl('Klicka var som helst för att fortsätta') + '</span></p>') + (state.auto > 0 ? ('<span class="ov-auto">' + txl('Startar automatiskt') + '</span>') : ''),
       { autoMs: state.auto > 0 ? 3000 : 0, cover: true, bomb: !resuming && !state.turbo, maniac: !!maniac, under: fsOn, foldCols: maniac ? ['#ffd21f', '#e8202e', '#b45cff', '#fff6e0'] : ['#ff750c', '#b45cff', '#4fd6e8', '#fff6e0'] }
