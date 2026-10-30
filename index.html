@@ -1,7 +1,7 @@
 <!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><script>if(/[?&]step\b/.test(location.search)){(function(){var q=[],t=performance.now();window.requestAnimationFrame=function(f){q.push(f);return q.length};window.cancelAnimationFrame=function(){};window.__step=async function(n){for(var i=0;i<n;i++){t+=1000/60;var c=q;q=[];c.forEach(function(f){f(t)});for(var k=0;k<12;k++)await null}return t}})()}</script><title>C&amp;T Maniac</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&family=Knewave&display=swap">
 <style>
 /* Layout: helskärm som en modern onlineslot — logga överst, köp-bonus och lavinmätare till vänster,
    6x6-brädet i en serietidningsram i mitten, hjältarna till höger, kontrollpanel längst ner.
@@ -1933,6 +1933,9 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 :root:not(.portrait) .fs-layers .ly.linf em { font-size: 30px; line-height: .8; }
 /* telefonen: mitt under raden med LAYER 1–5, ovanpå brädets ram (panelen ligger över maskinen) */
 .portrait body.fs .g-left .meter { z-index: 4; }
+/* och i INFINITY-bonusen står hela panelen (rutorna, LAYERSPINS och brickorna) 14 px högre, så att INFINITY-brickan ligger
+   precis ovanför brädets ram i stället för över den (användaren 2026-10-29) */
+.portrait body.fs.maniac .meter-fs:not(.base-lag) { top: -14px; }
 .portrait .meter-fs:not(.base-lag) .fs-layers .ly.l6 { position: absolute; left: 50%; top: calc(100% + 1px); width: auto; flex: none; translate: -50% 0; transform: rotate(-2deg);
   display: flex; align-items: center; gap: 4px; padding: 2px 12px 2px; }
 .portrait .meter-fs:not(.base-lag) .fs-layers .ly.linf span { font-size: 13px; letter-spacing: .02em; }
@@ -2015,6 +2018,47 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
 .inf-uv { position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 11px; opacity: 0; transition: opacity .4s ease-out;
   background: radial-gradient(circle at var(--ux) var(--uy), rgba(20, 0, 40, 0) 0, rgba(20, 0, 40, 0) 9%, rgba(28, 6, 58, .72) 19%, rgba(16, 2, 34, .82) 100%); }
 .inf-uv.on { opacity: 1; }
+/* INFINITY-brickan som en hemlighet: mörk och dammig som en gammal överspraygad tagg, på brädet och på bonusaffischen.
+   Man anar bara ordet och huvans silhuett, som andas långsamt. Färgen (.inf-paint) tonas fram när loggan har skallat
+   sönder stängslet och dammet ryker av. */
+.fs-layers .ly.l6.linf:not(.on), .cv-layers .ly.linf { background: linear-gradient(100deg, #221d2b, #15121c 55%, #241e2d) !important;
+  border-color: rgba(214, 221, 229, .22); box-shadow: 0 0 0 1.5px var(--ink), 3px 4px 0 rgba(5, 4, 30, .55); }
+.fs-layers .ly.l6.linf:not(.on) { opacity: .92 !important; filter: none !important; }
+.fs-layers .ly.l6.linf:not(.on) > span, .cv-layers .ly.linf > span { color: rgba(255, 255, 255, .06) !important; -webkit-text-stroke: 1px rgba(214, 221, 229, .32) !important;
+  text-shadow: none !important; filter: blur(.6px); animation: infMyst 4.6s ease-in-out infinite; }
+.fs-layers .ly.l6.linf:not(.on) > .inf-logo, .cv-layers .ly.linf > .inf-logo { filter: brightness(0) drop-shadow(0 0 1px rgba(214, 221, 229, .45)) blur(.4px) !important;
+  opacity: .8; animation: infMyst 4.6s ease-in-out infinite; }
+@keyframes infMyst { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+/* nästa att öppnas: samma mörka bricka, och den fylls med ett ljust sken i stället för krom; det syns tydligt genom
+   stängslet att stapeln växer (användaren 2026-10-30), men inte vad som står under */
+.fs-layers .ly.l6.linf { --lc: linear-gradient(90deg, rgba(160, 170, 184, .5), rgba(236, 240, 245, .88)); }
+.fs-layers .ly.l6.linf.next:not(.on)::before { box-shadow: 0 0 10px 2px rgba(230, 235, 242, .45); }
+
+/* färgen som kommer fram när dammet ryker av: brickan i full färg (som .linf.on); --sp är en maskkant från vänster (1,2 = hela) */
+.fs-layers .ly.l6.linf > .inf-paint { position: absolute; inset: -3px; z-index: 3; display: flex; align-items: center; justify-content: center; gap: inherit; padding: inherit;
+  box-sizing: border-box; border-radius: 12px; pointer-events: none; color: #fff;
+  background: radial-gradient(circle at 30% 20%, #34384a, #07070d 72%); box-shadow: inset 0 0 0 3px #eef2f6, 0 0 16px 4px rgba(230, 235, 242, .6);
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--sp, 0) * 100% - 16%), transparent calc(var(--sp, 0) * 100% + 2%));
+  mask-image: linear-gradient(90deg, #000 calc(var(--sp, 0) * 100% - 16%), transparent calc(var(--sp, 0) * 100% + 2%)); }
+/* dammet */
+.inf-mist { position: fixed; z-index: 86; border-radius: 50%; pointer-events: none; filter: blur(1px); box-shadow: 0 0 5px rgba(255, 255, 255, .6); }
+@media (prefers-reduced-motion: reduce) { .fs-layers .ly.l6.linf:not(.on) > span, .fs-layers .ly.l6.linf:not(.on) > .inf-logo, .cv-layers .ly.linf > * { animation: none; } }
+/* ett litet stängsel (nätstängsel med ram) över den hemliga brickan, så att man undrar "vad är detta"; nätet är tunt och
+   halvgenomskinligt så att man ser stapeln växa bakom det (inget hänglås, användaren 2026-10-30). Loggan skallar sönder
+   det (infRam): sprickorna (.inf-cracks), stjärnan (.inf-pow) och bitarna (.inf-shard) */
+.fs-layers .ly.l6.linf > .inf-fence, .cv-layers .ly.linf > .inf-fence { position: absolute; inset: -5px -7px; z-index: 2; pointer-events: none; --m: 9px;
+  border: 2.5px solid rgba(154, 164, 176, .9); border-radius: 4px; box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1px rgba(21, 17, 31, .45);
+  background: repeating-linear-gradient(45deg, transparent 0 calc(var(--m) - 1px), rgba(205, 212, 220, .42) calc(var(--m) - 1px) var(--m)),
+    repeating-linear-gradient(-45deg, transparent 0 calc(var(--m) - 1px), rgba(205, 212, 220, .42) calc(var(--m) - 1px) var(--m)); }
+.portrait .meter-fs:not(.base-lag) .fs-layers .ly.l6.linf > .inf-fence, .portrait .cv-layers .ly.linf > .inf-fence { inset: -4px -5px; --m: 7px; border-width: 2px; }
+.fs-layers .ly.linf.on > .inf-fence { display: none; }
+.inf-fence > .inf-cracks { position: absolute; inset: -2px; width: calc(100% + 4px); height: calc(100% + 4px); overflow: hidden; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.inf-pow { position: fixed; z-index: 87; pointer-events: none; transform: translate(-50%, -50%); }
+.inf-pow svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.inf-shard { position: fixed; z-index: 86; pointer-events: none; box-sizing: border-box; --m: 9px; border: 2.5px solid rgba(154, 164, 176, .95); border-radius: 4px;
+  background: repeating-linear-gradient(45deg, transparent 0 calc(var(--m) - 1.5px), rgba(214, 221, 229, .8) calc(var(--m) - 1.5px) var(--m)),
+    repeating-linear-gradient(-45deg, transparent 0 calc(var(--m) - 1.5px), rgba(214, 221, 229, .8) calc(var(--m) - 1.5px) var(--m)), rgba(21, 17, 31, .3); }
+.portrait .inf-shard { --m: 7px; border-width: 2px; }
 @media (prefers-reduced-motion: reduce) {
   body::before, .bigwin::before, .buy::before { animation: none; }
   .pop .shape, .pop .word, .pop .mul, .pop.shine .shape::after { animation: none; }
@@ -2261,8 +2305,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // Sannolikhet för stapelhöjd 1, 2, 3, 4.
   var STACK = [0.15, 0.30, 0.35, 0.20];
 
-  // 3 bomber i Bonusspelet ger så många frispinn till
-  var FS_RETRIGGER = 5;
+  // 3 bomber i Bonusspelet ger så många frispinn till (3, som i INFINITY-bonusen, sedan 1.6.1; förut 5)
+  var FS_RETRIGGER = 3;
 
 
   function mulberry32(a) {
@@ -2380,7 +2424,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // för 10) med multi från x15 (i stället för x10). Fler snurr med lägre värde per snurr (fsScale och maniacScale) gör
   // att riktigt dåliga bonusar blir ungefär hälften så vanliga och fler köp ger tillbaka minst priset, medan de stora
   // vinsterna finns kvar. Båda köpen och hela spelet är kalibrerade mot 96 % (korta simuleringar).
-  var TIME = { goldP: 0.165, maxX: 20000, maniacDepth: 5, maniacSpins: 10, maniacStart: 15, maniacScale: 0.20833, fsDepth: 3, fsStart: 8, fsScale: 0.11854, layerTedP: 1 / 140, layerCarlaP: 1 / 450, throwMinT: 10, throwMinC: 25, maniacMin: 5, maniacBuy: 500, fsBuy: 80, scale: 0.54108, minCur: 2, thread: true, multi: true, baseMulti: false, fsTmult: false, sw: true, fsAward: { 3: 10, 4: 10, 5: 10, 6: 10 } };
+  var TIME = { goldP: 0.165, maxX: 20000, maniacDepth: 5, maniacSpins: 10, maniacStart: 15, maniacScale: 0.20833, fsDepth: 3, fsStart: 8, fsScale: 0.13831, layerTedP: 1 / 140, layerCarlaP: 1 / 450, throwMinT: 10, throwMinC: 25, maniacMin: 5, maniacBuy: 500, fsBuy: 80, scale: 0.54108, minCur: 2, thread: true, multi: true, baseMulti: false, fsTmult: false, sw: true, fsAward: { 3: 10, 4: 10, 5: 10, 6: 10 } };
   // Spelets matte (2026-10-22; var prototypens, engine/next-math.js, och blev spelets när den gamla varianten togs bort).
   // Grundspelet: 3 i rad ger ingen vinst för Sneaker, Sprayburk, Kassett och A–J (färre vinster under insatsen); 4 i rad
   // betalar 1,6 gånger så mycket som förut, 5 i rad 1,2 och 6 i rad som förut. Kassetten betalar ungefär dubbelt (minst
@@ -2654,7 +2698,13 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // 1.5.0 (2026-10-24): prototypens matte (sparade omgångar hette 1.4.0-proto) är nu spelets enda matte, med samma utfall.
   // 1.6.0 (2026-10-29): Maniac är INFINITY-bonusen (stegen och INFINITY, se TIME ovan). Grundspelet och Bonusspelet är
   // som i 1.5.0.
-  var ENGINE_VERSION = '1.6.0';
+  // 1.6.1 (2026-10-30): 3 bomber i Bonusspelet ger 3 frispinn till (FS_RETRIGGER, förut 5), som i INFINITY-bonusen
+  // (användaren). Det sänker Bonusspelet till 0,857 av förut (parad simulering, 1 M köp med samma slumptal: 76,78x mot
+  // 65,81x per köp, 11,60 mot 10,90 frispinn), så fsScale är 0,11854 / 0,85708 = 0,13831 och bonusen betalar lika mycket
+  // i snitt som förut: medianen 46,7x (förut 43,6x), största 7 850x på 1 M köp. Kontroll med tools/sim-cert.js samma dag:
+  // köpt Bonusspel 96,00 % ±0,36 (500 000 köp, 10,90 frispinn i snitt), hela spelet 96,18 % ±0,36, SD 10,07 (fortfarande
+  // 4/5; 30 M snurr). Inte certifierat.
+  var ENGINE_VERSION = '1.6.1';
   // Grundspelet: grundremsorna, inga multis, och guldbomben kan komma.
   function baseOpts(extra) { var o = { fs: false, plain: true, goldCheck: true }; for (var k in extra) o[k] = extra[k]; return o; }
   function emptyGrid() { var g = []; for (var r = 0; r < REELS; r++) g.push([-1, -1, -1, -1, -1, -1]); return g; }
@@ -2676,7 +2726,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     do { r = playRound(rng, baseOpts({ layers: hist.slice(0, thr.depth), depth: thr.depth })); } while (r.x < min);
     return r;
   }
-  // En bonus från ett startbräde: Bonusspel (12 frispinn, 3 lager, multi från x5, 3+ bomber ger 5 till) eller Maniac
+  // En bonus från ett startbräde: Bonusspel (12 frispinn, 3 lager, multi från x5, 3+ bomber ger 3 till) eller Maniac
   // (12 frispinn, 5 lager, multi från x15, 3+ bomber ger 3 till). x0: vad omgången redan har vunnit (för taket).
   // Maniac kan börja med lagren fyllda (TIME.maniacPrefill: nya bräden från grundspelets hjul, slumpade när bonusen
   // startar; alla, eller så många som TIME.maniacLayersDraw slumpar fram) och med en startmulti som slumpas per fyllt lager
@@ -4072,7 +4122,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       var song = this.song();
       var six = 60 / (song.bpm + 2 * this.heat) / 4;
       if (this.next < c.currentTime - 0.2) this.next = c.currentTime + 0.05;
-      while (this.next < c.currentTime + 0.14) {
+      while (this.next < c.currentTime + 0.3) {
         this.play(this.step, this.next, song);
         // swing: varannan 16-del är lite längre
         this.next += six * 2 * (this.step % 2 === 0 ? song.swing : 1 - song.swing);
@@ -4157,26 +4207,26 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     this.bell(880 * up, t, 0.25, 0.05);
     this.hiss(0.12, { f: 7500, to: 9500, q: 2, vol: 0.03, at: t + 0.02 });
   };
-  // Vinst: en kraftig smäll (duns och en kort mässingsstöt: A, E, A), sedan ljusa klockor som gnistrar uppåt och ett
-  // myntglitter. Allt går två halvtoner upp för varje steg i lavinen. Stora steg (big: 5x eller mer) får i stället en
-  // djup basduns, en kort stigande mässingsslinga i A-dur (A, C#, E och sedan ackordet) och ett myntregn: små pling som
-  // faller (crashen och airhornen är borta, användaren tyckte att de lät illa).
+  // Vinst: en handklapp och en kort mässingsstöt (A, E, A), sedan ljusa klockor som gnistrar uppåt och ett myntglitter.
+  // Allt går två halvtoner upp för varje steg i lavinen. Stora steg (big: 5x eller mer) får i stället en kort stigande
+  // mässingsslinga i A-dur (A, C#, E och sedan ackordet) och ett myntregn: små pling som faller (crashen och airhornen är
+  // borta, användaren tyckte att de lät illa). Ingen bas (kick eller 808) när man vinner, användaren 2026-10-30: "Gillar
+  // inte alls ljudet ... när man vinner. Att det kommer en bas".
   Sound.win = function (step, big) {
     var n = Math.min(step || 0, 10);
     if (this.fx('win_step', { rate: this.semi(n * 2) })) return;
     if (!this.ctx) return;
     var t = this.ctx.currentTime + 0.005, up = this.semi(n * 2), k;
-    this.kick(t, big ? 0.5 : 0.36, this.sfx);
+    this.clap(t, big ? 0.3 : 0.18, this.sfx);
     if (!big) {
       this.brass([220 * up, 329.6 * up, 440 * up], t, 0.22, 0.028, this.sfx);
       for (k = 0; k < 5; k++) this.bell(penta(5 + k) * up, t + 0.06 + k * 0.045, 0.4, 0.05);
       this.hiss(0.3, { f: 7000, to: 9800, q: 2, vol: 0.05, at: t + 0.06 });
       return;
     }
-    this.bass808(55 * up, t, 0.75, 0.34, this.sfx);
     var run = [220, 277.2, 329.6];
-    for (k = 0; k < 3; k++) this.brass([run[k] * up], t + 0.03 + k * 0.065, 0.12, 0.034, this.sfx);
-    this.brass([220 * up, 277.2 * up, 329.6 * up, 440 * up], t + 0.225, 0.6, 0.024, this.sfx);
+    for (k = 0; k < 3; k++) this.brass([run[k] * up], t + 0.03 + k * 0.065, 0.12, 0.042, this.sfx);
+    this.brass([220 * up, 277.2 * up, 329.6 * up, 440 * up], t + 0.225, 0.6, 0.03, this.sfx);
     // myntregnet: tolv ljusa pling som faller i skalan, lite oregelbundet och allt tystare
     for (k = 0; k < 12; k++) {
       var at = t + 0.14 + k * 0.042 + Math.random() * 0.016, f = penta(14 - Math.floor(k * 0.42) - (Math.random() < 0.4 ? 1 : 0)), v = 0.05 - k * 0.0025;
@@ -4191,7 +4241,6 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     if (this.fx('symbols_pop', { rate: (0.95 + Math.random() * 0.1) * this.semi(n * 2) })) return;
     this.hiss(0.16, { f: 2000, to: 5200, q: 0.7, vol: 0.14, attack: 0.005 });
     this.tone(penta(5 + n), 0.09, { type: 'square', to: penta(6 + n), vol: 0.03 });
-    this.tone(90, 0.12, { type: 'sine', to: 50, vol: 0.18 });
   };
   // en bonusbomb landar: en tung smäll och en klocka som går uppåt i skalan för varje bomb
   Sound.scatter = function (n) {
@@ -4212,14 +4261,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     this.kick(t + 0.85, 0.6, this.sfx); this.crash(t + 0.85, 0.1, this.sfx);
     this.brass([220, 277.2, 329.6, 440], t + 0.85, 0.9, 0.03, this.sfx);
   };
-  // fanfar: F – G – A-dur i mässing med kick, virvel och crash
+  // fanfar: F – G – A-dur i mässing med handklapp (ingen kick, 2026-10-30), virvel och crash
   Sound.fanfare = function () {
     if (this.fx('fanfare')) return;
     var c = this.ctx; if (!c) return;
     var t = c.currentTime, chords = [[174.6, 220, 261.6, 349.2], [196, 246.9, 293.7, 392], [220, 277.2, 329.6, 440, 554.4]], at = [0, 0.2, 0.42];
     for (var i = 0; i < 3; i++) {
       this.brass(chords[i], t + at[i], i === 2 ? 1.2 : 0.22, 0.026, this.sfx);
-      this.kick(t + at[i], i === 2 ? 0.6 : 0.35, this.sfx);
+      this.clap(t + at[i], i === 2 ? 0.26 : 0.15, this.sfx);
     }
     this.snare(t + 0.32, 0.12, this.sfx); this.snare(t + 0.37, 0.16, this.sfx);
     this.crash(t + 0.42, 0.11, this.sfx);
@@ -6847,7 +6896,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     bgEl.parentNode.insertBefore(dim, bgEl.nextSibling);
     void dim.offsetWidth; dim.classList.add('on');
     if (!Sound.fx('bigwin_hit', { vol: 0.6 + 0.2 * lvl })) {
-      Sound.tone(lvl > 1 ? 70 : 90, 0.5 + 0.25 * lvl, { type: 'sine', to: 32, vol: 0.25 + 0.12 * lvl });
+      winBright(lvl);
       Sound.hiss(0.3 + 0.2 * lvl, { f: 300, to: 2400, q: 0.7, vol: 0.05 + 0.04 * lvl });
     }
     // guldet sprutar ur upp till fyra av de vinnande rutorna
@@ -7132,7 +7181,6 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     ], { duration: skip ? 1 : 620 * k, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
     await pause(0.62 * k);
     if (!Sound.fx('bonus_end')) Sound.fanfare();
-    Sound.tone(70, 0.5, { type: 'sine', to: 35, vol: 0.4 });
     cashParts(70, window.innerWidth / 2, window.innerHeight * 0.45, true);
     // vinstpresentationen kommer direkt (flow.js); beloppet tonar bort under tiden
     chip.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).onfinish = function () { chip.remove(); };
@@ -8124,7 +8172,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   var INF_LOGO = new Image(); INF_LOGO.src = INF_LOGO_URL;
   function infLogoHtml(cls) { return '<img class="' + (cls || 'inf-logo') + '" src="' + INF_LOGO_URL + '" alt="">'; }
   // INFINITY-brickan (panelen och bonusaffischen)
-  function infChipHtml() { return '<i class="ly l6 linf"><span>infinity</span>' + infLogoHtml() + '</i>'; }
+  function infChipHtml() { return '<i class="ly l6 linf"><span>infinity</span>' + infLogoHtml() + '<i class="inf-fence"></i></i>'; }
   // loggan på brädet: centrerad i (x, y), s = halva bredden (som infSign), med en tunn vit kant så att den syns på svart
   function infLogo(g, x, y, s) {
     if (!INF_LOGO.complete || !INF_LOGO.naturalWidth) { infSign(g, x, y, s); return; }
@@ -8276,7 +8324,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     parts.push({ kind: 'ring', x: cx, y: cy, life: 0, max: 0.5, c: '#ffffff' });
     for (var i = 0; i < (v >= 500 ? 26 : v >= 100 ? 16 : 10); i++) sparkle(cx + (Math.random() - 0.5) * cell * 2, cy + (Math.random() - 0.5) * cell * 1.6);
     infChime(v >= 500 ? 4 : v >= 100 ? 3 : 2);
-    if (v >= 100) { shakeBoard(2); Sound.tone(70, 0.5, { type: 'sine', to: 35, vol: 0.35 }); }
+    if (v >= 100) { shakeBoard(2); winBright(1); }
     if (v >= 500) infUvOn(r, y);
   }
   // x500 och x1000: UV-neon i graffitistil (studions lime, ODD HEAD GAMES). Resten av brädet släcks till svartljus (infUvOn),
@@ -8329,7 +8377,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     Sound.tone(110, up, { type: 'sawtooth', to: 440, vol: 0.04 });
     await wait(up, true);
     infUvOff();
-    Sound.tone(55, 0.6, { type: 'sine', to: 30, vol: 0.45 });
+    winBright(2);
     if (state.fs) state.fs.hugeRes = state.fs.cur;
     await winShow(amount, false);
     roundShown = amount;
@@ -8519,7 +8567,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     if (fs.ladU == null) { fs.ladU = u1; fs.ladC = c1; renderMeter(); return; }
     while (fs.ladU < u1) {
       fs.ladC = need; renderMeter(); ladTick(need);
-      await wait(showTime(0.45), true);
+      var hitIn = fs.ladU + 1 < infD() ? ladRise(fs.ladU + 1) : 0;
+      await wait(hitIn || showTime(0.45), !hitIn);
       fs.ladU++; fs.ladC = 0;
       if (fs.ladU >= infD()) { await infPortal(); continue; }
       renderMeter(); ladOpen(fs.ladU);
@@ -8550,7 +8599,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     var cv = document.createElement('canvas'); cv.className = 'inf-portal'; cv.width = canvas.width; cv.height = canvas.height;
     stageEl.appendChild(cv);
     var g = cv.getContext('2d'), k = canvas.width / boardPx, dur = showTime(state.turbo ? 0.9 : 1.8), t0 = performance.now();
-    Sound.rewind(dur * 0.72);
+    Sound.rewind(dur * 0.72); infMusOut(dur);
     await new Promise(function (done) {
       function frame(now) {
         var t = Math.min(1, (now - t0) / 1000 / Math.max(0.05, dur));
@@ -8594,7 +8643,9 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         hr.addColorStop(0, 'rgba(0,0,0,1)'); hr.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = hr; g.fillRect(0, 0, boardPx, boardPx); g.restore();
       }
+      if (infTag) infTagPaint(g, hole);
     }
+    infTag = null;
     // 1. pulsen
     var t1 = performance.now();
     await new Promise(function (done) {
@@ -8606,12 +8657,13 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       }
       requestAnimationFrame(beat);
     });
+    infLogoAt = { x: boardPx / 2, y: boardPx / 2, s: L }; await infCan(darkness, g);
     // 2. loggan blir en bild ovanpå sidan som flyger hem, och mörkret öppnar sig under tiden
-    var br = cv.getBoundingClientRect(), px = br.width / boardPx, size = L * 2 * px;
+    var br = cv.getBoundingClientRect(), px = br.width / boardPx, size = (infLogoAt ? infLogoAt.s : L) * 2 * px;
     var home = el.meterFs && (el.meterFs.querySelector('.fs-layers .l6 .inf-logo') || el.meterFs.querySelector('.fs-layers .l6'));
-    var hr2 = home ? home.getBoundingClientRect() : null;
+    var hr2 = infRamFrom() || (home ? home.getBoundingClientRect() : null);
     var im = document.createElement('img'); im.src = INF_LOGO_URL; im.className = 'inf-fly-logo'; im.alt = '';
-    var sx = br.left + br.width / 2, sy = br.top + br.height / 2;
+    var sx = br.left + (infLogoAt ? infLogoAt.x : boardPx / 2) * px, sy = br.top + (infLogoAt ? infLogoAt.y : boardPx / 2) * px;
     im.style.left = sx + 'px'; im.style.top = sy + 'px'; im.style.width = size + 'px'; im.style.height = size + 'px';
     document.body.appendChild(im);
     var t2 = performance.now(), flown = new Promise(function (done) {
@@ -8624,7 +8676,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       ], { duration: open * 1000 * 1.1, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
       a.onfinish = done;
     });
-    if (Sound.hiss) Sound.hiss(open, { f: 900, to: 3200, q: 0.8, vol: 0.05 });
+    infRiser(open * 1.1 + infRamDur());
     await new Promise(function (done) {
       function iris(now) {
         var q = Math.min(1, (now - t2) / 1000 / Math.max(0.05, open)), e = q * q * (3 - 2 * q);
@@ -8633,9 +8685,10 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       }
       requestAnimationFrame(iris);
     });
-    cv.remove();
+    cv.remove(); infLogoAt = null; infTag = null;
     if (pp) pp.style.visibility = '';
     await flown;
+    await infRam(im);
     // 3. landningen: brickan tänds och smäller in, krom-ringen runt brädet tänds med ett sken
     im.remove();
     renderMeter(); ladOpen(infD());
@@ -8643,7 +8696,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     setTimeout(function () { stageEl.classList.remove('inf-glint'); }, 1000);
     await wait(showTime(0.5), true);
   }
-  function ladTick(c) { Sound.tone(620 * Sound.semi(c * 3), 0.1, { type: 'triangle', vol: 0.07 }); }
+  function ladTick(c) { ladTickNew(c, state.fs && state.fs.ladU || 1); }
   // ett lager öppnas: brickan studsar och lyser, gnistor i lagrets färg; INFINITY med en vit blixt och en klang
   function ladOpen(u) {
     var ly = el.meterFs && el.meterFs.querySelector('.fs-layers .l' + u); if (!ly) return;
@@ -8652,7 +8705,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     setTimeout(function () { ly.classList.remove(cls); }, u >= infD() ? 1300 : 750);
     var r = ly.getBoundingClientRect(), col = u >= infD() ? '#ffffff' : HOME_COLS[u];
     for (var s = 0; s < (u >= infD() ? 22 : 12); s++) emberPart(r.left + r.width * Math.random(), r.top + r.height * (0.1 + Math.random() * 0.8), s % 3 ? col : '#e6ebf2');
-    if (u >= infD()) { infChime(3); Sound.fanfare(); } else if (!Sound.fx('multi_up', { rate: Sound.semi(u * 2) })) Sound.tone(520 * Sound.semi(u * 2), 0.14, { type: 'triangle', vol: 0.09 });
+    if (u >= infD()) infDrop(); else if (ladSyncU === u) ladSyncU = 0; else if (!Sound.fx('multi_up', { rate: Sound.semi(u * 2) })) Sound.tone(520 * Sound.semi(u * 2), 0.14, { type: 'triangle', vol: 0.09 });
   }
   // A. storvinst-rutan mitt i bonusen från så många gånger insatsen (ett frispinn)
   var INF_BIG_X = 500;
@@ -8764,6 +8817,532 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   }
   async function infTestBig() { infPlay(infPick('nInfBig', infPredBig) || await infFind(infPredBig, 40000)); }
   EN['Letar fram testet …'] = 'Finding the test …';
+  // ---- INFINITY-stegens musik: Music.lad = öppna lager (1–5, 6 = INFINITY) i INFINITY-bonusen; varje steg lägger på
+  // något i bonusens beat (Music.FS). Allt byter på ett taktslag: ett nytt lager smäller på nästa slag (brickan tänds
+  // samtidigt), trummorna tystnar under uppsvepet fram till slaget, och tempot, filtret och volymen byts på slaget.
+  //   LAYER 1: trummor, 808-bas och Rhodes, bakom ett stängt filter   LAYER 2: filtret öppnas, 16-delshihat, handklapp
+  //   LAYER 3: mässingsstötar och mässingshooken                       LAYER 4: helt öppet, oktavbas, virvelrulle
+  //   LAYER 5: crash på varje takt, hooken en oktav upp, ett sus       INFINITY: krom-pad, glitter, dubbel kick, subbas
+  var LAD_CUT = [20000, 1500, 3200, 7000, 20000, 20000, 20000], LAD_VOL = [0.42, 0.28, 0.32, 0.36, 0.4, 0.42, 0.46], ladSyncU = 0;
+  function ladMix(L, at) {
+    if (!Sound.ctx) return;
+    var t = Math.max(at || 0, Sound.ctx.currentTime);
+    Sound.musF.frequency.setTargetAtTime(LAD_CUT[Math.min(L, 6)], t, 0.04);
+    if (Sound.musicOn) Sound.mus.gain.setTargetAtTime(L ? LAD_VOL[Math.min(L, 6)] : 0.42, t, 0.06);
+  }
+  var playGame = Music.play;
+  Music.play = function (i, t, song) {
+    if (this.pend && t >= this.pend.at - 0.003) { this.lad = this.pend.lad; this.heat = Math.min(5, this.lad - 1); ladMix(this.lad, this.pend.at); this.pend = null; }
+    var L = this.lad || 0;
+    if (!L || song !== this.FS) return playGame.call(this, i, t, song);
+    var S = Sound, d = S.mus, s = i % 16, barN = Math.floor(i / 16), bar = song.bars[barN % 4], root = bar[0], chord = bar[1];
+    var six = 60 / (song.bpm + 2 * this.heat) / 4, inf = L >= 6, drums = !(this.brk && t >= this.brk[0] - 0.003 && t < this.brk[1] - 0.003);
+    if (Math.random() < 0.3) S.crackle(t, d);
+    if (drums) {
+      var kicks = inf && barN % 2 === 1 ? [0, 3, 6, 8, 10, 12, 14] : L >= 2 ? [0, 6, 8, 10, 14] : [0, 7, 10];
+      if (kicks.indexOf(s) >= 0) S.kick(t, s === 0 ? 0.7 : 0.5, d);
+      if (s === 4 || s === 12) { S.snare(t, 0.3, d); if (L >= 2) S.clap(t, 0.16, d); }
+      if (s % 2 === 0 || L >= 2) S.hat(t, s % 4 === 2 ? 0.07 : s % 2 ? 0.03 : 0.045, d, L >= 4 && s === 14);
+      if (inf && s % 2 === 1) S.hat(t + six * 0.5, 0.025, d);
+      if (L >= 5 && s === 0) S.crash(t, inf ? 0.09 : 0.06, d);
+      if (L >= 4 && barN % 4 === 3 && s >= 8) { S.snare(t, 0.04 + (s - 8) * 0.014, d); if (L >= 5) S.snare(t + six * 0.5, 0.03 + (s - 8) * 0.012, d); }
+    }
+    var bp = { 0: [1, 3], 3: [1, 2], 6: [1, 2], 8: [1, 3], 11: [1.5, 2], 14: [2, 2] }[s];
+    if (bp && drums) S.bass808(root * bp[0], t, six * bp[1] * 0.95, 0.42, d);
+    if (L >= 4 && s % 4 === 2 && drums) S.bass808(root * 2, t, six * 1.2, 0.16, d);
+    if (s === 0 || s === 8) S.ep(chord, t, six * 6, 0.03, d);
+    if (L >= 3 && (s === 7 || s === 15)) S.brass(chord.slice(1).map(function (f) { return f * 2; }), t, six * 1.6, 0.018, d);
+    var step = i % 64;
+    song.hook.forEach(function (n) {
+      if (n[0] !== step) return;
+      if (L >= 3) S.brass([n[1]], t, six * n[2], 0.028, d);
+      if (L >= 5) S.lead(n[1] * 2, t, six * n[2], 0.026, d);
+    });
+    if (L >= 5 && barN % 4 === 3 && s === 0) S.hiss(six * 16, { f: 400, to: 6500, q: 0.7, vol: 0.05, at: t, dest: d, attack: six * 14 });
+    if (inf) {
+      if (s === 0) chord.forEach(function (f) { S.voice(f * 2, t, six * 16, { types: ['sawtooth', 'sawtooth', 'sawtooth'], detune: [-14, 0, 14], vol: 0.011, attack: six * 5, sus: 0.85, f0: 500, f1: 2800, f2: 1500, dest: d }); });
+      var arp = [0, 2, 1, 3, 2, 3, 1, 2];
+      S.tone(chord[arp[s % 8] % chord.length] * 4, six * 0.9, { type: 'triangle', vol: 0.016, at: t, dest: d });
+      if (s === 0 && barN % 4 === 0 && drums) S.tone(110, 1.1, { type: 'sine', to: 38, vol: 0.28, at: t, dest: d });
+    }
+    if (s === 13 && barN % 4 === 3 && drums) S.scratch(t, 0.12, d);
+  };
+  // nästa taktslag i musiken (ljudmotorns klocka) minst min sekunder bort, eller null om musiken inte går
+  function musBeat(min) {
+    if (!Sound.ctx || !Music.timer) return null;
+    var song = Music.song(), six = 60 / (song.bpm + 2 * Music.heat) / 4, t = Music.next, st = Music.step, now = Sound.ctx.currentTime;
+    for (var n = 0; n < 40; n++) {
+      if (st % 4 === 0 && t >= now + (min || 0)) return t;
+      t += six * 2 * (st % 2 === 0 ? song.swing : 1 - song.swing); st = (st + 1) % 128;
+    }
+    return null;
+  }
+  // INFINITY-bonusen börjar på LAYER 1; lagret följer stegen (kassetten och varje snurr), alltid på nästa taktslag
+  function musLadStart(mn) {
+    Music.pend = null; Music.brk = null;
+    if (mn && M.TIME.infVals) { Music.lad = 1; Music.heat = 0; ladMix(1); } else { Music.lad = 0; ladMix(0); }
+  }
+  function musLadStop() { Music.lad = 0; Music.pend = null; Music.brk = null; if (Sound.ctx) { ladMix(0); Sound.apply(); } }
+  function musLadSet(u) {
+    if (!infOn()) return;
+    var L = Math.max(1, Math.min(6, u || 1));
+    if (L === Music.lad || (Music.pend && Music.pend.lad === L)) { Music.heat = Math.min(5, (Music.lad || 1) - 1); return; }
+    var tb = musBeat(0.05);
+    if (tb == null) { Music.lad = L; Music.heat = Math.min(5, L - 1); ladMix(L); } else Music.pend = { at: tb, lad: L };
+  }
+  // en lagervinst mot nästa lager (c av 3): en klocka som går upp i skalan genom hela klättringen, ett sus på 2 av 3
+  // (ny 2026-10-29: användaren ville inte ha plinget) brickan fylls med färg som ur en sprayburk: kulan skramlar och ett
+  // kort sprej, två sprej på 2 av 3 och ett långt på 3 av 3; lite starkare för varje steg, inga toner
+  function ladTickNew(c, u) {
+    if (!Sound.ctx) return;
+    var t = Sound.ctx.currentTime + 0.01, v = 0.08 + Math.min(5, u || 1) * 0.008;
+    for (var s = 0; s < 3; s++) Sound.hiss(0.018, { filter: 'highpass', f: 4200, vol: 0.06, at: t + s * 0.045, attack: 0.002 });
+    var at = t + 0.14, n = c >= 3 ? 1 : c;
+    for (var i = 0; i < n; i++) {
+      var len = c >= 3 ? 0.32 : 0.1;
+      Sound.hiss(len, { f: 3600, to: 5400, q: 0.8, vol: v, at: at + i * 0.15, attack: 0.008 });
+      Sound.hiss(len * 0.8, { filter: 'highpass', f: 7000, vol: v * 0.4, at: at + i * 0.15, attack: 0.008 });
+    }
+  }
+  // nästa lager (u, 2–5): uppsvep fram till nästa taktslag (trummorna tystnar under tiden), smällen på slaget och det
+  // nya lagret i musiken från slaget. Svarar hur många sekunder det är kvar till slaget (0: musiken går inte).
+  function ladRise(u) {
+    var tb = musBeat(0.32); if (tb == null) return 0;
+    // (ny 2026-10-29: mässingen och klockorna passade inte, användaren) som en DJ: trummorna tystnar under uppsvepet och
+    // det nya lagret smäller på slaget (kick och handklapp; crash från LAYER 3, dubbelslag från LAYER 4).
+    // (ny 2026-10-30: användaren ville ha ett klarare ljud, "inte bara att basen höjs som när man vinner stort") ingen
+    // 808 längre, i stället en egen signal som bara betyder nytt lager och som går upp ett steg för varje lager (Tejpen;
+    // Arkad och Sirenen provades också)
+    var now = Sound.ctx.currentTime, up = tb - now, k = u;
+    Music.brk = [now, tb]; Music.pend = { at: tb, lad: u };
+    lvlTape(now, tb, k);
+    // (2026-10-30: ingen bas alls, användaren) handklapp på slaget, ingen kick
+    if (k >= 4) for (var r = 0; r < 4; r++) Sound.snare(tb - 0.24 + r * 0.06, 0.03 + r * 0.02, Sound.sfx);
+    Sound.clap(tb, 0.18 + k * 0.02, Sound.sfx);
+    if (k >= 3) Sound.crash(tb, 0.05 + k * 0.01, Sound.sfx);
+    if (k >= 4) { var b8 = 60 / (Music.FS.bpm + 2 * Music.heat) / 2; Sound.clap(tb + b8, 0.14, Sound.sfx); }
+    ladSyncU = u;
+    return up;
+  }
+  // tonen för lager k (2–5): ett steg upp i a-moll pentatoniskt för varje lager (LAYER 2 = A, 3 = C, 4 = D, 5 = E)
+  function lvlNote(k, n) { return Sound.penta(Math.max(0, k - 2) + (n || 0), 440); }
+  // en ton genom ett eget filter (oscillatortyp, frekvens från f till to, filter från c0 till c1), för svepen; starkast
+  // vid andelen atk av tiden (standard 0,85: ett uppsvep som är starkast precis före slaget)
+  function lvlSweep(type, f, to, at, dur, vol, c0, c1, q, atk) {
+    var c = Sound.ctx, o = c.createOscillator(), fl = c.createBiquadFilter(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(to, at + dur);
+    fl.type = 'lowpass'; fl.Q.value = q || 1; fl.frequency.setValueAtTime(c0, at); fl.frequency.exponentialRampToValueAtTime(c1, at + dur);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + dur * (atk || 0.85)); g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.03);
+    o.connect(fl); fl.connect(g); g.connect(Sound.sfx); o.start(at); o.stop(at + dur + 0.06);
+    return o;
+  }
+  // ett kort, ljust syntackord (fyrtonsstöt i kvarter, som en hiphop-stab), lagrets ton i botten
+  function lvlStab(at, k, dur, vol) {
+    [0, 2, 4, 5].forEach(function (n) {
+      Sound.voice(lvlNote(k, n), at, dur, { types: ['square', 'sawtooth'], detune: [-6, 6], vol: vol, attack: 0.004, sus: 0.3, f0: 900, f1: 5200, f2: 1500, q: 2, dest: Sound.sfx });
+    });
+  }
+  // A Tejpen: kassettdäckets knapp klickar ner, bandet varvar upp (ett ylande som stiger) fram till slaget, och på slaget
+  // ett ljust ackord på lagrets ton
+  function lvlTape(now, tb, k) {
+    var up = tb - now;
+    Sound.hiss(0.018, { filter: 'highpass', f: 2200, vol: 0.22, at: now, attack: 0.001 });
+    Sound.tone(1800, 0.012, { type: 'square', vol: 0.05, at: now + 0.004 });
+    Sound.hiss(0.03, { f: 900, q: 2, vol: 0.12, at: now + 0.03, attack: 0.002 });
+    lvlSweep('sawtooth', lvlNote(k) / 4, lvlNote(k), now + 0.05, up - 0.05, 0.09, 300, 4000, 3);
+    lvlSweep('triangle', lvlNote(k) / 2, lvlNote(k) * 2, now + 0.05, up - 0.05, 0.05, 2000, 8000, 1);
+    Sound.hiss(up, { f: 500, to: 5000, q: 1.2, vol: 0.05, at: now, attack: up * 0.9 });
+    lvlHit(tb, k);
+  }
+  // själva signalen på slaget: ett ljust ackord på lagrets ton (också när INFINITY öppnas, k = 6)
+  function lvlHit(at, k) { lvlStab(at, k, 0.42, 0.065); }
+  // INFINITY öppnas: musiken tonar ut när porten börjar (bandet spolas bakåt), hjärtslag, ett långt uppsvep medan loggan
+  // flyger hem, och när den landar smäller det och INFINITY-musiken startar från början på samma slag (infDrop)
+  function infMusOut(dur) {
+    if (!Sound.ctx) return;
+    var n = Sound.ctx.currentTime;
+    Music.pend = null; Music.brk = null;
+    Sound.musF.frequency.setTargetAtTime(300, n, 0.08);
+    Sound.mus.gain.setTargetAtTime(0.0001, n + 0.15, 0.12);
+    setTimeout(function () { if (state.fs && Music.lad !== 6) Music.stop(); }, 700);
+    for (var hb = 0; hb < 2; hb++) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.16, at: n + dur * 0.75 + hb * 0.42 }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.12, at: n + dur * 0.75 + 0.17 + hb * 0.42 }); }
+  }
+  function infRiser(up) {
+    if (!Sound.ctx) return;
+    var n = Sound.ctx.currentTime;
+    Sound.hiss(up, { f: 300, to: 6000, q: 0.7, vol: 0.08, at: n, attack: up * 0.95 });
+    for (var r = 0; r < 8; r++) Sound.snare(n + up - 0.48 + r * 0.06, 0.03 + r * 0.02, Sound.sfx);
+    Sound.scratch(n + Math.max(0, up - 0.32), 0.16, Sound.sfx);
+  }
+  function infDrop() {
+    if (!Sound.ctx) { infChime(3); return; }
+    // det största slaget: lagersignalen ett steg över LAYER 5 (Tejpens ackord), handklapp, virvel och crash (2026-10-30:
+    // ingen kick, 808 eller subbas längre, användaren ville inte ha bas; ingen mässing, inga klockor)
+    var hit = Sound.ctx.currentTime + 0.13;
+    lvlHit(hit, 6);
+    Sound.clap(hit, 0.3, Sound.sfx); Sound.snare(hit, 0.2, Sound.sfx);
+    Sound.crash(hit, 0.16, Sound.sfx);
+    Music.stop(); Music.lad = 6; Music.heat = 5; Music.pend = null; Music.brk = null; ladMix(6, hit);
+    Music.start(hit);
+  }
+
+  // ---- vinstljuden utan bas (2026-10-30, användaren: "Gillar inte alls ljudet ... när man vinner. Att det kommer en
+  // bas"; Sound.win, Sound.pop och Sound.fanfare i sound-street.js)
+  // en ljus smäll i stället för basdunsen (storvinsten och de stora INFINITY-talen): handklapp och glitter (ingen crash,
+  // användaren tyckte tidigare att crashen i vinsterna lät illa)
+  function winBright(v) { if (!Sound.ctx) return; var t = Sound.ctx.currentTime + 0.005; Sound.clap(t, 0.24 + v * 0.1, Sound.sfx); Sound.hiss(0.45, { f: 7000, to: 9800, q: 2, vol: 0.05 + v * 0.02, at: t + 0.02 }); }
+  // ---- INFINITY-brickan som en hemlighet (2026-10-30, användaren: "man kollar på den brickan och inte riktigt ser
+  // vad det är ... så man blir lite fundersam och får en överraskning när man kommer förbi layer 5"). Brickan är mörk och
+  // dammig och har ett litet stängsel över sig (infspray.css): man anar ordet och huvans silhuett. När LAYER 5 är klart
+  // kommer öppningen som förut (mörkret, spolningen, loggan och pulsen), sedan plockar loggan fram sprayburken och sprayar
+  // INFINITY över brädet (infCan), flyger till brickan och skallar stängslet (infRam): stängslet spricker och går i bitar, dammet ryker av brickan och loggan
+  // dyker in på sin plats i den. Först då öppnas INFINITY. (Användaren 2026-10-30: "istället för att flyga runt så rapar
+  // han ut INFINITY som idag ... när han tar sig till iconen ute till vänster så flyger han in i det med huvudet så att
+  // staket spricker och sedan försvinner i en bra animation", och sedan: "kan han plocka fram sprayburken istället för att
+  // rapa ut det med samma typ som i det nya introt"; rapet är borttaget.)
+  function infChipEl() { return el.meterFs && el.meterFs.querySelector('.fs-layers .l6'); }
+  function infFast() { return state.turbo || state.hurry ? 0.55 : 1; }
+  // skallningens tider (s): ansatsen, rusningen, frysningen när den träffar och dyket in i brickan
+  function infRamTimes() { var k = infFast(); return { aim: showTime(0.16 * k), dash: showTime(0.1 * k), hold: showTime(0.14 * k), dive: showTime(0.26 * k) }; }
+  function infRamDur() { var T = infRamTimes(); return T.aim + T.dash + T.hold + T.dive; }
+  // skallningens plan (skärmens koordinater): loggans storlek s, träffpunkten (ix, iy) på stängslet, riktningen (ux, uy),
+  // lutningen rot (grader, hjässan framåt), loggans mitt när hjässan träffar (hx, hy) och ansatsen (wx, wy). Den kommer
+  // från höger; finns det inte plats där kommer den snett ovanifrån.
+  function infRamAim() {
+    var ch = infChipEl(); if (!ch) return null;
+    var r = ch.getBoundingClientRect(); if (!r.width) return null;
+    var fe = ch.querySelector('.inf-fence'), fr = fe ? fe.getBoundingClientRect() : r; if (!fr.width) fr = r;
+    var s = Math.max(58, r.height * 1.9), ix = fr.left + fr.width * 0.62, iy = fr.top + fr.height * 0.5, dirs = [[-1, 0.14], [-0.5, 0.87], [0.5, 0.87]], A = null;
+    for (var i = 0; i < dirs.length && !A; i++) {
+      var d = Math.hypot(dirs[i][0], dirs[i][1]), ux = dirs[i][0] / d, uy = dirs[i][1] / d, rot = Math.atan2(ux, -uy) * 0.68;
+      var hx = ix - Math.sin(rot) * s * 0.4, hy = iy + Math.cos(rot) * s * 0.4, wx = hx - ux * s * 1.15, wy = hy - uy * s * 1.15;
+      if ((wx - s * 0.7 > 0 && wx + s * 0.7 < window.innerWidth && wy - s * 0.7 > 0 && wy + s * 0.7 < window.innerHeight) || i === dirs.length - 1)
+        A = { s: s, ix: ix, iy: iy, ux: ux, uy: uy, rot: rot * 180 / Math.PI, hx: hx, hy: hy, wx: wx, wy: wy, fence: fe, fr: fr, r: r };
+    }
+    return A;
+  }
+  // dit loggan flyger i infPortal steg 2: ansatsen
+  function infRamFrom() {
+    var A = infRamAim(); if (!A) return null;
+    return { left: A.wx - A.s / 2, top: A.wy - A.s / 2, width: A.s, height: A.s };
+  }
+  // en rörelse över dur sekunder: fn(q) med q från 0 till 1 varje bildruta
+  function infAnim(dur, fn) {
+    return new Promise(function (done) {
+      var t0 = performance.now();
+      function frame(now) { var q = Math.min(1, (now - t0) / 1000 / Math.max(0.02, dur)); fn(q); if (q < 1) requestAnimationFrame(frame); else done(); }
+      requestAnimationFrame(frame);
+    });
+  }
+  // skallningen (im: bilden från flygningen, som står i ansatsen)
+  async function infRam(im) {
+    var A = infRamAim(), ch = infChipEl(); if (!A || !ch || !im) return;
+    ch.classList.remove('near');
+    var T = infRamTimes(), s = A.s, b = im.getBoundingClientRect();
+    if (im.getAnimations) im.getAnimations().forEach(function (a) { a.cancel(); });
+    im.style.width = s + 'px'; im.style.height = s + 'px';
+    function put(x, y, rot, sx, sy) {
+      im.style.left = x.toFixed(1) + 'px'; im.style.top = y.toFixed(1) + 'px';
+      im.style.transform = 'translate(-50%, -50%) rotate(' + rot.toFixed(1) + 'deg) scale(' + sx.toFixed(3) + ', ' + sy.toFixed(3) + ')';
+    }
+    var x0 = b.left + b.width / 2, y0 = b.top + b.height / 2;
+    put(x0, y0, 0, 1, 1);
+    // 1. ansatsen: hjässan lutar fram mot brickan och loggan backar lite
+    var bx = A.wx - A.ux * s * 0.2, by = A.wy - A.uy * s * 0.2;
+    await infAnim(T.aim, function (q) { var e = 1 - (1 - q) * (1 - q); put(x0 + (bx - x0) * e, y0 + (by - y0) * e, A.rot * e, 1 + 0.06 * e, 1 - 0.08 * e); });
+    // 2. rusningen
+    infRamSound('dash', T.dash);
+    await infAnim(T.dash, function (q) { var e = q * q; put(bx + (A.hx - bx) * e, by + (A.hy - by) * e, A.rot, 1.06 - 0.1 * e, 0.92 + 0.12 * e); });
+    // 3. smällen: huvudet trycks ihop, stängslet spricker och skakar, en vit stjärna; en kort frysning
+    put(A.hx, A.hy, A.rot, 1.14, 0.84);
+    infRamSound('bonk');
+    var rays = infCracks(A);
+    infPow(A.ix, A.iy, s);
+    if (A.fence && A.fence.animate) A.fence.animate([{ transform: 'translate(0, 0)' }, { transform: 'translate(' + (A.ux * 4).toFixed(1) + 'px, ' + (A.uy * 4 + 1).toFixed(1) + 'px)' }, { transform: 'translate(-1px, 0)' }, { transform: 'translate(0, 0)' }], { duration: T.hold * 1000 });
+    await infAnim(T.hold, function (q) { put(A.hx, A.hy, A.rot, 1.14 - 0.08 * q, 0.84 + 0.1 * q); });
+    // 4. stängslet går i bitar, dammet ryker av brickan och färgen syns, och loggan dyker in på sin plats i brickan
+    infRamSound('shatter');
+    infShatter(A, rays);
+    var paint = document.createElement('i'); paint.className = 'inf-paint';
+    paint.innerHTML = '<span>infinity</span>' + infLogoHtml(); paint.style.setProperty('--sp', '1.2');
+    ch.appendChild(paint);
+    if (paint.animate) paint.animate([{ opacity: 0 }, { opacity: 1 }], { duration: T.dive * 1000 * 0.7, easing: 'ease-out', fill: 'forwards' });
+    var cx = A.r.left + A.r.width / 2, cy = A.r.top + A.r.height / 2;
+    for (var m = 0; m < 16; m++) {
+      var sx = A.r.left + A.r.width * Math.random(), sy = A.r.top + A.r.height * Math.random();
+      infMist(sx, sy, sx + (sx - cx) * 1.2 + (Math.random() - 0.5) * 30, sy + (sy - cy) * 1.6 - 10 - Math.random() * 24);
+    }
+    var lg = paint.querySelector('.inf-logo'), lr = lg ? lg.getBoundingClientRect() : null;
+    var tx = lr && lr.width ? lr.left + lr.width / 2 : cx, ty = lr && lr.width ? lr.top + lr.height / 2 : cy, ts = lr && lr.width ? lr.width / s : 0.3;
+    await infAnim(T.dive, function (q) {
+      var e = q < 0.5 ? 2 * q * q : 1 - Math.pow(2 - 2 * q, 2) / 2, sc = 1 + (ts - 1) * e;
+      put(A.hx + (tx - A.hx) * e, A.hy + (ty - A.hy) * e - Math.sin(q * Math.PI) * s * 0.25, A.rot * (1 - e), sc, sc);
+    });
+    paint.remove();
+  }
+  // sprickorna: taggiga linjer från träffpunkten ut över stängslet (svart kant och vit linje), som växer fram snabbt.
+  // Ger strålarnas vinklar, som bitarna sedan delas längs
+  function infCracks(A) {
+    var fe = A.fence, fr = A.fr, n = 7, base = Math.random() * Math.PI * 2, rays = [];
+    for (var i = 0; i < n; i++) rays.push(base + i * Math.PI * 2 / n + (Math.random() - 0.5) * 0.5);
+    if (!fe) return rays;
+    var W = fr.width, H = fr.height, px = A.ix - fr.left, py = A.iy - fr.top, R = Math.max(W, H) * 1.2, d = '';
+    rays.forEach(function (a) {
+      var x = px, y = py; d += 'M' + x.toFixed(1) + ' ' + y.toFixed(1);
+      for (var k = 1; k <= 3; k++) { var aa = a + (Math.random() - 0.5) * 0.7; x += Math.cos(aa) * R / 3; y += Math.sin(aa) * R / 3; d += 'L' + x.toFixed(1) + ' ' + y.toFixed(1); }
+    });
+    var sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    sv.setAttribute('class', 'inf-cracks'); sv.setAttribute('viewBox', '0 0 ' + W.toFixed(1) + ' ' + H.toFixed(1));
+    sv.innerHTML = '<path d="' + d + '" stroke="#15111F" stroke-width="3.2"/><path d="' + d + '" stroke="#ffffff" stroke-width="1.4"/>';
+    fe.appendChild(sv);
+    var at = (px / W * 100).toFixed(1) + '% ' + (py / H * 100).toFixed(1) + '%';
+    if (sv.animate) sv.animate([{ clipPath: 'circle(0% at ' + at + ')' }, { clipPath: 'circle(150% at ' + at + ')' }], { duration: 110, easing: 'ease-out', fill: 'forwards' });
+    return rays;
+  }
+  // smällens stjärna: en vit serietidningsstjärna med svart kant som växer och bleknar
+  function infPow(x, y, s) {
+    var n = 10, pts = [];
+    for (var i = 0; i < n * 2; i++) { var a = i * Math.PI / n - Math.PI / 2, ra = i % 2 ? 22 : (i % 4 ? 48 : 54); pts.push((50 + Math.cos(a) * ra).toFixed(1) + ',' + (50 + Math.sin(a) * ra).toFixed(1)); }
+    var w = document.createElement('i'); w.className = 'inf-pow';
+    w.style.left = x + 'px'; w.style.top = y + 'px'; w.style.width = w.style.height = (s * 0.95).toFixed(0) + 'px';
+    w.innerHTML = '<svg viewBox="0 0 100 100"><polygon points="' + pts.join(' ') + '" fill="#ffffff" stroke="#15111F" stroke-width="5" stroke-linejoin="round"/></svg>';
+    document.body.appendChild(w);
+    if (!w.animate) { setTimeout(function () { w.remove(); }, 300); return; }
+    w.animate([{ transform: 'translate(-50%, -50%) scale(.25) rotate(0deg)', opacity: 1 }, { transform: 'translate(-50%, -50%) scale(1) rotate(12deg)', opacity: 1, offset: 0.35 },
+      { transform: 'translate(-50%, -50%) scale(1.2) rotate(18deg)', opacity: 0 }], { duration: 340, easing: 'ease-out', fill: 'forwards' }).onfinish = function () { w.remove(); };
+  }
+  // stängslet går i bitar: bitar av nätet (delade längs sprickorna, en inre och en yttre bit mellan varje par) flyger ut
+  // från träffpunkten, snurrar och faller, och bleknar
+  function infShatter(A, rays) {
+    var fe = A.fence, fr = A.fr; if (!fe) return;
+    fe.style.visibility = 'hidden';
+    var W = fr.width, H = fr.height, px = A.ix - fr.left, py = A.iy - fr.top, R = Math.max(W, H) * 3, dur = 650 * infFast();
+    var srt = rays.slice().sort(function (a, b) { return a - b; });
+    function pt(a, rad) { return [px + Math.cos(a) * rad, py + Math.sin(a) * rad]; }
+    srt.forEach(function (a0, i) {
+      var a1 = i + 1 < srt.length ? srt[i + 1] : srt[0] + Math.PI * 2, am = (a0 + a1) / 2, r1 = Math.min(W, H) * (0.45 + Math.random() * 0.35);
+      [[pt(a0, 0), pt(a0, r1), pt(am, r1), pt(a1, r1)], [pt(a0, r1), pt(a0, R), pt(am, R), pt(a1, R), pt(a1, r1), pt(am, r1)]].forEach(function (poly, j) {
+        var mx = Math.max(2, Math.min(W - 2, px + Math.cos(am) * (j ? r1 * 1.6 : r1 * 0.5))), my = Math.max(2, Math.min(H - 2, py + Math.sin(am) * (j ? r1 * 1.6 : r1 * 0.5)));
+        var sh = document.createElement('i'); sh.className = 'inf-shard';
+        sh.style.left = fr.left + 'px'; sh.style.top = fr.top + 'px'; sh.style.width = W + 'px'; sh.style.height = H + 'px';
+        sh.style.clipPath = 'polygon(' + poly.map(function (p) { return p[0].toFixed(1) + 'px ' + p[1].toFixed(1) + 'px'; }).join(', ') + ')';
+        sh.style.transformOrigin = mx.toFixed(1) + 'px ' + my.toFixed(1) + 'px';
+        document.body.appendChild(sh);
+        if (!sh.animate) { sh.remove(); return; }
+        var sp = (j ? 150 : 90) + Math.random() * 130, vx = Math.cos(am) * sp + A.ux * 60, vy = Math.sin(am) * sp - 90 - Math.random() * 60, w = (Math.random() - 0.5) * 900, kf = [];
+        for (var f = 0; f <= 5; f++) {
+          var t = f / 5 * dur / 1000;
+          kf.push({ transform: 'translate(' + (vx * t).toFixed(1) + 'px, ' + (vy * t + 900 * t * t).toFixed(1) + 'px) rotate(' + (w * t).toFixed(0) + 'deg)', opacity: f < 3 ? 1 : 1 - (f - 2) / 3 });
+        }
+        sh.animate(kf, { duration: dur, easing: 'linear', fill: 'forwards' }).onfinish = function () { sh.remove(); };
+      });
+    });
+  }
+  // ljuden, utan bas: rusningen (ett sus), smällen (en tecknad bonk och ett skrammel i nätet) och bitarna (klirr och skrap)
+  function infRamSound(kind, d) {
+    if (!Sound.ctx) return;
+    var t = Sound.ctx.currentTime + 0.005;
+    if (kind === 'dash') { Sound.hiss(d + 0.1, { f: 700, to: 3800, q: 0.9, vol: 0.09, at: t, attack: d * 0.8 }); return; }
+    if (kind === 'bonk') {
+      Sound.tone(640, 0.12, { type: 'triangle', to: 300, vol: 0.13, at: t });
+      Sound.tone(1450, 0.04, { type: 'square', vol: 0.03, at: t });
+      Sound.hiss(0.2, { f: 2800, q: 1.4, vol: 0.12, at: t, attack: 0.002 });
+      [1240, 1810, 2630, 3470].forEach(function (f, i) { Sound.tone(f, 0.38 - i * 0.05, { type: 'sine', vol: 0.028, at: t + 0.004 * i, attack: 0.002 }); });
+      return;
+    }
+    for (var i = 0; i < 9; i++) {
+      var at = t + Math.random() * 0.35;
+      Sound.hiss(0.03 + Math.random() * 0.03, { filter: 'highpass', f: 3500 + Math.random() * 2500, vol: 0.05, at: at, attack: 0.002 });
+      if (i % 2) Sound.tone(2800 + Math.random() * 1400, 0.06, { type: 'sine', vol: 0.016, at: at, attack: 0.002 });
+    }
+  }
+  // en dammtuss: från (sx, sy) mot (tx, ty), växer och bleknar
+  function infMist(sx, sy, tx, ty) {
+    var d = document.createElement('i'), z = 4 + Math.random() * 7;
+    d.className = 'inf-mist'; d.style.width = d.style.height = z.toFixed(1) + 'px';
+    d.style.left = sx + 'px'; d.style.top = sy + 'px';
+    d.style.background = ['#ffffff', '#c4ccd6', '#8f99a5', '#6f7884'][Math.floor(Math.random() * 4)];
+    document.body.appendChild(d);
+    if (!d.animate) { d.remove(); return; }
+    var a = d.animate([
+      { transform: 'translate(-50%, -50%) scale(.4)', opacity: 0.9 },
+      { transform: 'translate(calc(-50% + ' + (tx - sx).toFixed(1) + 'px), calc(-50% + ' + (ty - sy).toFixed(1) + 'px)) scale(1.5)', opacity: 0 }
+    ], { duration: 260 + Math.random() * 160, easing: 'cubic-bezier(.2, .6, .4, 1)' });
+    a.onfinish = function () { d.remove(); };
+  }
+  // var loggan står i brädets koordinater { x, y, s } (s = halva bredden), från pulsen och genom sprayningen; flygningen till
+  // brickan börjar där (build.js)
+  var infLogoAt = null;
+
+  // ---- Sprayburken (2026-10-30, användaren: "kan han plocka fram sprayburken istället för att rapa ut det med samma typ
+  // som i det nya introt"): efter pulsen glider loggan ner till brädets nedre vänstra hörn, handen med den rosa sprayburken
+  // (som i Odd Head-introt) svänger upp och skakar burken (kulan skramlar), och han sprayar INFINITY stort över brädet i
+  // introts stil: Knewave, rosa med lila skugga, svart kant och svart skugga, ett vitt glansband, rosa och lila stänk och
+  // färg som rinner. Sedan sänks handen, taggen står kvar tills mörkret öppnar sig (infTagPaint) och flygningen till
+  // brickan börjar där loggan står (infLogoAt).
+  var INF_TAG_FONT = 'Knewave, ' + DISPLAY;
+  if (document.fonts && document.fonts.load) document.fonts.load('40px Knewave').catch(function () {});
+  // handen med burken: introts arm i Huvans koordinater (samma som loggans, viewBox 112 78 296 296), vriden kring
+  // axeln (362, 402); bilden täcker 330–590 × 236–476
+  var INF_ARM = new Image();
+  INF_ARM.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="330 236 260 240"><g stroke="#15111F" stroke-linejoin="round" stroke-linecap="round">' +
+    '<g transform="translate(14 14)" fill="#15111F" stroke-width="20"><path d="M346 384C390 362 440 346 486 332L500 378C456 394 412 412 378 436Z"/><path d="M502 298C510 284 534 280 552 286C568 292 572 316 566 334C560 352 536 358 516 352C500 346 494 314 502 298Z"/><rect x="514" y="250" width="46" height="198" rx="9"/></g>' +
+    '<path d="M346 384C390 362 440 346 486 332L500 378C456 394 412 412 378 436Z" fill="#3A2A6B" stroke-width="20"/>' +
+    '<path d="M484 328L500 378L518 372L502 322Z" fill="#5B4A99" stroke-width="10"/>' +
+    '<rect x="514" y="274" width="46" height="174" rx="9" fill="#FF5FA2" stroke-width="10"/>' +
+    '<rect x="519" y="372" width="36" height="48" fill="#B5F23D" stroke="none"/>' +
+    '<path d="M514 372h46M514 420h46M514 434h46" fill="none" stroke-width="5"/>' +
+    '<text x="537" y="404" text-anchor="middle" font-family="Bangers, Impact, sans-serif" font-size="22" fill="#15111F" stroke="none">OH</text>' +
+    '<rect x="521" y="360" width="7" height="80" rx="3.5" fill="#fff" opacity=".4" stroke="none"/>' +
+    '<ellipse cx="537" cy="276" rx="23" ry="6" fill="#9B78FF" stroke-width="7"/>' +
+    '<rect x="525" y="250" width="24" height="28" rx="5" fill="#fff" stroke-width="8"/>' +
+    '<circle cx="549" cy="263" r="3.2" fill="#15111F" stroke="none"/>' +
+    '<path d="M508 296C500 278 504 258 518 250C526 246 536 248 540 254" fill="none" stroke-width="22"/>' +
+    '<path d="M508 296C500 278 504 258 518 250C526 246 536 248 540 254" fill="none" stroke="#9B78FF" stroke-width="10"/>' +
+    '<path d="M502 298C510 284 534 280 552 286C568 292 572 316 566 334C560 352 536 358 516 352C500 346 494 314 502 298Z" fill="#9B78FF" stroke-width="12"/>' +
+    '<path d="M506 312C522 308 544 308 566 314M506 330C522 326 544 326 564 332" fill="none" stroke-width="6"/></g></svg>');
+  var INF_PUFF = typeof Path2D === 'function' ? new Path2D('M0 -6C4 -22 26 -24 32 -10C46 -14 54 4 42 12C44 26 24 30 16 20C6 28 -10 20 -6 8C-16 4 -12 -10 0 -6Z') : null;
+  var infTag = null;
+  // taggen (kd: canvasens pixlar per brädpixel): ordet i alla lager på en egen canvas, stänken och dropparna som vektorer.
+  // Mitt på brädet i sidled, lite ovanför mitten
+  function infTagMake(kd) {
+    var word = 'INFINITY', B = boardPx, fs = cell * 1.7, c = document.createElement('canvas'), q = c.getContext('2d');
+    q.font = Math.round(fs) + 'px ' + INF_TAG_FONT;
+    var tw = q.measureText(word).width;
+    if (tw > B * 0.86) { fs *= B * 0.86 / tw; q.font = Math.round(fs) + 'px ' + INF_TAG_FONT; tw = q.measureText(word).width; }
+    var k = fs / 132, pad = fs * 0.35, w = tw + pad * 2, h = fs * 1.75, base = fs * 1.15, x0 = pad;
+    var X = (B - w) / 2, bb = B * 0.42 + fs * 0.35, Y = bb - base;
+    c.width = Math.ceil(w * kd); c.height = Math.ceil(h * kd);
+    q.setTransform(kd, 0, 0, kd, 0, 0);
+    q.font = Math.round(fs) + 'px ' + INF_TAG_FONT; q.textAlign = 'left'; q.textBaseline = 'alphabetic'; q.lineJoin = 'round';
+    function layer(fill, sw, off) {
+      q.save(); q.translate(off, off);
+      if (sw) { q.lineWidth = sw; q.strokeStyle = fill; q.strokeText(word, x0, base); }
+      q.fillStyle = fill; q.fillText(word, x0, base); q.restore();
+    }
+    layer(INK, fs * 0.2, fs * 0.09); layer('#5B33D6', fs * 0.167, fs * 0.045); layer(INK, fs * 0.167, 0); layer('#FF5FA2', 0, 0);
+    // det vita glansbandet över bokstävernas mitt
+    q.save(); q.beginPath(); q.rect(0, base - fs * 0.833, w, fs * 0.41); q.clip(); q.globalAlpha = 0.42; q.fillStyle = '#ffffff'; q.fillText(word, x0, base); q.restore();
+    var lt = word.split('').map(function (l, i) { return [X + x0 + q.measureText(word.slice(0, i)).width, q.measureText(l).width]; });
+    var T = { c: c, X: X, Y: Y, w: w, h: h, fs: fs, k: k, base: bb, bx: X + x0, tw: tw, by: bb - fs * 0.8, th: fs, dots: [], drips: [], done: false };
+    // stänken: rosa och lila prickar över ordet, som syns när sprayen har passerat
+    for (var i = 0; i < 52; i++) T.dots.push({ u: Math.random(), x: T.bx + Math.random() * tw, y: T.by + T.th * (0.05 + Math.random() * 0.8), r: fs * (0.014 + Math.random() * 0.03), c: Math.random() < 0.75 ? '#FF5FA2' : '#7A4DFF' });
+    T.dots.forEach(function (d) { d.u = (d.x - T.bx) / tw; });
+    // dropparna: under fem av bokstäverna
+    [[1, 0.24, 38], [2, 0.3, 28], [4, 0.22, 42], [5, 0.7, 30], [7, 0.3, 36]].forEach(function (p) {
+      var l = lt[p[0]]; T.drips.push({ x: l[0] + p[1] * l[1], y: bb - 10 * k, len: p[2] * k * 1.4, bw: 8 * k * 1.2 });
+    });
+    return T;
+  }
+  // stänken, dropparna (v: hur långt de har runnit, 0 till 1, per droppe) och ordet; reveal: hur långt sprayen har kommit
+  // (0 till 1, ordet klipps där)
+  function infTagDraw(g, T, reveal, dv) {
+    g.save();
+    if (reveal < 1) { g.beginPath(); g.rect(0, 0, T.bx - 30 * T.k + reveal * (T.tw + 70 * T.k), boardPx); g.clip(); }
+    T.dots.forEach(function (d) { if (reveal >= d.u) { g.fillStyle = d.c; g.globalAlpha = 0.85; g.beginPath(); g.arc(d.x, d.y, d.r, 0, Math.PI * 2); g.fill(); } });
+    g.globalAlpha = 1;
+    T.drips.forEach(function (d, i) {
+      var v = dv ? dv(i) : 1; if (v <= 0) return;
+      var ln = d.len * v;
+      g.beginPath(); g.moveTo(d.x - d.bw, d.y); g.lineTo(d.x - d.bw, d.y + ln); g.arc(d.x, d.y + ln, d.bw, Math.PI, 0, true); g.lineTo(d.x + d.bw, d.y); g.closePath();
+      g.fillStyle = '#FF5FA2'; g.fill(); g.lineWidth = 6 * T.k; g.strokeStyle = INK; g.lineJoin = 'round'; g.stroke();
+    });
+    g.drawImage(T.c, T.X, T.Y, T.w, T.h);
+    g.restore();
+  }
+  // den färdiga taggen i infPortals mörker; tonar bort när hålet i mörkret växer
+  function infTagPaint(g, hole) {
+    var T = infTag; if (!T || !T.done) return;
+    var a = hole > 0 ? Math.max(0, 1 - Math.pow(hole / (boardPx * 0.78), 1.4)) : 1; if (a <= 0) return;
+    g.save(); g.globalAlpha = a; infTagDraw(g, T, 1, null); g.restore();
+  }
+  // loggan med handen och burken (a: armens vinkel i grader, 0 = burken uppe; aa: armens synlighet; rattle: skramlet)
+  function infCanLogo(g, x, y, s, a, aa, rattle) {
+    g.save(); g.shadowColor = '#ffffff'; g.shadowBlur = cell * 0.4; infLogo(g, x, y, s); g.restore();
+    if (aa <= 0 || !INF_ARM.complete || !INF_ARM.naturalWidth) return;
+    g.save(); g.globalAlpha = aa; g.translate(x - s, y - s); g.scale(s * 2 / 296, s * 2 / 296); g.translate(-112, -78);
+    g.translate(362, 402); g.rotate(a * Math.PI / 180); g.translate(-362, -402);
+    g.shadowColor = 'rgba(255, 255, 255, 0.9)'; g.shadowBlur = s * 0.12;
+    g.drawImage(INF_ARM, 330, 236, 260, 240);
+    if (rattle) { g.shadowColor = 'transparent'; g.lineWidth = 7; g.lineCap = 'round'; g.strokeStyle = INK; g.beginPath(); g.moveTo(498, 252); g.lineTo(482, 244); g.moveTo(496, 274); g.lineTo(478, 274); g.moveTo(584, 244); g.lineTo(596, 232); g.moveTo(590, 266); g.lineTo(606, 264); g.stroke(); }
+    g.restore();
+  }
+  // munstycket i brädets koordinater (armen vriden a grader)
+  function infNozzle(x, y, s, a) {
+    var r = a * Math.PI / 180, ca = Math.cos(r), sa = Math.sin(r), u = s * 2 / 296;
+    var nx = 362 + (551 - 362) * ca - (263 - 402) * sa, ny = 402 + (551 - 362) * sa + (263 - 402) * ca;
+    return { x: x - s + (nx - 112) * u, y: y - s + (ny - 78) * u };
+  }
+  // sprayningen (darkness: infPortals mörker; loggan börjar i infLogoAt)
+  async function infCan(darkness, g) {
+    var E = infLogoAt; if (!E) return;
+    if (document.fonts && document.fonts.check && !document.fonts.check('40px Knewave')) {
+      try { await Promise.race([document.fonts.load('40px Knewave'), new Promise(function (r) { setTimeout(r, 400); })]); } catch (e) { /* reservtypsnittet */ }
+    }
+    var kf = infFast(), B = boardPx, T = infTagMake(canvas.width / boardPx), k = T.k;
+    function at(sec) { return showTime(sec * kf); }
+    var mv = at(0.28), up0 = at(0.2), up1 = at(0.42), sh1 = at(0.7), sp0 = at(0.72), sp1 = at(1.62), dn0 = at(1.72), dn1 = at(1.92), end = at(2.0);
+    var lx = B * 0.19, ly = B * 0.76, ls = B * 0.13, t0 = performance.now(), snd = { rattle: false, spray: false };
+    function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / Math.max(0.001, b - a))); }
+    function bOut(x) { return 1 + 2.9 * Math.pow(x - 1, 3) + 1.9 * Math.pow(x - 1, 2); }
+    function eIO(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function eOut(x) { return 1 - Math.pow(1 - x, 3); }
+    await new Promise(function (done) {
+      function frame(now) {
+        var tt = (now - t0) / 1000;
+        // loggan glider ner till hörnet och krymper
+        var e = seg(tt, 0, mv); e = e * e * (3 - 2 * e);
+        var x = E.x + (lx - E.x) * e, y = E.y + (ly - E.y) * e, s = E.s + (ls - E.s) * e;
+        // armen: upp, skakar burken, rycker lite medan den sprayar, och ner igen
+        var a = 38 * (1 - bOut(seg(tt, up0, up1))), aa = tt < up0 ? 0 : 1 - seg(tt, dn1 - at(0.06), dn1), shaking = tt > up1 && tt < sh1, spraying = tt > sp0 && tt < sp1;
+        if (shaking) a += 7 * Math.sin(2 * Math.PI * 8 * (tt - up1) / kf) * (1 - seg(tt, sh1 - at(0.08), sh1));
+        if (spraying) a += 1.2 * Math.sin(2 * Math.PI * 15 * tt);
+        a += 45 * seg(tt, dn0, dn1) * seg(tt, dn0, dn1);
+        if (!snd.rattle && tt >= up1) { snd.rattle = true; infCanSound('rattle', sh1 - up1); }
+        if (!snd.spray && tt >= sp0) { snd.spray = true; infCanSound('spray', sp1 - sp0); }
+        var p = eIO(seg(tt, sp0, sp1)), nz = infNozzle(x, y, s, a);
+        darkness(0);
+        infTagDraw(g, T, tt < sp0 ? 0 : p, function (i) { return eOut(seg(tt, sp1 + at(0.06 * i), sp1 + at(0.35 + 0.06 * i))); });
+        // sprayen: en kon från munstycket till ordet och ett rosa moln där den träffar
+        if (spraying) {
+          var hx = T.bx + p * T.tw, hy = T.by + T.th * 0.5 + 10 * k * Math.sin(tt * 40);
+          [[40, '#ffffff', 0.5], [18, '#FF5FA2', 0.6]].forEach(function (c) {
+            g.globalAlpha = c[2]; g.fillStyle = c[1]; g.beginPath(); g.moveTo(nz.x, nz.y); g.lineTo(hx, hy - c[0] * k); g.lineTo(hx, hy + c[0] * k); g.closePath(); g.fill();
+          });
+          var ms = 1 + 0.25 * Math.sin(tt * 55);
+          [[14, 0.5], [9, 0.6], [6, 1]].forEach(function (c) { g.globalAlpha = c[1]; g.fillStyle = '#FF5FA2'; g.beginPath(); g.arc(hx, hy, c[0] * k * ms, 0, Math.PI * 2); g.fill(); });
+          g.globalAlpha = 1;
+        }
+        infCanLogo(g, x, y, s, a, aa, shaking && Math.sin(2 * Math.PI * 8 * tt) > 0);
+        // ett litet moln vid munstycket när sprayen börjar
+        var pf = eOut(seg(tt, sp0 - at(0.04), sp0 + at(0.06))) * (1 - seg(tt, sp1, sp1 + at(0.15)));
+        if (pf > 0 && INF_PUFF) {
+          g.save(); g.translate(nz.x + 4 * k, nz.y - 6 * k); g.scale(pf * s / 160, pf * s / 160);
+          g.fillStyle = '#ffffff'; g.fill(INF_PUFF); g.lineWidth = 6; g.lineJoin = 'round'; g.strokeStyle = INK; g.stroke(INF_PUFF);
+          g.fillStyle = '#FF5FA2'; g.beginPath(); g.arc(20, 2, 5, 0, Math.PI * 2); g.fill(); g.fillStyle = '#B5F23D'; g.beginPath(); g.arc(34, -4, 3.5, 0, Math.PI * 2); g.fill();
+          g.restore();
+        }
+        infLogoAt = { x: x, y: y, s: s };
+        if (tt < end) requestAnimationFrame(frame); else done();
+      }
+      requestAnimationFrame(frame);
+    });
+    T.done = true; infTag = T; infLogoAt = { x: lx, y: ly, s: ls };
+    darkness(0);
+    g.save(); g.shadowColor = '#ffffff'; g.shadowBlur = cell * 0.4; infLogo(g, lx, ly, ls); g.restore();
+  }
+  // ljuden, utan bas: kulan skramlar när han skakar burken, sedan ett sprej i korta drag medan ordet växer fram
+  function infCanSound(kind, d) {
+    if (!Sound.ctx) return;
+    var t = Sound.ctx.currentTime + 0.01;
+    if (kind === 'rattle') { var n = Math.max(3, Math.round(d / 0.045)); for (var s = 0; s < n; s++) Sound.hiss(0.018, { filter: 'highpass', f: 4200, vol: 0.08, at: t + s * d / n, attack: 0.002 }); return; }
+    var m = Math.max(2, Math.round(d / 0.22)), len = d / m;
+    Sound.hiss(0.06, { f: 2600, q: 1, vol: 0.08, at: t, attack: 0.004 });
+    for (var i = 0; i < m; i++) {
+      Sound.hiss(len * 1.25, { f: 3400, to: 5600, q: 0.8, vol: 0.11, at: t + i * len, attack: 0.02 });
+      Sound.hiss(len * 1.05, { filter: 'highpass', f: 7000, vol: 0.045, at: t + i * len, attack: 0.02 });
+    }
+  }
   // Bara när matten har startmulti per lager (M.TIME.maniacStartDraw, prototypen). Bandspelaren glider upp, Maniac-
   // kassetten (guld med röd rand) hoppar in och spolar bakåt. För varje steg bakåt skjuts en bricka LAYER n upp ur luckan,
   // lagrets startmulti (x1–x5, plan.startDraws) smäller fram under brickan, x4 och x5 hårdare, och flyger in i MULTI, som
@@ -8830,7 +9409,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // smäll i sin färg; MULTI får hela summan först när kassetten är klar (maniacTape)
   function mtLand(plan, k, v, sumEl) {
     var fs = state.fs; if (!fs) return;
-    fs.layers = plan.layers0.slice(0, k); if (infOn()) { fs.ladU = k; fs.ladC = 0; } renderMeter();
+    fs.layers = plan.layers0.slice(0, k); if (infOn()) { fs.ladU = k; fs.ladC = 0; musLadSet(k); } renderMeter();
     if (sumEl) {
       sumEl.textContent = 'x' + ((parseInt(sumEl.textContent.slice(1), 10) || 0) + v);
       if (sumEl.animate) sumEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.4) rotate(-5deg)', offset: 0.4 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.3, 1.8, .5, 1)' });
@@ -9189,14 +9768,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       if (infOn()) { var lq0 = plan.spins[si] && plan.spins[si].ladIn; state.fs.ladU = lq0 ? lq0.u : plan.ladStart; state.fs.ladC = lq0 ? lq0.c : 0; }
       state.fs.total = resume.total;
     }
-    function fsOn() { document.body.classList.add('fs'); document.body.classList.toggle('maniac', !!maniac); drawBackdrop(); renderMeter(); hud(); }
+    function fsOn() { document.body.classList.add('fs'); document.body.classList.toggle('maniac', !!maniac); musLadStart(!!maniac); drawBackdrop(); renderMeter(); hud(); }
     if (!resuming) roundProgress(0);
     Sound.fx(maniac ? 'maniac_intro' : 'bonus_intro');
     await overlay(
       '<span class="ov-kicker">' + (resuming ? txl('Bonusen fortsätter') : bought ? txl('Köpt bonus') : 'Bonus') + '</span><h2 class="ov-title">' + (maniac ? 'INFINITY' : txl('BONUSSPEL')) + '</h2>' +
       '<div class="ov-big">' + (resuming ? txl('{n} frispinn kvar', { n: state.fs.left }) : txl('{n} frispinn', { n: count })) + '</div>' +
       // Tidsvägar: reglerna i korta, stora rader (multin, hur långt bakåt vinsterna når, med lagerbrickorna, och bomberna),
-      // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +5 frispinn i Bonusspelet och +3 i Maniac
+      // likadant i båda bonusarna, bara siffrorna skiljer sig. 3 bomber ger +3 frispinn i båda bonusarna
       // (samma som playBonus i math.js).
       '<div class="cv-facts">' + (tape && !resuming && mtLD(!!maniac) ? txl('<p>Kassetten spolar fram <b>{n} LAYER</b>. Varje LAYER ger <b class="nw">LAYER-numret × {x}</b> i MULTI, och allt läggs ihop</p>', { n: mtLayersText(!!maniac), x: mtStep(!!maniac) })
         : txl('<p><b>MULTI x{m}</b> nollställs aldrig</p>', { m: tape && !resuming ? mtRange(!!maniac) : state.fs.mult })) +
@@ -9215,7 +9794,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     roundProgress(si);
     while (si < plan.spins.length) {
       state.fs.left--; renderMeter(); hud(); clearChips();
-      var m0 = maniac ? (state.fs.m0 || M.TIME.maniacStart) : M.TIME.fsStart; Music.heat = state.fs.mult >= m0 * 4 ? 3 : state.fs.mult >= m0 * 2 ? 2 : 1; if (infOn() && state.fs.ladU >= infD()) Music.heat = Math.min(5, Music.heat + 1);
+      var m0 = maniac ? (state.fs.m0 || M.TIME.maniacStart) : M.TIME.fsStart; Music.heat = state.fs.mult >= m0 * 4 ? 3 : state.fs.mult >= m0 * 2 ? 2 : 1; if (infOn() && state.fs.ladU >= infD()) Music.heat = Math.min(5, Music.heat + 1); if (infOn()) musLadSet(state.fs.ladU);
       state.slam = false; state.hurry = false;
       var res = plan.spins[si++];
       // INFINITY-bonusen: stegen börjar där matten säger, och ett hjärtslag när INFINITY bara saknar en lagervinst (infinity.js)
@@ -9263,7 +9842,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     );
     var covers = gameEl.querySelectorAll('.ov-cover .ov-inner'); bonusSummaryPlay(covers[covers.length - 1], { total: total, counted: shown || maxed });
     await endOv;
-    function fsOff() { clearMaxEnd(); if (!state.fs) return; state.fs = null; document.body.classList.remove('fs', 'maniac'); drawBackdrop(); renderMeter(); hud(); }
+    function fsOff() { clearMaxEnd(); if (!state.fs) return; state.fs = null; musLadStop(); document.body.classList.remove('fs', 'maniac'); drawBackdrop(); renderMeter(); hud(); }
     fsOff();
     return total;
   }
@@ -9522,7 +10101,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         if (k < 1) requestAnimationFrame(tick); else { amt.classList.remove('pump'); void amt.offsetWidth; amt.classList.add('pump'); }
       })(t0);
     }]);
-    steps.push([o.counted ? 500 : 2100, function () { slap(p.querySelector('.bs-x')); if (done) return; Sound.tone(90, 0.3, { type: 'sine', to: 45, vol: 0.3 }); if (Sound.spray) Sound.spray(0.3); }]);
+    steps.push([o.counted ? 500 : 2100, function () { slap(p.querySelector('.bs-x')); if (done) return; if (Sound.ctx) Sound.clap(Sound.ctx.currentTime + 0.005, 0.2, Sound.sfx); if (Sound.spray) Sound.spray(0.3); }]);
     p.querySelectorAll('.bs-st').forEach(function (e, i) { steps.push([(o.counted ? 1100 : 2700) + i * 260, function () { slap(e); sticker(); }]); });
     p.querySelectorAll('.bs-lay .ly').forEach(function (e, i) { steps.push([(o.counted ? 1950 : 3550) + i * 220, function () { slap(e); sticker(); }]); });
     steps.push([(o.counted ? 2000 : 3600) + p.querySelectorAll('.bs-lay .ly').length * 220, function () { slap(p.querySelector('.bs-min')); slap(p.querySelector('.bs-btns')); }]);
@@ -11005,22 +11584,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   }
   // antal bomber på hjulen före hjul n (spin-reels.js väntar när det är 2, guldväntan när det är minst 3)
   function nxBombsBefore(g, n) { var c = 0; for (var r = 0; r < n; r++) g.base.startGrid[r].forEach(function (x) { if (x === SCAT) c++; }); return c; }
+  // Fliken Nytt har bara det som inte är provat och pushat än: [knappen i TESTS, rubrik, text]. Det som är provat och
+  // pushat tas bort härifrån (användaren 2026-10-29), och när listan är tom syns bara spelets lista, utan flikar. En
+  // funktion och inte en lista, eftersom mode-setup.js bygger menyn innan den här delen har körts.
+  function nxNew() { return []; }
   function nxTestTab(tbt) {
-    var list = $('#testList'); if (!list) return;
+    var list = $('#testList'), items = nxNew(); if (!list || !items.length) return;
     var game = list.innerHTML;
-    var news = [
-      tbt('nAnt2', 'Väntan: 2 bomber', 'Två bomber har landat: nästa hjul snurrar längre, saktar in och kryper in mot den tredje.'),
-      tbt('nAntGold', 'Guldväntan', '3 bomber på hjul 1–3: hjul 4, 5 och 6 väntar i guld, längre för varje hjul. Oftast utan guld.'),
-      tbt('nGold', 'Guldbomben', 'Guldväntan som slutar med guldbomben och Infinity-bonusen (kan ta några sekunder att hitta).'),
-      tbt('nBs3', 'Bonusspel: kassetten 3 lager', 'Bonusspelet där kassetten spolar alla 3 lager (x18).'),
-      tbt('nMn5', 'Infinity: kassetten 5 lager', 'Infinity-bonusen där kassetten spolar alla 5 lager (x90).'),
-      tbt('nInf', 'Infinity: fullt band', 'Fullt band (5 lager) som öppnar INFINITY och får ett Infinity-tal i något av de första snurren.'),
-      tbt('nInfUp', 'Infinity: klättra till INFINITY', 'Kort band (3 lager) som klättrar hela vägen upp till INFINITY.'),
-      tbt('nInfBig', 'Infinity: x1000', 'Hoppar in snurret före ett Infinity-tal på x1000.'),
-      tbt('nMn2', 'Infinity: kassetten stannar tidigt', 'Infinity-bonusen där bandet stannar efter 2 lager (x18).'),
-      tbt('tstudio', 'Introt (CtP-loggan)', 'Studiointrot med den nya loggan.'),
-      tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
-    ].join('');
+    var news = items.map(function (n) { return tbt(n[0], n[1], n[2]); }).join('') + tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.');
     list.innerHTML = '<div class="tl-group" data-g="new">' + news + '</div><div class="tl-group" data-g="game" hidden>' + game + '</div>';
     var tabs = document.createElement('div'); tabs.className = 'tl-tabs';
     tabs.innerHTML = '<button type="button" class="on" data-g="new">Nytt</button><button type="button" data-g="game">Spelet</button>';
