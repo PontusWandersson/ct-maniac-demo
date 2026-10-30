@@ -5165,11 +5165,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     g.strokeStyle = INK; g.lineWidth = Math.max(1, cell * 0.011); edge(-cell * 0.014, -cell * 0.014);
     g.restore();
   }
-  // rivkanten i INFINITY-bonusen: guld (användaren 2026-10-30: "skall inte de avrivna hörnen vara guldiga i
-  // infinitybonusen?"), en metallisk gradient över rutan (r, y) i stället för det blå
-  function tearGold(g, r, y) {
-    var x0 = r * cell, y0 = y * cell, gr = g.createLinearGradient(x0 + cell * 0.4, y0 + cell * 0.4, x0 + cell, y0 + cell);
-    gr.addColorStop(0, '#fff4b0'); gr.addColorStop(0.35, '#ffd21f'); gr.addColorStop(0.65, '#d99a00'); gr.addColorStop(1, '#ffe46b');
+  // rivkanten i rutan (r, y): blå i grundspelet; i bonusarna en metallisk gradient i stället, orange i Bonusspelet och guld
+  // i INFINITY-bonusen, så att man ser vilken nivå man är på (användaren 2026-10-30: "skall inte de avrivna hörnen vara
+  // guldiga i infinitybonusen?", och sedan "Sätt kanten orange i bonusen")
+  var TEAR_METAL = { fs: ['#ffd6ad', '#ff8629', '#c75a00', '#ffb36b'], inf: ['#fff4b0', '#ffd21f', '#d99a00', '#ffe46b'] };
+  function tearEdge(g, r, y) {
+    if (!state.fs) return DEPTH_COL[1];
+    var c = TEAR_METAL[state.fs.maniac ? 'inf' : 'fs'], x0 = r * cell, y0 = y * cell, gr = g.createLinearGradient(x0 + cell * 0.4, y0 + cell * 0.4, x0 + cell, y0 + cell);
+    gr.addColorStop(0, c[0]); gr.addColorStop(0.35, c[1]); gr.addColorStop(0.65, c[2]); gr.addColorStop(1, c[3]);
     return gr;
   }
   // När rundan är slut viks förra snurrets hörn bort, hjul för hjul (EXIT_DUR s per hörn, EXIT_STAG s mellan hjulen).
@@ -5272,7 +5275,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
           var tear = TEAR_NX, tsz = 0.58;
           var ci = 2 - (2 - tear) * tc, ex = exitAt != null ? Math.max(0, Math.min(1, (clock - exitAt - r * EXIT_STAG) / exDur)) : 0;
           var csym = rl.cells[y] ? rl.cells[y].sym : 0;
-          if (!ex) drawTear(g, r, y, sym, ci, tsz, false, null, infOn() ? tearGold(g, r, y) : DEPTH_COL[1]);
+          if (!ex) drawTear(g, r, y, sym, ci, tsz, false, null, tearEdge(g, r, y));
           else if (ex < 1) {
             // fliken (samma bild som symbolen) täcker hålet vid cirka 40 %; hålet och rivkanten tonas bort mellan 20 och 45 %, medan fliken lägger sig
             var hf = Math.max(0, Math.min(1, 1 - (ex - 0.2) / 0.25)), ga = g.globalAlpha;
@@ -8171,7 +8174,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   }
   function hideBaseLayers() { baseLag(1); }
   // { s: fröet till sfc32, j: frispinnet testet hoppar in på }; infinity.js räknar fram bonusen och kontrollerar att den passar
-  var INF_TESTS = {"nInf":[{"s":[3084604757,2048320096,1875128155,72301364],"j":0},{"s":[1977834859,526286013,4120846921,2573247434],"j":0},{"s":[1302954234,3542054128,4210114935,833432660],"j":0}],"nInfUp":[{"s":[517605366,3930894817,815797010,2945743585],"j":0},{"s":[1654410312,16159452,504430765,2248985320],"j":0},{"s":[3788084009,1538413178,1320806721,678705735],"j":0}],"nInfBig":[{"s":[614178412,660045957,1968141954,886868021],"j":8},{"s":[3225807160,528533819,165378658,3632155194],"j":7},{"s":[1499775729,4233864648,2544973061,799252336],"j":3}]};
+  var INF_TESTS = {"nInf":[{"s":[2362061777,916226063,2926585856,402450027],"j":0},{"s":[1270106619,2788288752,3191603200,3276653842],"j":0},{"s":[1240029290,128423713,2160534303,3729070082],"j":0}],"nInfUp":[{"s":[2608736359,1190511930,4191314311,3629528052],"j":0},{"s":[2283766685,3075744861,1238096015,3073932531],"j":0},{"s":[2663947185,2534304696,726743368,1545833326],"j":0}],"nInfBig":[{"s":[3576382785,1017341292,617467728,3900870500],"j":15},{"s":[4085171822,3429922002,2112356614,2095210919],"j":10},{"s":[3242883596,511460856,1598522695,2256470217],"j":8}],"nInf5":[{"s":[2357563940,2613433947,2176733630,904300815],"j":5},{"s":[3336950256,1081657533,4238835596,2578999526],"j":8},{"s":[226995921,3856170587,3004477622,697305656],"j":8}],"nInf1k":[{"s":[730138520,1373246088,1051408654,3609914693],"j":0},{"s":[3295610281,669129343,640141390,3490467555],"j":0},{"s":[198536206,1554867656,3707229045,2449208613],"j":0}],"nInf2k5":[{"s":[1678525620,3290630223,3227830580,2895841231],"j":0},{"s":[3845503910,850135101,3151727604,1747601711],"j":0},{"s":[3938589002,2790161212,4141629078,519442553],"j":0}]};
   // ODD HEAD GAMES: Huvan, bara huvudet (från designduken "ODD HEAD GAMES: logga och intro", Huvan.dc.html, still och
   // beskuren som "huvud"), som ikon för INFINITY i stället för ∞: i panelen, på rutorna, på skylten och när INFINITY öppnas.
   var INF_LOGO_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"112 78 296 296\"><defs><clipPath id=\"ohSh\"><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\"/><\/clipPath><clipPath id=\"ohHood\"><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\"/><\/clipPath><clipPath id=\"ohFace\"><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\"/><\/clipPath><clipPath id=\"ohBand\"><path d=\"M172 254C206 268 294 268 328 254C334 286 314 312 286 318L250 352L214 318C186 312 166 286 172 254Z\"/><\/clipPath><pattern id=\"ohHt\" width=\"20\" height=\"20\" patternUnits=\"userSpaceOnUse\"><circle cx=\"6\" cy=\"6\" r=\"3.4\" fill=\"#15111F\" opacity=\".16\"/><\/pattern><\/defs><g stroke=\"#15111F\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><g transform=\"translate(14 14)\" fill=\"#15111F\" stroke-width=\"20\"><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\"/><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\"/><\/g><path d=\"M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z\" fill=\"#3A2A6B\" stroke-width=\"20\"/><g clip-path=\"url(#ohSh)\" stroke=\"none\"><ellipse cx=\"420\" cy=\"500\" rx=\"150\" ry=\"170\" fill=\"#2B1E4F\"/><rect x=\"310\" y=\"380\" width=\"200\" height=\"240\" fill=\"url(#ohHt)\"/><ellipse cx=\"160\" cy=\"420\" rx=\"40\" ry=\"14\" fill=\"#fff\" opacity=\".2\" transform=\"rotate(-40 160 420)\"/><\/g><path d=\"M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z\" fill=\"#3A2A6B\" stroke-width=\"20\"/><g clip-path=\"url(#ohHood)\" stroke=\"none\"><ellipse cx=\"372\" cy=\"300\" rx=\"120\" ry=\"210\" fill=\"#2B1E4F\"/><ellipse cx=\"190\" cy=\"124\" rx=\"54\" ry=\"18\" fill=\"#fff\" opacity=\".28\" transform=\"rotate(-38 190 124)\"/><\/g><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"none\" stroke-width=\"36\"/><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"none\" stroke=\"#5B4A99\" stroke-width=\"24\"/><path d=\"M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z\" fill=\"#9B78FF\" stroke-width=\"8\"/><g clip-path=\"url(#ohFace)\" stroke=\"none\"><ellipse cx=\"250\" cy=\"150\" rx=\"106\" ry=\"40\" fill=\"#6E52D9\"/><ellipse cx=\"330\" cy=\"270\" rx=\"44\" ry=\"90\" fill=\"#15111F\" opacity=\".1\"/><\/g><path d=\"M190 208C204 200 222 200 238 210\" fill=\"none\" stroke-width=\"13\"/><path d=\"M264 206L282 199M291 196L310 188\" fill=\"none\" stroke-width=\"13\"/><ellipse cx=\"216\" cy=\"240\" rx=\"23\" ry=\"15\" fill=\"#fff\" stroke-width=\"8\"/><ellipse cx=\"286\" cy=\"238\" rx=\"23\" ry=\"15\" fill=\"#fff\" stroke-width=\"8\"/><circle cx=\"220\" cy=\"244\" r=\"9\" fill=\"#B5F23D\" stroke-width=\"3\"/><circle cx=\"221\" cy=\"245\" r=\"4.5\" fill=\"#15111F\" stroke=\"none\"/><circle cx=\"290\" cy=\"242\" r=\"9\" fill=\"#B5F23D\" stroke-width=\"3\"/><circle cx=\"291\" cy=\"243\" r=\"4.5\" fill=\"#15111F\" stroke=\"none\"/><path d=\"M192 241C195 220 238 220 241 241Z\" fill=\"#8466E6\" stroke-width=\"8\"/><path d=\"M262 239C265 218 308 218 311 239Z\" fill=\"#8466E6\" stroke-width=\"8\"/><path d=\"M172 254C206 268 294 268 328 254C334 286 314 312 286 318L250 352L214 318C186 312 166 286 172 254Z\" fill=\"#FF5FA2\" stroke-width=\"10\"/><g clip-path=\"url(#ohBand)\" stroke=\"none\"><ellipse cx=\"312\" cy=\"322\" rx=\"84\" ry=\"54\" fill=\"#D9457F\"/><\/g><path d=\"M175 263C208 277 292 277 325 263\" fill=\"none\" stroke=\"#B83470\" stroke-width=\"5\"/><g fill=\"#fff\" stroke=\"none\"><circle cx=\"206\" cy=\"286\" r=\"5\"/><circle cx=\"250\" cy=\"298\" r=\"5\"/><circle cx=\"294\" cy=\"286\" r=\"5\"/><circle cx=\"232\" cy=\"318\" r=\"4\"/><circle cx=\"270\" cy=\"318\" r=\"4\"/><\/g><path d=\"M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392\" fill=\"none\" stroke-width=\"14\"/><path d=\"M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392\" fill=\"none\" stroke=\"#fff\" stroke-width=\"6\"/><\/g><\/svg>";
@@ -8823,6 +8826,18 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     return null;
   }
   async function infTestBig() { infPlay(infPick('nInfBig', infPredBig) || await infFind(infPredBig, 40000)); }
+  // TEST-menyn (användaren 2026-10-30): hela INFINITY öppet (öppnat i ett tidigare snurr) med 5 frispinn kvar, och en hel
+  // INFINITY-bonus från början som slutar på cirka 1 000x eller cirka 2 500x (samma villkor som tools/infinity-tests.js)
+  function infReach(sp) { return sp.steps.some(function (s) { return s.lad && s.lad.u >= infD(); }); }
+  function infPred5(g) {
+    if (g.base.x + g.bonus.x >= M.TIME.maxX) return null;
+    var j = g.bonus.spins.length - 5; if (j < 1) return null;
+    for (var i = 0; i < j; i++) if (infReach(g.bonus.spins[i])) return j;
+    return null;
+  }
+  function infPredX(lo, hi) { return function (g) { var x = g.base.x + g.bonus.x; return x >= lo && x < hi ? 0 : null; }; }
+  async function infTest5() { infPlay(infPick('nInf5', infPred5) || await infFind(infPred5, 40000)); }
+  async function infTestX(k, lo, hi) { var p = infPredX(lo, hi); infPlay(infPick(k, p) || await infFind(p, 40000)); }
   EN['Letar fram testet …'] = 'Finding the test …';
   // ---- INFINITY-stegens musik: Music.lad = öppna lager (1–5, 6 = INFINITY) i INFINITY-bonusen; varje steg lägger på
   // något i bonusens beat (Music.FS). Allt byter på ett taktslag: ett nytt lager smäller på nästa slag (brickan tänds
@@ -10605,6 +10620,12 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     refill: function () { state.balance = START_BALANCE; store.set('balance', state.balance); hud(); },
     // fyller på saldot med 10 miljoner (saldot är i ören)
     cash10m: function () { syncBalance(); state.balance += 1000000000; store.set('balance', state.balance); hud(); },
+    // fyller på saldot med 1 miljon (användaren 2026-10-30)
+    cash1m: function () { syncBalance(); state.balance += 100000000; store.set('balance', state.balance); hud(); },
+    // INFINITY: hela INFINITY öppet med 5 frispinn kvar, och hela bonusar på cirka 1 000x och 2 500x (infinity.js)
+    tinf5: function () { infTest5(); },
+    tinf1k: function () { infTestX('nInf1k', 1000, 1400); },
+    tinf2k5: function () { infTestX('nInf2k5', 2500, 3200); },
     // fliken Nytt (nxTestTab): snurr som visar de nya funktionerna
     nAnt2: function () { nxTest(function (g) { for (var i = 1; i < REELS; i++) if (nxBombsBefore(g, i) === 2) return true; return false; }); },
     nAntGold: function () { var p = function (g) { return nxBombsBefore(g, 3) >= 3; }; p.tries = 400000; nxTest(p); },
@@ -10772,19 +10793,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   TESTS.tendB = function () { TESTS.bonusEnd(false); };
   TESTS.tendM = function () { TESTS.bonusEnd(true); };
   var tbt = function (k, t, d) { return '<button class="mitem" type="button" data-test="' + k + '"><span><b>' + t + '</b><small>' + d + '</small></span><span aria-hidden="true">›</span></button>'; };
-  // TEST-menyn: bara det viktigaste, i spelets ordning (Layerspins, kassetten, storvinsten, bonusarna). Marknaden väljs
-  // med ?market=xx i adressen (market.js).
+  // TEST-menyn: bara de fem knappar användaren bad om, i den ordningen (2026-10-30: "Ta bort allt annat"); de andra testerna
+  // finns kvar i TESTS (tests.js) men har ingen knapp. Marknaden väljs med ?market=xx i adressen (market.js).
   $('#testList').innerHTML = [
-    tbt('tswitch', 'Layerspins', 'Hörnet fyller en lucka och vinsten fortsätter på brädet efteråt.'),
-    tbt('tcassette', 'Kassetten', 'Ett vanligt snurr där kassetten dyker upp och spolar 2 eller 3 snurr bakåt (slumpas, som i spelet).'),
-    tbt('big', 'Stor vinst', 'Ett snurr som ger minst 55 gånger insatsen: storvinst-rutan.'),
-    tbt('bonus', 'Bonusspel', 'Tre bomber landar och Bonusspelet startar.'),
-    tbt('maniac', 'Infinity-bonus', 'Startar Infinity-bonusen direkt (gratis).'),
-    tbt('tendB', 'Bonusspel slut', 'En ny slumpad Bonusspel-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
-    tbt('tendM', 'Infinity slut', 'En ny slumpad Infinity-bonus, två snurr före slutet: pengarna samlas in efter sista snurret.'),
     tbt('tmax', 'Maxvinst', 'En ny slumpad Infinity-bonus, två snurr före maxvinsten. Tv:n stängs av och vinstpresentationen slås på.'),
-    tbt('refill', 'Fyll på saldot', 'Sätter tillbaka saldot till startbeloppet.'),
-    tbt('cash10m', 'Fyll på 10 miljoner', 'Lägger till 10 000 000 kr på saldot.')
+    tbt('cash1m', 'Fyll på 1 miljon', 'Lägger till 1 000 000 kr på saldot.'),
+    tbt('tinf5', 'Infinity, 5 snurr kvar', 'En Infinity-bonus där hela INFINITY redan är öppet, med 5 frispinn kvar.'),
+    tbt('tinf1k', 'Infinity-bonus 1000x', 'En hel Infinity-bonus från början som slutar på cirka 1 000 gånger insatsen.'),
+    tbt('tinf2k5', 'Infinity-bonus 2500x', 'En hel Infinity-bonus från början som slutar på cirka 2 500 gånger insatsen.')
   ].join('');
   // fliken Nytt med de nya funktionerna, en knapp per funktion (användaren 2026-10-22)
   nxTestTab(tbt);
