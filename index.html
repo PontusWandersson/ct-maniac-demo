@@ -2,7 +2,7 @@
 <meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><script>if(/[?&]step\b/.test(location.search)){(function(){var q=[],t=performance.now();window.requestAnimationFrame=function(f){q.push(f);return q.length};window.cancelAnimationFrame=function(){};window.__step=async function(n){for(var i=0;i<n;i++){t+=1000/60;var c=q;q=[];c.forEach(function(f){f(t)});for(var k=0;k<12;k++)await null}return t}})()}</script><title>C&amp;T Maniac</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&family=Rubik+Spray+Paint&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&family=Rubik+Spray+Paint&family=Knewave&display=swap">
 <style>
 /* Layout: helskärm som en modern onlineslot — logga överst, köp-bonus och lavinmätare till vänster,
    6x6-brädet i en serietidningsram i mitten, hjältarna till höger, kontrollpanel längst ner.
@@ -12184,7 +12184,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   });
   // Studions intro sedan 2026-11-03 (användaren: "lägg in det så detta blir orginal här i detta spel"), i stället för
   // CataPa-introt. Byggt i CataPaAI slotplattform (packages/ct-maniac/studio/odd-head, Huvan i packages/core/src/huvan.ts,
-  // commit 5a4a8c5 och 9f69de4) och kopierat hit oförändrat; Huvan ligger i HUVAN nedan. Samma papper, samma tider och
+  // commit 5a4a8c5 och 9f69de4) och kopierat hit; Huvan ligger i HUVAN nedan. Rättat här 2026-11-03: namnet mäts i rätt
+  // typsnitt (begin, mat) och Huvan krockar inte med laddaren i breda fönster (siPassa). Samma papper, samma tider och
   // samma API som CataPa-introt (studioIntro med onCover och hold, ended, onEnd, onTitle och release), och flygningen in
   // i spelet går genom O:et i ODD. Ett tryck eller en tangent hoppar till slutet (inte i det första introt, som väntar på
   // laddningen).
@@ -12357,24 +12358,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       const m1 = q('cpohM1'),
         m2 = q('cpohM2');
       if (!m1 || !m2) return;
-      const b1 = m1.getBBox(),
-        b2 = m2.getBBox();
-      // dropparna under bokstävernas ben, och hålet i O:et
-      const dr = DROPPAR.map(([r, i, andel, len], n) => {
-        const m = r === 1 ? m1 : m2;
-        const e = m.getExtentOfChar(i);
-        const x = e.x + andel * e.width,
-          y = (r === 1 ? l.rad1[1] : l.rad2[1]) - 10 * k,
-          ln = len * k,
-          bw = 8 * k;
-        s(`cpohD${n}`, 'd', `M${(x - bw).toFixed(1)} ${y.toFixed(1)}v${ln.toFixed(1)}a${bw.toFixed(1)} ${bw.toFixed(1)} 0 0 0 ${(2 * bw).toFixed(1)} 0v-${ln.toFixed(1)}Z`);
-        return [x, y];
-      });
-      const o = m1.getExtentOfChar(0);
       const hole = svg.querySelector('.cp-oh-hole');
-      hole?.setAttribute('cx', (o.x + o.width * 0.5 + l.fs * 0.023).toFixed(1));
-      hole?.setAttribute('cy', (l.rad1[1] - l.fs * 0.33).toFixed(1));
-      hole?.setAttribute('r', (l.fs * 0.075).toFixed(1));
       // stänket runt bokstäverna: en fast talföljd, ingen slump
       const dots = q('cpohDots');
       const prickar = [];
@@ -12383,23 +12367,50 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         frö = (Math.imul(frö, 1664525) + 1013904223) >>> 0;
         return frö / 4294967296;
       };
-      for (const [b, r] of [
-        [b1, 1],
-        [b2, 2],
-      ])
+      for (const r of [1, 2])
         for (let i = 0; i < 26; i++) {
           const u = nasta(),
             v = nasta(),
             rr = (1.6 + nasta() * 3.2) * k;
           const c = document.createElementNS(NS, 'circle');
-          c.setAttribute('cx', (b.x + u * b.width).toFixed(1));
-          c.setAttribute('cy', (b.y + b.height * 0.1 + v * b.height * 0.7).toFixed(1));
           c.setAttribute('r', rr.toFixed(1));
           c.setAttribute('fill', nasta() < 0.75 ? '#FF5FA2' : '#7A4DFF');
           c.setAttribute('opacity', '0');
           dots?.append(c);
-          prickar.push({ el: c, u, rad: r });
+          prickar.push({ el: c, u, v, rad: r });
         }
+      // Bokstävernas mått: rutan som visar det sprejade, dropparna under bokstävernas ben, hålet i O:et och stänket. De
+      // mäts om när namnets bredd ändras (användaren 2026-11-03: "ODD HEAD klipps"; Knewave kom efter att bokstäverna
+      // hade mätts i ett smalare reservtypsnitt, så att rutan klippte av dem och dropparna och hålet hamnade fel).
+      let b1 = null,
+        b2 = null,
+        dr = [];
+      const mat = () => {
+        b1 = m1.getBBox();
+        b2 = m2.getBBox();
+        dr = DROPPAR.map(([r, i, andel, len], n) => {
+          const m = r === 1 ? m1 : m2;
+          const e = m.getExtentOfChar(i);
+          const x = e.x + andel * e.width,
+            y = (r === 1 ? l.rad1[1] : l.rad2[1]) - 10 * k,
+            ln = len * k,
+            bw = 8 * k;
+          s(`cpohD${n}`, 'd', `M${(x - bw).toFixed(1)} ${y.toFixed(1)}v${ln.toFixed(1)}a${bw.toFixed(1)} ${bw.toFixed(1)} 0 0 0 ${(2 * bw).toFixed(1)} 0v-${ln.toFixed(1)}Z`);
+          return [x, y];
+        });
+        const o = m1.getExtentOfChar(0);
+        hole?.setAttribute('cx', (o.x + o.width * 0.5 + l.fs * 0.023).toFixed(1));
+        hole?.setAttribute('cy', (l.rad1[1] - l.fs * 0.33).toFixed(1));
+        hole?.setAttribute('r', (l.fs * 0.075).toFixed(1));
+        for (const d of prickar) {
+          const b = d.rad === 1 ? b1 : b2;
+          d.el.setAttribute('cx', (b.x + d.u * b.width).toFixed(1));
+          d.el.setAttribute('cy', (b.y + b.height * 0.1 + d.v * b.height * 0.7).toFixed(1));
+        }
+      };
+      mat();
+      // har namnet bytt bredd sedan det mättes? (då mäts det om)
+      const bytt = () => Math.abs(m1.getBBox().width - b1.width) > 0.5 || Math.abs(m2.getBBox().width - b2.width) > 0.5;
       const [ax, ay] = AXEL;
       const rot = (x, y, a) => {
         const r = (a * Math.PI) / 180,
@@ -12477,7 +12488,25 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         s('cpohSpark', 'transform', `translate(${sx} ${sy}) scale(${sk.toFixed(3)}) rotate(${(90 * (1 - sk)).toFixed(1)}) translate(${-sx} ${-sy})`);
       };
 
+      // kommer ett typsnitt först när animationen är klar (eller utan rörelse) mäts namnet om och slutbilden ritas igen:
+      // när typsnittet säger till, och en koll var fjärdedels sekund så länge introt syns
+      let sist = 0,
+        vakt = 0;
+      const omMat = () => {
+        if (!svg.isConnected) {
+          clearInterval(vakt);
+          document.fonts?.removeEventListener?.('loadingdone', omMat);
+          return;
+        }
+        if (bytt()) {
+          mat();
+          rita(sist);
+        }
+      };
+      document.fonts?.addEventListener?.('loadingdone', omMat);
+      vakt = setInterval(omMat, 250);
       if (lugn) {
+        sist = 9;
         rita(9);
         return;
       }
@@ -12487,7 +12516,9 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         if (!svg.isConnected) return;
         if (start === null) start = nu;
         const t = (nu - start) / 1000;
-        rita(Math.min(t, HUVAN_T));
+        if (bytt()) mat();
+        sist = Math.min(t, HUVAN_T);
+        rita(sist);
         if (t < HUVAN_T) requestAnimationFrame(ruta);
       };
       requestAnimationFrame(ruta);
@@ -12508,9 +12539,20 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     var box = document.querySelector('#loader .ld-box'), oh = root.querySelector('.cp-oh'), art = root.querySelector('.cp-oh-art');
     if (!box || !oh || !art) return;
     var a = art.getBoundingClientRect(), b = box.getBoundingClientRect();
-    if (!b.height || (!st && a.height >= window.innerHeight * 0.4)) return;
+    if (!b.height) return;
     var vb = art.viewBox.baseVal, ih = window.innerHeight;
     var topp = Math.max(ih * 0.035, 20), luft = Math.max(14, ih * 0.02), plats = b.top - luft - topp;
+    // I ett brett fönster är Huvan stor och står mitt i: där får luvtröjan inte gå in i "presenterar" överst i laddaren
+    // (användaren 2026-11-03). Bilden lyfts så att den slutar luft ovanför laddaren, men inte högre än topp; räcker inte
+    // det krymper den lite.
+    if (!st && a.height >= ih * 0.4) {
+      if (a.bottom <= b.top - luft) return;
+      var hb = Math.min(a.height, plats);
+      if (hb < a.height) art.style.width = (hb * vb.width / vb.height).toFixed(1) + 'px';
+      var yb = Math.max(topp, b.top - luft - hb);
+      oh.style.transform = 'translateY(' + (yb - (ih - hb) / 2).toFixed(1) + 'px)';
+      return;
+    }
     var h = Math.max(Math.min(a.height || Infinity, plats), ih * 0.3);
     art.style.width = (h * vb.width / vb.height).toFixed(1) + 'px';
     var y = topp + Math.max(0, (plats - h) / 2);
@@ -12609,6 +12651,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     document.addEventListener('keydown', skip, true);
     function play() {
       if (done || root.classList.contains('si-play')) return;
+      // laddarens storlek är klar först när dess typsnitt har kommit: Huvan ställs igen precis innan han syns
+      if (hold) siPassa(root, st);
       root.classList.add('si-play');
       var art = root.querySelector('.cp-oh-art');
       if (art) HUVAN.spela(art, st, calm);
@@ -12623,10 +12667,28 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     // det första introt: onTitle när studions namn sprejas (spelets namn visas), ended och onEnd när animationen är klar,
     // och release() lämnar över till spelet (laddningen är klar)
     var ctl = { ended: false, onEnd: null, onTitle: null, release: function (fade) { cover(fade === true); } };
-    // väntar på typsnitten (högst 1,2 s) så att namnet inte byter typsnitt mitt i; under tiden syns bara papperet
-    var need = ['400 40px Knewave', '400 34px Bangers'];
-    var fonts = document.fonts && document.fonts.load ? Promise.all(need.map(function (f) { return document.fonts.load(f); })) : Promise.resolve();
-    function begin() { Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(play, play); }
+    // Väntar på typsnitten så att namnet mäts och sprejas i rätt typsnitt; under tiden syns bara papperet (användaren
+    // 2026-11-03: "ODD HEAD klipps"). Ett typsnitt räknas som klart först när det verkligen ritas (en text i det blir
+    // annorlunda bred än i reservtypsnittet), inte när document.fonts svarar: innan typsnittets stilmall har kommit finns
+    // inget att vänta på, och då svarade fonts.load direkt. Sidans andra typsnitt (laddarens "presenterar" och loggan) ska
+    // också ha kommit, så att laddaren har sin rätta storlek när Huvan ställs ovanför den. Högst 4 s; kommer något ännu
+    // senare mäter Huvan om namnet när det kommer (spelaHuvan).
+    var need = ['400 40px Knewave', '400 34px Bangers'], siMat = document.createElement('canvas').getContext('2d');
+    function siRitas(f) {
+      if (!siMat) return true;
+      siMat.font = f + ', monospace'; var a = siMat.measureText('ODD HEAD GAMES').width;
+      siMat.font = f.replace(/ [^ ]+$/, ' monospace'); return a !== siMat.measureText('ODD HEAD GAMES').width;
+    }
+    function begin() {
+      var t0 = Date.now();
+      (function vanta() {
+        // (ett typsnitt som inte går att hämta ger ett fel som inte ska synas: då gäller reservtypsnittet)
+        try { if (document.fonts && document.fonts.load) need.forEach(function (f) { document.fonts.load(f).catch(function () {}); }); } catch (e) { /* ignorera */ }
+        var klart = need.every(siRitas) && (!document.fonts || document.fonts.status === 'loaded');
+        if (klart || Date.now() - t0 > 4000) { play(); return; }
+        setTimeout(vanta, 50);
+      })();
+    }
     // det första introt: spelas direkt och tyst
     if (hold) { begin(); return ctl; }
     // Ljudet: webbläsare (alltid på telefoner) spelar inget ljud förrän spelaren har tryckt. Är ljudet på i spelet och
