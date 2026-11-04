@@ -1,7 +1,7 @@
 <!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><script>if(/[?&]step\b/.test(location.search)){(function(){var q=[],t=performance.now();window.requestAnimationFrame=function(f){q.push(f);return q.length};window.cancelAnimationFrame=function(){};window.__step=async function(n){for(var i=0;i<n;i++){t+=1000/60;var c=q;q=[];c.forEach(function(f){f(t)});for(var k=0;k<12;k++)await null}return t}})()}</script><title>Kingz &amp; Queenz (prototyp)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&family=Cinzel+Decorative:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&family=Titan+One&family=Sedgwick+Ave+Display&family=VT323&family=Permanent+Marker&family=Cinzel+Decorative:wght@700;900&family=Knewave&display=swap">
 <style>
 /* Layout: helskärm som en modern onlineslot — logga överst, köp-bonus och lavinmätare till vänster,
    6x6-brädet i en serietidningsram i mitten, hjältarna till höger, kontrollpanel längst ner.
@@ -1225,7 +1225,7 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .studio { position: fixed; inset: 0; z-index: 200; overflow: hidden; cursor: pointer; background: #000; -webkit-tap-highlight-color: transparent; }
 .studio.si-out { pointer-events: none; }
 
-/* ================= SYMBOLEN (mono) ================= */
+/* ================= PAPPERET OCH HUVAN (mono) ================= */
 .sv-mono { background: var(--ink); }
 .sm-page {
   position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; opacity: 0; transform-origin: 0 50%; backface-visibility: hidden;
@@ -1237,77 +1237,19 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
   -webkit-mask: radial-gradient(circle at 50% 44%, transparent 24%, #000 80%); mask: radial-gradient(circle at 50% 44%, transparent 24%, #000 80%);
 }
 .sm-page::after { content: ''; position: absolute; inset: clamp(8px, 2vmin, 16px); border: clamp(4px, .8vmin, 6px) solid var(--ink); border-radius: 12px; pointer-events: none; }
-.sm-logo { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; transform: translateY(-3vmin); }
-.sm-disc {
-  position: absolute; left: 50%; top: 32%; width: min(78vmin, 600px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .5;
-  background: radial-gradient(var(--pink) 34%, transparent 38%) 0 0 / 11px 11px;
-  -webkit-mask: radial-gradient(circle, #000 38%, transparent 70%); mask: radial-gradient(circle, #000 38%, transparent 70%); transform: scale(0);
-}
-.sm-ring { position: absolute; left: 50%; top: 32%; width: 40vmin; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; border: 1.4vmin solid var(--ink); opacity: 0; transform: scale(.3); }
-/* symbolen (C, t och P tätt ihop) lite bredare än förut, med samma höjd */
-.sm-mark { position: relative; width: clamp(175px, min(50.2vmin, 67.6vw), 349px); height: auto; overflow: visible; }
-.sm-mark g { transform-box: fill-box; transform-origin: 50% 50%; }
-.sm-mark .sm-stem { transform-origin: 50% 100%; }
-.sm-ink { fill: none; stroke: var(--ink); stroke-width: 46; stroke-linecap: round; }
-.sm-fill { fill: none; stroke: var(--sun); stroke-width: 30; stroke-linecap: round; }
-.sm-stem rect, .sm-stem path { fill: var(--pink); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
-/* t:ets tvärslå och stav i ett stycke: fogen täcker kanten där de möts */
-.sm-stem rect.sm-join, .sm-bowl rect.sm-join { stroke: none; }
-.sm-bowl path, .sm-bowl rect { fill: var(--sky); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
-.sm-bowl circle { fill: var(--paper); stroke: var(--ink); stroke-width: 6; }
-.sm-spark path, .sm-spark circle { fill: var(--sun); stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
-.sm-spark { transform: scale(0); }
-.sm-word { position: relative; display: flex; margin-top: .1em; font: 700 clamp(46px, min(12vmin + 2vmax, 14vw), 112px)/1 var(--ui); color: var(--ink); letter-spacing: .01em; text-shadow: .05em .05em 0 var(--pink); }
-.sm-word span, .sm-name span { display: inline-block; opacity: 0; }
-.sm-name { position: relative; display: flex; gap: .55em; margin-top: .45em; padding-left: .55em; font: 700 clamp(15px, min(4vmin + .5vmax, 5vw), 30px)/1 var(--ui); color: var(--ink); }
+/* Huvan och namnet: liggande i ett brett fönster, stående på en telefon i porträtt, ovanför laddaren. På telefonen
+   ställer studio-intro.js (siPassa) storleken och platsen efter laddaren. */
+.cp-oh { position: relative; z-index: 1; transform: translateY(-5vh); }
+.cp-oh-art { display: block; width: min(94vw, calc((100vh - 400px) * 1.778), 1000px); height: auto; overflow: visible; }
+.cp-oh-st { transform: translateY(-8vh); }
+.cp-oh-st .cp-oh-art { width: min(92vw, calc((100vh - 247px) * .58), 520px); }
 .sm-shade { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(21, 17, 31, 0) 0%, rgba(21, 17, 31, .1) 55%, rgba(21, 17, 31, .45) 100%); }
 .sv-mono.si-play .sm-page { animation: smIn .32s cubic-bezier(.2, 1.3, .4, 1) both; }
 @keyframes smIn { from { opacity: 0; transform: scale(1.06) rotate(-1deg); } to { opacity: 1; transform: none; } }
-@keyframes smDisc { from { transform: scale(0); } to { transform: scale(1); } }
-@keyframes smTurnDisc { to { transform: rotate(360deg); } }
-/* formerna kommer in var för sig: C faller, strecket hoppar upp, bågen snurrar in */
-.sv-mono.si-play .sm-c { animation: smDrop .6s .22s both, smWiggle .5s 1.85s; }
-@keyframes smDrop {
-  0% { transform: translateY(-120vh) rotate(-160deg); animation-timing-function: cubic-bezier(.5, 0, 1, .6); }
-  58% { transform: translateY(0) rotate(6deg) scale(1.14, .86); animation-timing-function: cubic-bezier(.2, .8, .4, 1); }
-  80% { transform: rotate(-3deg) scale(.96, 1.04); }
-  100% { transform: none; }
-}
-.sv-mono.si-play .sm-stem { animation: smJump .55s .42s both; }
-@keyframes smJump {
-  0% { transform: translateY(120vh) scale(.9, 1.2); animation-timing-function: cubic-bezier(.2, .7, .5, 1); }
-  50% { transform: translateY(-14%) scale(.95, 1.08); animation-timing-function: cubic-bezier(.5, 0, 1, .6); }
-  70% { transform: translateY(0) scale(1.18, .8); animation-timing-function: cubic-bezier(.2, .8, .4, 1); }
-  86% { transform: translateY(-3%) scale(.97, 1.04); }
-  100% { transform: none; }
-}
-.sv-mono.si-play .sm-bowl { animation: smSpin .5s cubic-bezier(.25, 1.3, .5, 1) .62s both, smNod .5s ease-in-out 1.9s; }
-@keyframes smSpin { 0% { transform: translateX(90vw) rotate(300deg) scale(.4); } 70% { transform: rotate(-12deg) scale(1.15); } 100% { transform: none; } }
-@keyframes smNod { 35% { transform: rotate(-16deg) translateY(-6%); } 70% { transform: rotate(5deg); } }
-@keyframes smWiggle { 35% { transform: rotate(8deg); } 70% { transform: rotate(-3deg); } }
-/* smällen när symbolen klickar ihop */
-.sv-mono.si-play .sm-logo { animation: smShake .3s linear .98s; }
-@keyframes smShake { 25% { transform: translateY(-3vmin) translate(-1.2%, .8%); } 50% { transform: translateY(-3vmin) translate(1%, -.8%); } 75% { transform: translateY(-3vmin) translate(-.5%, .4%); } }
-.sv-mono.si-play .sm-ring { animation: smRing .6s cubic-bezier(.1, .7, .3, 1) .98s forwards; }
-@keyframes smRing { 0% { opacity: 1; transform: scale(.3); border-width: 1.6vmin; } 100% { opacity: 0; transform: scale(2.6); border-width: .2vmin; } }
-.sv-mono.si-play .sm-spark { animation: smSpark .45s cubic-bezier(.2, 1.7, .4, 1) 1s both; }
-@keyframes smSpark { from { transform: scale(0) rotate(-40deg); } to { transform: none; } }
-.sv-mono.si-play .sm-word span { animation: smLetter .4s cubic-bezier(.2, 1.6, .4, 1) calc(1.1s + var(--i) * .05s) both; }
-.sv-mono.si-play .sm-name span { animation: smLetter .34s cubic-bezier(.2, 1.6, .4, 1) calc(1.45s + var(--i) * .04s) both; }
-@keyframes smLetter { from { opacity: 0; transform: translateY(.8em) scale(.3); } 40% { opacity: 1; } to { opacity: 1; transform: none; } }
-/* lite coolare: vit blixt och färgklick när symbolen klickar ihop, rasterskivan studsar, glans över symbolen, prickarna driver */
+/* vit blixt när GAMES smäller fast (2,02 s) */
 .sm-flash { position: absolute; inset: 0; z-index: 3; background: #fff; opacity: 0; pointer-events: none; }
-.sv-mono.si-play .sm-flash { animation: smFlash .32s ease-out .98s; }
-@keyframes smFlash { 0% { opacity: 0; } 25% { opacity: .75; } 100% { opacity: 0; } }
-.sm-burst { position: absolute; left: 50%; top: 32%; width: 0; height: 0; z-index: 0; }
-.sm-burst i { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: var(--c); border: 3px solid var(--ink); opacity: 0; transform: rotate(var(--a)) translateX(0); }
-.sv-mono.si-play .sm-burst i { animation: smBurst .6s cubic-bezier(.15, .7, .3, 1) .98s forwards; }
-@keyframes smBurst { 0% { opacity: 1; transform: rotate(var(--a)) translateX(4vmin) scale(1.2); } 70% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateX(calc(34vmin * var(--d))) scale(.4); } }
-.sv-mono.si-play .sm-disc { animation: smDisc .55s cubic-bezier(.2, 1.4, .4, 1) .12s both, smTurnDisc 16s linear .7s infinite, smPulse .4s ease-out .98s; }
-@keyframes smPulse { 40% { scale: 1.1; } }
-.sm-shine { transform: skewX(-20deg) translateX(0); }
-.sv-mono.si-play .sm-shine { animation: smShine .6s cubic-bezier(.4, 0, .2, 1) 1.6s; }
-@keyframes smShine { from { transform: skewX(-20deg) translateX(0); } to { transform: skewX(-20deg) translateX(340px); } }
+.sv-mono.si-play .sm-flash { animation: smFlash .3s ease-out 2.04s; }
+@keyframes smFlash { 0% { opacity: 0; } 25% { opacity: .55; } 100% { opacity: 0; } }
 .sv-mono.si-play .sm-page::before { animation: smDrift 6s linear infinite; }
 @keyframes smDrift { to { background-position: 24px 12px; } }
 /* sidan vänds som i en serietidning, och spelet ligger på nästa sida */
@@ -1316,46 +1258,10 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 @keyframes smTurn { from { transform: perspective(1500px) rotateY(0); } to { transform: perspective(1500px) rotateY(-108deg); } }
 .sv-mono.si-out .sm-shade { animation: smShadeOn .65s ease-in forwards; }
 @keyframes smShadeOn { to { opacity: 1; } }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.sv-final {
-  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10% 6% 9%; --r: -1.5deg;
-  background: radial-gradient(rgba(21, 17, 31, .08) 1.2px, transparent 1.7px) 0 0 / 7px 7px, linear-gradient(172deg, #fffaf0, #f1e2c2);
-  transform: rotate(var(--r)); transform-origin: 50% 100%;
-}
-
-
-
-
-
-
-
 @media (prefers-reduced-motion: reduce) {
   .studio, .studio *, .studio *::before, .studio *::after { animation: none !important; }
-  .studio .sv-word, .studio .sv-name, .studio .sv-final, .studio .sm-page, .studio .sm-word span, .studio .sm-name span { opacity: 1; }
-  .studio .sm-disc, .studio .sm-spark { transform: none; }
-  .studio .sm-burst i, .studio .sm-flash { display: none; }
+  .studio .sm-page { opacity: 1; }
+  .studio .sm-flash { display: none; }
   .studio.si-out { display: none; }
 }
 /* ljudspärren: TRYCK FÖR ATT STARTA (webbläsaren spelar inget ljud före ett tryck), i studions färger */
@@ -1376,7 +1282,7 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 @keyframes siGatePulse { 0% { box-shadow: 0 0 0 0 rgba(255, 210, 31, .55); } 100% { box-shadow: 0 0 0 28px rgba(255, 210, 31, 0); } }
 @keyframes siGateIn { from { opacity: 0; transform: scale(.92); } }
 @media (prefers-reduced-motion: reduce) { .si-gate, .si-gate-play { animation: none; } }
-/* det första introt är halvgenomskinligt: spelet syns suddigt bakom papperet (och bakom ramen när sidan vänds) */
+/* det första introt är halvgenomskinligt: spelet syns suddigt bakom papperet */
 .studio.sv-mono { background: rgba(21, 17, 31, .35); }
 .sv-mono .sm-page {
   background: radial-gradient(circle at 50% 44%, rgba(255, 251, 242, .9) 0, rgba(250, 238, 212, .82) 42%, rgba(243, 223, 182, .74) 100%);
@@ -1388,8 +1294,7 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .sv-mono.si-fade .sm-page { opacity: 1; animation: smFade .4s cubic-bezier(.4, 0, .7, .5) forwards; }
 @keyframes smFade { to { opacity: 0; transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .sv-mono.si-fade .sm-page { animation: smFade .3s linear forwards; } }
-/* det första introts slut med rörelse (mono, studio-intro.js flyPage): kameran flyger in genom hålet i P:ets båge, och
-   rutorna syns genom hålet (bakgrunden blir genomskinlig) */
+/* det första introts slut med rörelse: kameran flyger in genom O:et i ODD, och rutorna syns genom hålet */
 .studio.si-fly { pointer-events: none; background: transparent; transition: background .3s ease; }
 .ts { position: fixed; inset: 0; z-index: 70; overflow: hidden; pointer-events: none; }
 .ts-black { position: absolute; inset: 0; background: #050409; opacity: 0; }
@@ -2876,7 +2781,10 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // per frispinn i mellanbonusen (sparade omgångar från 1.5.0 kan inte spelas upp igen; insatsen betalas tillbaka).
   // 1.7.0 (2026-10-29): x500 och x1000 på bonusarnas småhjul, som gångrar multin, och en egen vinsttabell för KingzBonus
   // (sparade omgångar från 1.6.0 kan inte spelas upp igen; insatsen betalas tillbaka).
-  var ENGINE_VERSION = '1.7.0';
+  // 1.8.0 (2026-11-04): stegen 250x, 500x, 1000x och 5000x på bonusarnas småhjul, som läggs på multin som de andra
+  // multisarna (förut gångrade x500 och x1000 multin), och nya vinsttabeller för bonusarna (sparade omgångar från 1.7.0 kan
+  // inte spelas upp igen; insatsen betalas tillbaka).
+  var ENGINE_VERSION = '1.8.0';
   // Grundspelet: grundremsorna, inga multis, och guldbomben kan komma.
   function baseOpts(extra) { var o = { fs: false, plain: true, goldCheck: true }; for (var k in extra) o[k] = extra[k]; return o; }
   function emptyGrid() { var g = []; for (var r = 0; r < REELS; r++) { var c = []; for (var y = 0; y < ROWS; y++) c.push(-1); g.push(c); } return g; }
@@ -2987,35 +2895,36 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   //     fem hjulens torn. Köpt Bonus eller Guldbonus: ett startbräde med exakt 3 Troner (royalBuy), i Guldbonusen är den
   //     sista guld. I Bonusen (mellanbonusen) öppnas lika många nya hjul efter varje frispinn (royalBonus); bonushjulen har
   //     inga Troner.
-  //   Ett småhjul ger LAYER n, en multi (x2–x50, och i bonusarna sällan x500 eller x1000) eller tomt (SR.w i Bonusen,
+  //   Ett småhjul ger LAYER n, en multi (x2–x50, och i bonusarna sällan 250x, 500x, 1000x eller 5000x) eller tomt (SR.w i Bonusen,
   //     SR.goldW i KingzBonus). Ett hjul får högst ett LAYER per snurr: har det övre småhjulet gett LAYER kan det undre inte
   //     göra det (SR_W_NL).
   //   LAYER n: hjulet kan hämta en symbol som saknas upp till n lager bakåt i snurret (närmaste lager först), som i C&T. Ett
   //     hjul utan LAYER har bara brädet.
   //   Multin: småhjulens multis läggs på bonusens multi innan brädet snurrar. Den börjar på 0 (ingen multi; vinsterna
   //     betalas då x1) och nollställs aldrig. Efter varje vinststeg växer den med lagrens siffror i vinsterna (LAYER 3 =
-  //     +3), som i C&T. x500 och x1000 (times) gångrar multin i stället (srMultAfter).
+  //     +3), som i C&T. Också de stora (big: 250x, 500x, 1000x och 5000x) läggs på multin (srMultAfter).
   // Lagren: SR.layers bräden från grundhjulen (utan Troner) när bonusen startar; efter varje frispinn blir sista brädet
   // LAYER 1 och det äldsta försvinner. Lagerrutor som har använts i en vinst förbrukas. Hela omgången är högst TIME.maxX.
   // Inställningarna (SR) är modulens egna, så att funktionen kan flyttas till plattformen som en egen del.
   var SR_ICONS = [{ k: 'blank' }, { k: 'layer', n: 1 }, { k: 'layer', n: 2 }, { k: 'layer', n: 3 }, { k: 'layer', n: 4 }, { k: 'layer', n: 5 },
     { k: 'multi', n: 2 }, { k: 'multi', n: 3 }, { k: 'multi', n: 5 }, { k: 'multi', n: 10 }, { k: 'multi', n: 20 }, { k: 'multi', n: 25 }, { k: 'multi', n: 50 },
-    { k: 'multi', n: 500, times: true }, { k: 'multi', n: 1000, times: true }];
+    { k: 'multi', n: 250, big: true }, { k: 'multi', n: 500, big: true }, { k: 'multi', n: 1000, big: true }, { k: 'multi', n: 5000, big: true }];
   // w: vikterna per småhjul (SR_ICONS i ordning) i Bonusen, goldW i KingzBonus. vis: remsan som syns medan småhjulen
-  // snurrar (bara utseendet; vad som landar avgörs av vikterna; x500 och x1000 syns bara i bonusen där de kan landa).
+  // snurrar (bara utseendet; vad som landar avgörs av vikterna; de stora syns bara i bonusen där de kan landa).
   // spins: frispinn. layers: lager bakåt. pay och goldPay: Bonusens och KingzBonus vinsttabell (gånger den vanliga,
   // oberoende av grundspelets TIME.scale). buy och goldBuy: priserna för en köpt Bonus och KingzBonus (gånger insatsen).
   // goldP: chansen att den sista av 3–4 Troner blir guld. baseTrons: Tronblock per hjul på grundhjulen. wilds: wildblock
   // (Narren) per hjul, på grundhjulen och bonushjulen (användaren 2026-10-27: "lägg till en passande wildsymbol"); hjul 1
   // har ingen, som i C&T.
-  // x500 och x1000 (användaren 2026-10-29: "1000x ska finnas med på hjulet i maniac bonusen och 500x i vanliga bonusen så
-  // man kan vinna maxvinst enklare"; han valde att de gångrar multin och att KingzBonus har båda): x500 i båda bonusarna,
-  // x1000 bara i KingzBonus. De är mycket sällsynta (vikterna 0,0003–0,0006 av cirka 1 020).
+  // Stegen av stora multis (användaren 2026-11-04: "250x 500x 1000 och 2500", han valde 5000 som högsta steg efter
+  // simuleringen): de läggs på multin som de andra multisarna ("5x lägger på multin med +5"; förut gångrade x500 och x1000
+  // multin). 250x, 500x och 1000x finns i båda bonusarna och 5000x bara i KingzBonus. De är sällsynta (vikterna
+  // 0,002–0,009 av cirka 1 020); 5000x är det som gör maxvinsten nåbar (cirka 1 gång på 100 M snurr, som regelverket kräver).
   var SR = {
-    w: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.0006, 0],
-    goldW: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.0003, 0.0006],
-    vis: [10, 4, 4, 3, 3, 2, 4, 3, 3, 2, 2, 1, 1, 1, 1],
-    spins: 10, layers: 5, pay: 0.12274, goldPay: 0.12273, buy: 48, goldBuy: 151, goldP: 0.15, baseTrons: [1, 1, 2, 1, 1], wilds: [0, 1, 1, 1, 1]
+    w: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.00774, 0.00387, 0.00194, 0],
+    goldW: [420, 110, 95, 80, 50, 30, 90, 60, 40, 25, 12, 6, 2.5, 0.00928, 0.00464, 0.00464, 0.00417],
+    vis: [10, 4, 4, 3, 3, 2, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 1],
+    spins: 10, layers: 5, pay: 0.12288, goldPay: 0.12141, buy: 48, goldBuy: 151, goldP: 0.15, baseTrons: [1, 1, 2, 1, 1], wilds: [0, 1, 1, 1, 1]
   };
   // köpmenyn (C&T:s, buy.js): Bonusen för BUY_X (state.js) och Guldbonusen i Maniacs plats
   TIME.fsBuy = SR.buy; TIME.maniacBuy = SR.goldBuy; TIME.maniacSpins = SR.spins;
@@ -3038,8 +2947,16 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // på 500 000. Köpt Bonus i snitt 46,2x (48x: 96,3 %), köpt KingzBonus i snitt 145,3x (151x: cirka 96,2 %). scale 3,27
   // drar ner hela spelet cirka 0,4 procentenheter.
   // (Förut, 2026-10-27, Hög 4/5: lång kontroll med 160 M omgångar 96,43 %, SD 13,6; scale 3,03, pay 0,2416, köp 68x och 214x.)
-  // x500 och x1000 (2026-10-29, kort simulering: 100 M grundsnurr plus viktad simulering av 7,2 M bonusar, där x500 och x1000
-  // dras oftare och vikten rättar till det): förut nåddes maxvinsten i stort sett aldrig. Bonusen kommer var 201:a snurr och
+  // Stegen (1.8.0, 2026-11-04, kort simulering: 100 M grundsnurr plus viktad simulering av 3,6 M bonusar, där de stora dras
+  // oftare och vikten rättar till det): maxvinst cirka 1 på 88 M snurr (±5 %), allt från 5000x i KingzBonus (landar i 1 av
+  // cirka 2 200 KingzBonusar, i snitt 3 200x, maxvinst i 3,8 % av dem). 250x, 500x och 1000x landar i cirka 1 av 2 000,
+  // 4 000 och 8 000 Bonusar (i snitt 140x, 230x och 420x) och i 1 av 1 000, 2 000 och 2 000 KingzBonusar (300x, 460x och
+  // 780x). Den byggda matten utan viktning (2,4 M av varje bonus): hela spelet 96,10 %, SD 8,21 (Medel 3/5), köpt Bonus
+  // 96,39 % ±0,08 och köpt KingzBonus 96,12 % ±0,10 (pay 0,12288 och goldPay 0,12141). Medianen per bonus är som förut
+  // (cirka 33x och 115x). Lagda till med bara 500x och 1000x nåddes maxvinsten nästan aldrig (1 på cirka 530 000 M snurr),
+  // och med 2500x som högsta steg blev spelet för svängigt (SD 9,2) för att nå 1 på 100 M.
+  // 1.7.0 (x500 och x1000 som gångrade multin, 2026-10-29, kort simulering: 100 M grundsnurr plus viktad simulering av
+  // 7,2 M bonusar): förut nåddes maxvinsten i stort sett aldrig. Bonusen kommer var 201:a snurr och
   // KingzBonus var 1 508:e (båda var 177:e). x500 landar i cirka 1 av 26 500 Bonusar (maxvinst i 26 % av dem, i snitt
   // 5 000x), i KingzBonus x500 i 1 av 31 000 (67 %, 8 200x) och x1000 i 1 av 15 500 (81 %, 8 900x). Maxvinst cirka 1 på
   // 10 M snurr, hela spelet 96,11 %, SD 8,61 (fortfarande Medel 3/5). pay 0,12274 och goldPay 0,12273 (var 0,1235 för båda):
@@ -3054,7 +2971,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // brädena) och multi x2–x5, aldrig tomt. Ett hjul får högst ett LAYER. En multi gäller vinster som går genom hjulet
   // (användaren 2026-10-27), och går vinsten genom flera multis läggs de ihop (srAdd); ett hjul med LAYER n kan hämta en
   // symbol som saknas upp till n snurr bakåt.
-  SR.baseP = 0.1; SR.baseOpen = [55, 28, 12, 4, 1]; SR.baseW = [0, 30, 22, 14, 0, 0, 12, 4, 1, 0, 0, 0, 0, 0, 0];
+  SR.baseP = 0.1; SR.baseOpen = [55, 28, 12, 4, 1]; SR.baseW = [0, 30, 22, 14, 0, 0, 12, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0];
   TIME.srAdd = true;
   var SR_BASE_NL = SR.baseW.map(function (w, i) { return SR_ICONS[i].k === 'layer' ? 0 : w; });
   // Vilka småhjul som öppnas och vad de ger: cells[r] = [övre, undre] (ikonens nummer, -1 = stängt), depth[r] (hjulets
@@ -3099,12 +3016,12 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   applyTime();
   // bonushjulen: utan Troner (i bonusen öppnar ingen Tron något; vilka småhjul som är öppna avgör royalBonus)
   STRIPS.fs = buildStrips(srBlocks([0, 0, 0, 0, 0]), 0x7A0E5);
-  // remsan som småhjulen visar i farten: ikonerna blandade med ett fast frö. x500 och x1000 är bara med på remsan i den
+  // remsan som småhjulen visar i farten: ikonerna blandade med ett fast frö. De stora multisarna är bara med på remsan i den
   // bonus där de kan landa (W: bonusens vikter; grundspelets remsa har dem inte): SR_STRIP i grundspelet, SR_STRIP_FS i
   // Bonusen och SR_STRIP_GOLD i KingzBonus.
   function srStripOf(W) {
     var list = [], rnd = mulberry32(0xD3E9B0);
-    SR.vis.forEach(function (w, i) { if (SR_ICONS[i].times && !(W && W[i] > 0)) return; for (var k = 0; k < w; k++) list.push(i); });
+    SR.vis.forEach(function (w, i) { if (SR_ICONS[i].big && !(W && W[i] > 0)) return; for (var k = 0; k < w; k++) list.push(i); });
     for (var j = list.length - 1; j > 0; j--) { var q = Math.floor(rnd() * (j + 1)), t = list[j]; list[j] = list[q]; list[q] = t; }
     return list;
   }
@@ -3117,23 +3034,23 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     return 0;
   }
   // Ett snurr på småhjulen. open[r]: hjulets småhjul är öppna, gold: KingzBonus (goldW). Ger cells[r] = [övre, undre]
-  // (ikonens nummer i SR_ICONS, -1 = stängt), depth[r] (hjulets LAYER, 0 = inget) och add (summan av multis x2–x50).
+  // (ikonens nummer i SR_ICONS, -1 = stängt), depth[r] (hjulets LAYER, 0 = inget) och add (summan av multisarna).
   function srDraw(rng, open, gold) {
     var cells = [], depth = [], add = 0, WT = gold ? SR.goldW : SR.w, WN = gold ? SR_GW_NL : SR_W_NL;
     for (var r = 0; r < REELS; r++) {
       if (!open[r]) { cells.push([-1, -1]); depth.push(0); continue; }
       var t = srPick(rng, WT), b = srPick(rng, SR_ICONS[t].k === 'layer' ? WN : WT), d = 0;
-      [t, b].forEach(function (i) { var ic = SR_ICONS[i]; if (ic.k === 'layer') d = ic.n; else if (ic.k === 'multi' && !ic.times) add += ic.n; });
+      [t, b].forEach(function (i) { var ic = SR_ICONS[i]; if (ic.k === 'layer') d = ic.n; else if (ic.k === 'multi') add += ic.n; });
       cells.push([t, b]); depth.push(d);
     }
     return { cells: cells, depth: depth, add: add };
   }
-  // Bonusens multi efter småhjulen: ikonerna räknas i den ordning de landar (övre raden först, sedan den undre, från vänster
-  // till höger). x2–x50 läggs till; x500 och x1000 gångrar multin (som är minst 1 när den gångras: utan multi blir det x500).
+  // Bonusens multi efter småhjulen: alla multis läggs till, också de stora (250x–5000x); ikonerna räknas i den ordning de
+  // landar (övre raden först, sedan den undre, från vänster till höger), som klienten visar dem.
   function srMultAfter(multi, cells) {
     for (var row = 0; row < 2; row++) for (var r = 0; r < REELS; r++) {
       var ic = cells[r][row] >= 0 ? SR_ICONS[cells[r][row]] : null;
-      if (ic && ic.k === 'multi') multi = ic.times ? Math.max(1, multi) * ic.n : multi + ic.n;
+      if (ic && ic.k === 'multi') multi += ic.n;
     }
     return multi;
   }
@@ -3489,8 +3406,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'Väl kämpat!': 'Well fought!',
     'Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.':
       'Mini reels: sometimes one or more mini reels above and below the board open while it spins. LAYER n lets the reel fetch a missing symbol from up to n spins back. A multiplier applies to wins that pass through its reel, and a win through several reels with multipliers adds them together. While the mini reels are open, wins cascade: winning symbols disappear and new ones fall in until there are no more wins, and a multiplier that was part of a win grows by its own value (x2 becomes x4) for the next cascade.',
-    'Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Multisarna 2x–50x läggs på bonusens multi, som aldrig nollställs. Rubinen 500x (i båda bonusarna) och guldkronan 1000x (bara i KingzBonus) gångrar multin i stället. Hela spelomgången ger högst {m}x insatsen.':
-      'The bonuses: 3 Thrones give the Bonus and the gold Throne gives KingzBonus, with {n} free spins. Before every free spin the open mini reels spin and give LAYER, a multiplier or nothing. The 2x–50x multipliers are added to the bonus multiplier, which never resets. The 500x ruby (in both bonuses) and the 1000x gold crown (KingzBonus only) multiply it instead. A whole game round pays at most {m}x the bet.',
+    'Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Alla multis läggs på bonusens multi, som aldrig nollställs, och multin gångrar vinsterna. De stora multisarna 250x, 500x och 1000x finns i båda bonusarna och 5000x bara i KingzBonus. Hela spelomgången ger högst {m}x insatsen.':
+      'The bonuses: 3 Thrones give the Bonus and the gold Throne gives KingzBonus, with {n} free spins. Before every free spin the open mini reels spin and give LAYER, a multiplier or nothing. Every multiplier is added to the bonus multiplier, which never resets, and the bonus multiplier multiplies the wins. The big multipliers 250x, 500x and 1000x are in both bonuses, and 5000x only in KingzBonus. A whole game round pays at most {m}x the bet.',
     '+1 MILJON': '+1 MILLION',
     '<b>Narren</b> är wild. Den finns på hjul 2–5 och ersätter alla symboler utom Tronen.': '<b>The Jester</b> is wild. It appears on reels 2–5 and substitutes for all symbols except the Throne.',
     'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.': 'If the symbol is missing on the next reel, the previous spin\'s symbol in the torn corner can fill the gap, and the win continues.',
@@ -3584,8 +3501,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     'Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.':
       'Earlier boards stay behind as layers. If the symbol is missing on a reel with LAYER, it can be fetched from the layers, and the win continues.',
     'Bonus & KingzBonus': 'Bonus & KingzBonus',
-    '3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Rubinen 500x (och i KingzBonus kronan 1000x) gångrar multin. Köp: Bonus {a}x, KingzBonus {b}x.':
-      '3 Thrones give the Bonus: {n} free spins with 3 new reels each spin. The gold Throne gives KingzBonus, all open. The 500x ruby (and in KingzBonus the 1000x crown) multiplies the multi. Buy: Bonus {a}x, KingzBonus {b}x.',
+    '3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Alla multis, även 250x–5000x, läggs på multin. Köp: Bonus {a}x, KingzBonus {b}x.':
+      '3 Thrones give the Bonus: {n} free spins with 3 new reels each spin. The gold Throne gives KingzBonus, all open. All multipliers, even the big 250x to 5000x, are added to the bonus multi. Buy: Bonus {a}x, KingzBonus {b}x.',
 
     // ---- studiointrot
     'TRYCK FÖR ATT STARTA': 'TAP TO START',
@@ -4256,51 +4173,58 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     spark(cx + R * 0.7, cy - R * 0.62, size * 0.06);
     if (t >= 2) spark(cx - R * 0.75, cy + R * 0.5, size * 0.045);
   }
-  // x500 och x1000 (användaren 2026-10-29; de gångrar multin): större och kungligare än juvelerna, med strålar bakom.
-  // x500: en stor rubin i guldinfattning på kunglig purpur. x1000: en guldkrona med talet under på guld (guld =
-  // KingzBonus, som guldtronen). Båda har en guldram innanför bläckkanten.
-  function drawSrTimes(g, ic, x0, y0, w, h, r, lw, size, cx, cy) {
-    var top = ic.n >= 1000, i, bg = g.createRadialGradient(cx, y0 + h * 0.4, w * 0.05, cx, cy, w * 0.78);
-    if (top) { bg.addColorStop(0, '#fff6c0'); bg.addColorStop(0.5, '#ffcc33'); bg.addColorStop(1, '#b86e00'); }
-    else { bg.addColorStop(0, '#7a3cc8'); bg.addColorStop(0.55, '#3b1466'); bg.addColorStop(1, '#1a0830'); }
+  // De stora multisarna, stegen (användaren 2026-11-04: 250x, 500x, 1000x och 5000x; de läggs på multin som de andra):
+  // större och kungligare än juvelerna, med strålar bakom och en guldram innanför bläckkanten, så att varje steg ser
+  // finare ut än det förra. 250x: en smaragd i guldinfattning på grön sammet. 500x: en rubin på kunglig purpur. 1000x: en
+  // guldkrona på guld (guld = KingzBonus, som guldtronen). 5000x (bara i KingzBonus): en guldkrona med en diamant på
+  // karmosinröd sammet som mörknar mot svart, med guldstrålar, guldtal och gnistor.
+  function srBigLook(n) {
+    if (n >= 5000) return { tile: ['#ff5a6e', '#8a0f26', '#1a0308'], mid: 0.5, rays: 'rgba(255,210,31,0.36)', dots: 'rgba(20,2,6,0.18)', frame: '#ffd21f', crown: '#bff4ff', text: '#ffd21f' };
+    if (n >= 1000) return { tile: ['#fff6c0', '#ffcc33', '#b86e00'], mid: 0.5, rays: 'rgba(255,255,255,0.4)', dots: 'rgba(140,70,0,0.14)', frame: '#fff1a8', crown: '#e0284a', text: '#ffffff' };
+    if (n >= 500) return { tile: ['#7a3cc8', '#3b1466', '#1a0830'], mid: 0.55, rays: 'rgba(255,204,51,0.22)', dots: 'rgba(10,4,20,0.16)', frame: KQ_GOLD, gem: SR_GEM[2], glow: '#ff2d4f' };
+    return { tile: ['#3fd583', '#0f5a32', '#05200f'], mid: 0.55, rays: 'rgba(255,204,51,0.22)', dots: 'rgba(4,20,10,0.16)', frame: KQ_GOLD, gem: SR_GEM[1], glow: '#2fbf6a' };
+  }
+  function drawSrBig(g, ic, x0, y0, w, h, r, lw, size, cx, cy) {
+    var L = srBigLook(ic.n), i, bg = g.createRadialGradient(cx, y0 + h * 0.4, w * 0.05, cx, cy, w * 0.78);
+    bg.addColorStop(0, L.tile[0]); bg.addColorStop(L.mid, L.tile[1]); bg.addColorStop(1, L.tile[2]);
     g.fillStyle = bg; rr(g, x0, y0, w, h, r); g.fill();
     g.save(); rr(g, x0, y0, w, h, r); g.clip();
-    g.fillStyle = top ? 'rgba(255,255,255,0.4)' : 'rgba(255,204,51,0.22)';
+    g.fillStyle = L.rays;
     for (i = 0; i < 12; i++) {
       var a0 = i * Math.PI / 6, a1 = a0 + Math.PI / 13;
       g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a0) * w, cy + Math.sin(a0) * w); g.lineTo(cx + Math.cos(a1) * w, cy + Math.sin(a1) * w); g.closePath(); g.fill();
     }
-    halftone(g, x0, y0, w, h, size, top ? 'rgba(140,70,0,0.14)' : 'rgba(10,4,20,0.16)');
+    halftone(g, x0, y0, w, h, size, L.dots);
     g.fillStyle = 'rgba(255,255,255,0.3)'; g.beginPath(); g.ellipse(x0 + w * 0.3, y0 + h * 0.15, w * 0.36, h * 0.1, -0.35, 0, Math.PI * 2); g.fill();
     g.restore();
-    g.lineWidth = lw * 0.9; g.strokeStyle = top ? '#fff1a8' : KQ_GOLD; rr(g, x0 + lw * 1.1, y0 + lw * 1.1, w - lw * 2.2, h - lw * 2.2, r * 0.8); g.stroke();
+    g.lineWidth = lw * 0.9; g.strokeStyle = L.frame; rr(g, x0 + lw * 1.1, y0 + lw * 1.1, w - lw * 2.2, h - lw * 2.2, r * 0.8); g.stroke();
     g.lineWidth = lw; g.strokeStyle = INK; rr(g, x0, y0, w, h, r); g.stroke();
-    if (top) {
-      kqBox(g, cx, y0 + h * 0.5, w * 0.78, lw * 0.6, function (shape, circle, shade) { kqCrown(shape, circle, shade, 0, -2, 58, '#e0284a'); });
-      outlinedText(g, ic.n + 'x', cx, y0 + h * 0.74, Math.round(size * 0.27) + 'px ' + DISPLAY, '#ffffff', size * 0.065);
+    function spark(x, y, rad) { starPath(g, x, y, rad, rad * 0.3, 4, 0); g.fillStyle = '#ffffff'; g.fill(); g.lineWidth = rad * 0.18; g.strokeStyle = INK; g.stroke(); }
+    if (L.crown) {
+      kqBox(g, cx, y0 + h * 0.5, w * 0.78, lw * 0.6, function (shape, circle, shade) { kqCrown(shape, circle, shade, 0, -2, 58, L.crown); });
+      outlinedText(g, ic.n + 'x', cx, y0 + h * 0.74, Math.round(size * 0.27) + 'px ' + DISPLAY, L.text, size * 0.065);
+      if (ic.n >= 5000) [[0.2, 0.2, 0.06], [0.82, 0.24, 0.05], [0.86, 0.58, 0.04], [0.14, 0.6, 0.04]].forEach(function (p) { spark(x0 + w * p[0], y0 + h * p[1], size * p[2]); });
       return;
     }
-    // rubinen: en åttakantig slipad sten i en tjock guldinfattning
-    var R = w * 0.38, pts = [], inner = [];
+    // juvelen: en åttakantig slipad sten i en tjock guldinfattning
+    var R = w * 0.38, pts = [], inner = [], c = L.gem;
     for (i = 0; i < 8; i++) { var a = -Math.PI / 2 + Math.PI / 8 + i * Math.PI / 4; pts.push([cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.86]); inner.push([cx + Math.cos(a) * R * 0.58, cy + Math.sin(a) * R * 0.5]); }
     function poly(list) { g.beginPath(); list.forEach(function (p, k) { if (k) g.lineTo(p[0], p[1]); else g.moveTo(p[0], p[1]); }); g.closePath(); }
     // skenet stannar innanför brickan
-    g.save(); rr(g, x0 + lw, y0 + lw, w - lw * 2, h - lw * 2, r * 0.8); g.clip(); g.shadowColor = '#ff2d4f'; g.shadowBlur = size * 0.16;
+    g.save(); rr(g, x0 + lw, y0 + lw, w - lw * 2, h - lw * 2, r * 0.8); g.clip(); g.shadowColor = L.glow; g.shadowBlur = size * 0.16;
     poly(pts); g.lineJoin = 'round'; g.lineWidth = size * 0.1; g.strokeStyle = INK; g.stroke();
     g.lineWidth = size * 0.07; g.strokeStyle = KQ_GOLD; g.stroke(); g.restore();
-    poly(pts); var gr = g.createLinearGradient(cx - R, cy - R, cx + R, cy + R); gr.addColorStop(0, '#ff8aa2'); gr.addColorStop(0.5, '#e0284a'); gr.addColorStop(1, '#7a0c24');
+    poly(pts); var gr = g.createLinearGradient(cx - R, cy - R, cx + R, cy + R); gr.addColorStop(0, c[0]); gr.addColorStop(0.5, c[1]); gr.addColorStop(1, c[2]);
     g.fillStyle = gr; g.fill();
     g.lineWidth = Math.max(1, size * 0.012); g.strokeStyle = 'rgba(255,255,255,0.55)';
     for (i = 0; i < 8; i++) { g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(inner[i][0], inner[i][1]); g.stroke(); }
     poly(inner); g.fillStyle = 'rgba(255,255,255,0.22)'; g.fill(); g.stroke();
     poly(pts); g.lineWidth = Math.max(1.5, size * 0.025); g.strokeStyle = INK; g.stroke();
     outlinedText(g, ic.n + 'x', cx, cy + size * 0.02, Math.round(size * 0.28) + 'px ' + DISPLAY, '#ffffff', size * 0.065);
-    [[0.8, -0.72, 0.065], [-0.86, 0.56, 0.05], [0.88, 0.66, 0.04]].forEach(function (p) {
-      starPath(g, cx + R * p[0], cy + R * p[1], size * p[2], size * p[2] * 0.3, 4, 0); g.fillStyle = '#ffffff'; g.fill(); g.lineWidth = size * p[2] * 0.18; g.strokeStyle = INK; g.stroke();
-    });
+    [[0.8, -0.72, 0.065], [-0.86, 0.56, 0.05], [0.88, 0.66, 0.04]].forEach(function (p) { spark(cx + R * p[0], cy + R * p[1], size * p[2]); });
   }
   function drawSrTile(g, ic, x0, y0, w, h, r, lw, size, cx, cy) {
-    if (ic.times) { drawSrTimes(g, ic, x0, y0, w, h, r, lw, size, cx, cy); return; }
+    if (ic.big) { drawSrBig(g, ic, x0, y0, w, h, r, lw, size, cx, cy); return; }
     var base = ic.k === 'layer' ? LAYER_TILE[ic.n - 1] : '#241a3c', light = ic.k === 'layer' ? '#ffffff' : '#3e2f66';
     var bg = g.createRadialGradient(cx, y0 + h * 0.36, w * 0.04, cx, cy, w * 0.78);
     bg.addColorStop(0, ic.k === 'layer' ? 'rgba(255,255,255,0.55)' : light); bg.addColorStop(ic.k === 'layer' ? 0.45 : 1, base);
@@ -7732,9 +7656,10 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       }
     }
     var spinning = state.phase === 'spinning';
-    // När spelet snurrar av sig själv är knappen en stoppknapp hela tiden, röd med fyrkanten:
-    // autospelet (AUTO under; ett tryck stoppar autospelet, events-1.js spinPress) och bonusen (BONUS under; ett tryck
-    // stoppar hjulen snabbare och hoppar fram i vinsterna, men bonusen fortsätter). Den byter inte till gul mellan snurren.
+    // När spelet snurrar av sig själv är knappen en stoppknapp hela tiden, röd med fyrkanten (användaren 2026-10-27):
+    // autospelet (ett tryck stoppar autospelet, events-1.js spinPress) och bonusen (ett tryck stoppar hjulen snabbare och
+    // hoppar fram i vinsterna, men bonusen fortsätter). Den byter inte till gul mellan snurren. Ingen text under fyrkanten
+    // (förut AUTO och BONUS): röd färg och fyrkanten räcker (användaren 2026-10-29).
     var fsLook = !!state.fs, autoLook = state.auto > 0 && !fsLook, stopLook = spinning || autoLook || fsLook;
     el.spinWrap.classList.toggle('spinning', spinning);
     el.spin.classList.toggle('stop', stopLook);
@@ -7743,7 +7668,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     el.icoSpin.toggleAttribute('hidden', stopLook);
     el.icoStop.toggleAttribute('hidden', !stopLook);
     el.spinCount.hidden = true;
-    el.spinSub.textContent = autoLook ? 'AUTO' : fsLook ? 'BONUS' : '';
+    el.spinSub.textContent = '';
     el.spin.setAttribute('aria-label', autoLook ? txl('Stoppa autospel') : spinning || fsLook ? txl('Stoppa hjulen') : txl('Snurra'));
     el.auto.setAttribute('aria-pressed', state.auto > 0 ? 'true' : 'false');
     el.autoBadge.hidden = !(state.auto > 0);
@@ -8010,7 +7935,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     setTimeout(function () { home.classList.remove('home-hit'); }, 750);
   }
   // En siffra som inte får plats i sin ruta krymper i stället för att göra rutan bredare. Raden behåller sin höjd, så att
-  // rutan inte blir lägre och inget under den flyttar sig (Kingz & Queenz: multin kan bli x1 031 000 med x500 och x1000).
+  // rutan inte blir lägre och inget under den flyttar sig (Kingz & Queenz: multin kan bli stor med stegen 250x–5000x).
   function fitNum(b) {
     b.style.fontSize = ''; b.style.lineHeight = '';
     var room = b.parentNode.clientWidth - 16, h = b.offsetHeight;
@@ -8036,7 +7961,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     } else if (bl) bl.hidden = true;
     if (fs) {
       el.fsLeft.textContent = fs.left;
-      // multin betalar minst x1 (Kingz & Queenz börjar på 0); stora tal med mellanrum (x1 031 000, Kingz & Queenz x500 och x1000)
+      // multin betalar minst x1 (Kingz & Queenz börjar på 0); stora tal med mellanrum (x10 250, Kingz & Queenz stege)
       el.fsMult.textContent = 'x' + num(Math.max(1, fs.mult));
       var multLabel = el.fsMult.parentNode.querySelector('.meter-label');
       if (multLabel) multLabel.textContent = 'Multi';
@@ -10294,7 +10219,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     SRR.push([0, 1].map(function (row) { var rl = new Reel(sri, 1); rl.row = row; rl.setGrid([SR0]); rl.onLand = srLanded; return rl; }));
     srOpen.push(false); srRowOpen.push([false, false]); srFlash.push([-1, -1]);
   }
-  // remsorna i farten: grundspelets, Bonusens (med x500) och KingzBonus (med x500 och x1000)
+  // remsorna i farten: grundspelets, Bonusens (med 250x, 500x och 1000x) och KingzBonus (med hela stegen, också 5000x)
   var SR_STRIP_SYM = M.SR_STRIP.map(function (i) { return SR0 + i; }), SR_STRIP_FS_SYM = M.SR_STRIP_FS.map(function (i) { return SR0 + i; }), SR_STRIP_GOLD_SYM = M.SR_STRIP_GOLD.map(function (i) { return SR0 + i; });
   // ---------------------------------------------------------------- utseendet
   // Användaren 2026-10-26: "inte alls säker på att det ska vara borgar som är småhjulen och med den inramningen". Varje
@@ -10694,14 +10619,15 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     thud: function () { Sound.tone(130, 0.12, { to: 80, vol: 0.08 }); },
     // ett stort värde: en trumpetslinga uppåt, en djup puka och cymbal
     big: function () { var t = kqNow(); [69, 74, 78, 81].forEach(function (m, i) { Sound.horn([kqHz(m)], t + i * 0.07, 0.4, 0.028); }); Sound.timp(kqHz(38), t, 0.4, Sound.sfx, 1); Sound.cymbal(t + 0.1, 0.05); },
-    // x500 eller x1000 landar: två pukslag, en trumpetfanfar i full ackord som stiger (högre för x1000) och cymbal
-    times: function (n) {
-      var t = kqNow(), up = n >= 1000 ? 2 : 0;
+    // en stor multi (stegen 250x–5000x) landar: två pukslag, en trumpetfanfar i full ackord som stiger (högre ju högre
+    // steget är) och cymbal
+    bigMulti: function (n) {
+      var t = kqNow(), up = n >= 5000 ? 5 : n >= 1000 ? 2 : n >= 500 ? 0 : -2;
       Sound.timp(kqHz(36), t, 0.5, Sound.sfx, 1.2); Sound.timp(kqHz(36), t + 0.18, 0.5, Sound.sfx, 1.2);
       [[69, 73, 76], [71, 74, 78], [74, 78, 81]].forEach(function (c, i) { Sound.horn(c.map(function (m) { return kqHz(m + up); }), t + 0.3 + i * 0.16, i === 2 ? 0.9 : 0.24, 0.03); });
       Sound.cymbal(t + 0.62, 0.08);
     },
-    // multin gångras (x500 eller x1000 har flugit in i multin): en tung puka och ett klockspel uppåt
+    // en stor multi har flugit in i multin: en tung puka och ett klockspel uppåt
     slam: function () { var t = kqNow(); Sound.timp(kqHz(34), t, 0.6, Sound.sfx, 1.3); [81, 86, 88, 93].forEach(function (m, i) { Sound.glock(kqHz(m), t + 0.05 + i * 0.05, 0.08, Sound.sfx, 0.6); }); Sound.cymbal(t, 0.06); },
     fold: function () { Sound.hiss(0.6, { f: 1600, to: 500, q: 0.8, vol: 0.05 }); Sound.tone(220, 0.6, { to: 90, type: 'triangle', vol: 0.05 }); Sound.tone(70, 0.4, { to: 40, vol: 0.16, when: 0.55 }); },
     // svarta bilden: ett mörkt sus, en djup puka när kronan kommer och två klara klockor
@@ -10713,7 +10639,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var f = document.createElement('div'); f.className = 'sr-flash' + (gold ? ' gold' : '') + (soft ? ' soft' : '');
     document.body.appendChild(f); setTimeout(function () { f.remove(); }, 900);
   }
-  // multin har gångrats (x500 eller x1000): talet blir stort och lyser i guld och slår sedan ner på sin plats (bara
+  // en stor multi har lagts på (stegen 250x–5000x): talet blir stort och lyser i guld och slår sedan ner på sin plats (bara
   // transform och filter, så att inget i bonusrutan flyttar sig)
   function srMultSlam() {
     var e = el.fsMult; if (!e || !e.animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
@@ -10820,9 +10746,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     var ic = M.SR_ICONS[rl.target[0] - SR0];
     if (ic.k === 'blank') { srSnd.thud(); return; }
     srFlash[rl.i][rl.row] = 0;
-    // x500 och x1000 (gångrar multin, användaren 2026-10-29): ett eget kort ögonblick med guldblixt, fanfar och massor av
-    // gnistor (efter landningen, så att inget avslöjar den innan)
-    if (ic.times) { srSnd.times(ic.n); srScreenFlash(true); preFlare(); srSparks(rl.i, rl.row, 70, '#ffcc33'); srSparks(rl.i, rl.row, 30, ic.n >= 1000 ? '#fff1a8' : '#ff2d4f'); return; }
+    // stegens stora multis (250x–5000x, användaren 2026-11-04; de läggs på multin): ett eget kort ögonblick med guldblixt,
+    // fanfar och massor av gnistor i stenens eller kronans färg (efter landningen, så att inget avslöjar den innan)
+    if (ic.big) { srSnd.bigMulti(ic.n); srScreenFlash(true); preFlare(); srSparks(rl.i, rl.row, ic.n >= 5000 ? 110 : 70, '#ffcc33'); srSparks(rl.i, rl.row, ic.n >= 5000 ? 50 : 30, ic.n >= 5000 ? '#bff4ff' : ic.n >= 1000 ? '#fff1a8' : ic.n >= 500 ? '#ff2d4f' : '#3fd583'); return; }
     var big = (ic.k === 'layer' && ic.n >= 4) || (ic.k === 'multi' && ic.n >= 20);
     if (ic.k === 'layer') srSnd.layer(ic.n); else srSnd.multi(ic.n);
     if (big) { srSnd.big(); preFlare(); }
@@ -10869,8 +10795,8 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       rl.requestStop([SR0 + t.icon]);
       await waitFor(function () { return rl.landed; });
       rl.speed = 0.75;
-      // x500 och x1000 står kvar förstorade en stund (även i turbo, kortare)
-      if (ic.times) await wait(fast() ? 0.35 : 1.1, true);
+      // de stora multisarna står kvar förstorade en stund (även i turbo, kortare)
+      if (ic.big) await wait(fast() ? 0.35 : 1.1, true);
       else if (!fast()) await wait(ic.k === 'blank' ? hold * 0.4 : hold, true);
       if (srBig) srBig = { r: q, row: row, from: 1, to: 0, t0: clock, dur: 0.12 };
       srActive = null;
@@ -10942,12 +10868,12 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
         landHome(document.querySelector('.fs-layers .l' + n) || home, n, to.x, to.y);
       });
     }, function (t, n) {
-      // x500 och x1000 gångrar multin (minst x1 när den gångras), de andra läggs till; i samma ordning som spelmotorn
-      // (M.srMultAfter: i den ordning de landar)
-      var times = M.SR_ICONS[t.icon].times;
+      // alla multis läggs på multin, också stegens stora (250x–5000x), som spelmotorn (M.srMultAfter); de stora slår in med
+      // en puka, en blixt och talet som växer
+      var big = M.SR_ICONS[t.icon].big;
       return srFlyTo(t.r, t.row, SR0 + t.icon, srCenter(el.fsMult), fast()).then(function () {
-        state.fs.mult = times ? Math.max(1, state.fs.mult || 0) * n : (state.fs.mult || 0) + n; renderMeter(true);
-        if (times) { srSnd.slam(); srScreenFlash(true, true); srMultSlam(); return; }
+        state.fs.mult = (state.fs.mult || 0) + n; renderMeter(true);
+        if (big) { srSnd.slam(); srScreenFlash(true, true); srMultSlam(); return; }
         if (!Sound.fx('multi_up', { rate: Sound.semi(Math.min(12, n / 4)) })) Sound.tone(520 * Math.pow(1.06, Math.min(12, n / 4)), 0.14, { type: 'triangle', vol: 0.1 });
       });
     });
@@ -10998,14 +10924,15 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
   // (i den kungliga bonusen srSpinLive, i grundspelet när småhjul öppnas srBaseLive)
   spinHold = function (res, fs) { return fs && royalRun && res.sr ? srSpinLive(res) : !fs && res.srBase ? srBaseLive(res) : null; };
   // Mellanbonusen (användaren 2026-10-28: "3 nya småhjul som öppnas efter varje snurr, inte 3 fasta"): före varje frispinn
-  // byggs tavlorna upp igen på hjulen som inte är med längre (de faller ner och studsar), och sedan rasar tavlorna på de nya
-  // hjulen (övre raden från vänster till höger, sedan den nedre). Hjul som är med igen står öppna.
+  // byggs tavlorna upp igen på ALLA öppna hjul (de faller ner och studsar), och sedan rasar tavlorna på de nya hjulen (övre
+  // raden från vänster till höger, sedan den nedre). Också ett hjul som är med igen stängs först (användaren 2026-11-04:
+  // "Alla släcks och sen så tänds nya"). I KingzBonus är alla fem öppna hela tiden, och då händer inget.
   async function srReopen(openIn, fast) {
     var shut = [], add = [], r;
-    for (r = 0; r < REELS; r++) { if (srOpen[r] && !openIn[r]) shut.push(r); if (!srOpen[r] && openIn[r]) add.push(r); }
-    if (!shut.length && !add.length) return;
+    for (r = 0; r < REELS; r++) { if (srRowOpen[r][0] || srRowOpen[r][1]) shut.push(r); if (openIn[r]) add.push(r); }
+    if (shut.length === REELS && add.length === REELS) return;
     shut.forEach(function (q, i) { srShut(q, clock + i * 0.06); });
-    if (shut.length) await wait(fast ? 0.15 : SR_DROP + 0.1, true);
+    if (shut.length) await wait(fast ? 0.15 : SR_DROP + 0.1 + (shut.length - 1) * 0.06, true);
     await srRowWave(add, fast);
   }
   // ---------------------------------------------------------------- den kungliga bonusen
@@ -12333,8 +12260,9 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       '<li>' + txl('Vanliga snurr: vinsterna betalas och brädet står kvar till nästa snurr.') + '</li>' +
       // Kingz & Queenz: grundspelets småhjul (small-reels.js, M.SR.baseP)
       (M.SR && M.SR.baseP ? '<li>' + txl('Småhjulen: ibland öppnas ett eller flera småhjul ovanför och under brädet medan det snurrar. LAYER n låter hjulet hämta en symbol som saknas från upp till n snurr bakåt. En multi gäller vinster som går genom hjulet, och går vinsten genom flera hjul med multi läggs de ihop. När småhjulen är öppna blir det laviner: vinnande symboler försvinner och nya faller in tills det inte blir fler vinster, och en multi som har ingått i en vinst växer med sitt eget värde (x2 blir x4) till nästa lavin.') + '</li>' : '') +
-      // Kingz & Queenz: bonusarnas småhjul, med x500 och x1000 som gångrar multin (M.SR.goldW, användaren 2026-10-29)
-      (M.SR && M.SR.goldW ? '<li>' + txl('Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Multisarna 2x–50x läggs på bonusens multi, som aldrig nollställs. Rubinen 500x (i båda bonusarna) och guldkronan 1000x (bara i KingzBonus) gångrar multin i stället. Hela spelomgången ger högst {m}x insatsen.', { n: M.SR.spins, m: fmtX(M.TIME.maxX) }) + '</li>' : '') +
+      // Kingz & Queenz: bonusarnas småhjul, där alla multis läggs på multin, också stegen 250x–5000x (M.SR.goldW, användaren
+      // 2026-11-04)
+      (M.SR && M.SR.goldW ? '<li>' + txl('Bonusarna: 3 Troner ger Bonusen och guldtronen KingzBonus, med {n} frispinn. Före varje frispinn snurrar de öppna småhjulen och ger LAYER, multi eller tomt. Alla multis läggs på bonusens multi, som aldrig nollställs, och multin gångrar vinsterna. De stora multisarna 250x, 500x och 1000x finns i båda bonusarna och 5000x bara i KingzBonus. Hela spelomgången ger högst {m}x insatsen.', { n: M.SR.spins, m: fmtX(M.TIME.maxX) }) + '</li>' : '') +
       '<li>' + txl('Vinsten räknas i gånger insatsen och avrundas till hela ören en gång per spelomgång.') + '</li>' +
       '<li>' + txl('Avbrutet spel: lämnar du spelet mitt i en omgång spelas den klart med samma utfall nästa gång du startar spelet. Insatsen dras inte igen och vinsten betalas ut när omgången är klar.') + '</li></ul></section>' +
       '<section><h3>' + txl('Kontroller') + '</h3><ul>' +
@@ -13463,7 +13391,7 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     { t: txl('Vinstvägar'), x: txl('{h} hjul, {r} rader och {w} vinstvägar. Lika symboler på hjul i rad från vänster vinner. Narren är wild på hjul 2–5 och ersätter alla symboler utom Tronen.', { h: M.REELS, r: M.ROWS, w: num(Math.pow(M.ROWS, M.REELS)) }), demo: kgDemoWays },
     { t: txl('Småhjulen'), x: txl('Ibland öppnas småhjul ovanför och under brädet. Då blir det laviner, och en multi som vinner växer till nästa lavin. Flera multis läggs ihop. LAYER n hämtar en saknad symbol upp till n snurr bakåt.'), demo: kgDemoSmall },
     { t: 'Layerspins', x: txl('Förra snurrens bräden ligger kvar som lager bakåt. Saknas symbolen på ett hjul med LAYER kan den hämtas från lagren, och vinsten fortsätter.'), demo: kgDemoLayers },
-    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Rubinen 500x (och i KingzBonus kronan 1000x) gångrar multin. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
+    { t: txl('Bonus & KingzBonus'), x: txl('3 Troner ger Bonusen: {n} frispinn med 3 nya hjul varje snurr. Guldtronen ger KingzBonus med alla öppna. Alla multis, även 250x–5000x, läggs på multin. Köp: Bonus {a}x, KingzBonus {b}x.', { n: M.SR.spins, a: M.SR.buy, b: M.SR.goldBuy }), demo: kgDemoBonus }
   ];
   // Varje knapp väljer ett slumpat snurr som visar funktionen (flow.js nxPick; köpt Maniac via buyGame). Bara i prototypen
   // (mode-setup.js: nxTestTab). Nya funktioner läggs till här när de byggs.
@@ -13780,60 +13708,463 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     if (e.key === 'ArrowRight') { e.preventDefault(); guideGo(guide.i + 1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); guideGo(guide.i - 1); }
   });
-  // Serietidningsrutan (krämvitt papper, rasterprickar, tjock ram) och studions vektorsymbol: ett CP-monogram av tre
-  // enkla former (gult C, orange t, blått P) som faller, hoppar och snurrar in, klickar ihop med en smäll och nickar;
-  // CataPa och STUDIOS poppar fram, och sidan vänds som i en serietidning så att spelet ligger på nästa sida.
-  // Ett tryck eller en tangent hoppar till slutet. Namnet står bara här (STUDIO).
-  var STUDIO = { word: 'CataPa', name: 'STUDIOS' };
+  // Studions intro sedan 2026-11-03 (användaren: "lägg in det så detta blir orginal här i detta spel"), i stället för
+  // CataPa-introt. Byggt i CataPaAI slotplattform (packages/ct-maniac/studio/odd-head, Huvan i packages/core/src/huvan.ts,
+  // commit 5a4a8c5 och 9f69de4) och kopierat hit; Huvan ligger i HUVAN nedan. Rättat här 2026-11-03: namnet mäts i rätt
+  // typsnitt (begin, mat) och Huvan krockar inte med laddaren i breda fönster (siPassa). Samma papper, samma tider och
+  // samma API som CataPa-introt (studioIntro med onCover och hold, ended, onEnd, onTitle och release), och flygningen in
+  // i spelet går genom O:et i ODD. Ett tryck eller en tangent hoppar till slutet (inte i det första introt, som väntar på
+  // laddningen).
+  var STUDIO = 'ODD HEAD GAMES';
+  // studions namn är i Knewave, som C&T inte längre hämtar (sprayen i INFINITY är Rubik Spray Paint sedan 2026-11-02):
+  // introt hämtar det själv
+  if (!document.querySelector('link[href*="family=Knewave"]')) {
+    var siFont = document.createElement('link');
+    siFont.rel = 'stylesheet';
+    siFont.href = 'https://fonts.googleapis.com/css2?family=Knewave&display=swap';
+    document.head.appendChild(siFont);
+  }
+  // Huvan: figuren och namnet som en bild som animeras från koden (huvanSvg och spelaHuvan, ur plattformens kärna)
+  var HUVAN = (function () {
+    // Huvan, ODD HEAD GAMES figur i studiointrot (designförslaget 2026-10-29): graffitimålaren i huva och bandana dyker upp
+    // framför en grön färgplump, skakar sprejburken och sprejar studions namn, ODD och sedan HEAD. Färgen droppar, GAMES
+    // smäller fast och han blinkar. Liggande i ett brett fönster (figuren till vänster, namnet till höger) och stående på
+    // telefonen (figuren överst, namnet under). Ren presentation: inget slumpas, stänket kommer från en fast talföljd.
+    // Kameran flyger sist in genom O:et i ODD (hålet, .cp-oh-hole), som den förut flög in genom P:ets båge.
+
+    /** Hur länge Huvans animation tar, i sekunder (studiointrot är klart efter 2,7 s). */
+    const HUVAN_T = 2.65;
+
+    const LIGGANDE = { vb: [960, 540], fig: [40, 40, 0.86], arm: 0, upp: 300, rad1: [560, 250], rad2: [560, 390], mitt: false, fs: 132, games: [740, 462], glitter: [880, 170] };
+    // stående: figuren högre upp och namnet längre ned, så att huvtröjan inte hamnar över ODD
+    const STAENDE = { vb: [540, 930], fig: [35, 4, 0.78], arm: 20, upp: 330, rad1: [270, 630], rad2: [270, 800], mitt: true, fs: 170, games: [270, 885], glitter: [470, 500] };
+
+    const INK = '#15111f';
+    const NS = 'http://www.w3.org/2000/svg';
+    /** Armens led (axeln) och sprejmunstycket, i figurens mått. */
+    const AXEL = [362, 402];
+    const MUNSTYCKE = [551, 263];
+    /** Dropparna: rad, bokstav, var under bokstaven (andel av bredden) och längd (vid 132 px). */
+    const DROPPAR = [
+      [1, 1, 0.2, 38],
+      [1, 2, 0.24, 28],
+      [2, 0, 0.2, 42],
+      [2, 2, 0.78, 30],
+      [2, 3, 0.22, 36],
+    ];
+
+    /** Figuren i egna mått: kroppen (en byst), huvan, ansiktet med bandana och armen med sprejburken. */
+    function figur() {
+      const sh = 'M110 520C120 430 170 372 214 352L326 352C376 372 424 430 434 520C434 556 380 570 270 570C160 570 110 556 110 520Z';
+      const hood = 'M138 242C138 146 188 90 250 90C312 90 362 146 362 242C362 302 330 342 250 348C170 342 138 302 138 242Z';
+      const face = 'M176 248C176 180 208 146 250 146C292 146 324 180 324 248C324 292 292 316 250 318C208 316 176 292 176 248Z';
+      const band = 'M172 254C206 268 294 268 328 254C334 286 314 312 286 318L250 352L214 318C186 312 166 286 172 254Z';
+      const sleeve = 'M346 384C390 362 440 346 486 332L500 378C456 394 412 412 378 436Z';
+      const fist = 'M502 298C510 284 534 280 552 286C568 292 572 316 566 334C560 352 536 358 516 352C500 346 494 314 502 298Z';
+      return (
+        `<defs><clipPath id="cpohCSh"><path d="${sh}"/></clipPath><clipPath id="cpohCHood"><path d="${hood}"/></clipPath>` +
+        `<clipPath id="cpohCFace"><path d="${face}"/></clipPath><clipPath id="cpohCBand"><path d="${band}"/></clipPath>` +
+        `<pattern id="cpohHt" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="3.4" fill="${INK}" opacity=".16"/></pattern></defs>` +
+        `<g transform="translate(14 14)" fill="${INK}" stroke-width="20"><path d="${sh}"/><path d="${hood}"/></g>` +
+        `<path d="${sh}" fill="#3A2A6B" stroke-width="20"/>` +
+        `<g clip-path="url(#cpohCSh)" stroke="none"><ellipse cx="420" cy="500" rx="150" ry="170" fill="#2B1E4F"/><rect x="310" y="380" width="200" height="240" fill="url(#cpohHt)"/><ellipse cx="160" cy="420" rx="40" ry="14" fill="#fff" opacity=".2" transform="rotate(-40 160 420)"/></g>` +
+        '<circle cx="150" cy="440" r="7" fill="#B5F23D" stroke-width="4"/><circle cx="168" cy="460" r="4" fill="#B5F23D" stroke="none"/>' +
+        `<path d="${hood}" fill="#3A2A6B" stroke-width="20"/>` +
+        '<g clip-path="url(#cpohCHood)" stroke="none"><ellipse cx="372" cy="300" rx="120" ry="210" fill="#2B1E4F"/><ellipse cx="190" cy="124" rx="54" ry="18" fill="#fff" opacity=".28" transform="rotate(-38 190 124)"/></g>' +
+        `<path d="${face}" fill="none" stroke-width="36"/><path d="${face}" fill="none" stroke="#5B4A99" stroke-width="24"/><path d="${face}" fill="#9B78FF" stroke-width="8"/>` +
+        `<g clip-path="url(#cpohCFace)" stroke="none"><ellipse cx="250" cy="150" rx="106" ry="40" fill="#6E52D9"/><ellipse cx="330" cy="270" rx="44" ry="90" fill="${INK}" opacity=".1"/></g>` +
+        '<path d="M190 208C204 200 222 200 238 210" fill="none" stroke-width="13"/>' +
+        '<g id="cpohBrow"><path d="M264 206L282 199M291 196L310 188" fill="none" stroke-width="13"/></g>' +
+        '<ellipse cx="216" cy="240" rx="23" ry="15" fill="#fff" stroke-width="8"/><ellipse cx="286" cy="238" rx="23" ry="15" fill="#fff" stroke-width="8"/>' +
+        `<g id="cpohIris"><circle cx="220" cy="244" r="9" fill="#B5F23D" stroke-width="3"/><circle cx="221" cy="245" r="4.5" fill="${INK}" stroke="none"/>` +
+        `<circle cx="290" cy="242" r="9" fill="#B5F23D" stroke-width="3"/><circle cx="291" cy="243" r="4.5" fill="${INK}" stroke="none"/></g>` +
+        '<path id="cpohLidL" d="M192 241C195 220 238 220 241 241Z" fill="#8466E6" stroke-width="8"/>' +
+        '<path id="cpohLidR" d="M262 239C265 218 308 218 311 239Z" fill="#8466E6" stroke-width="8"/>' +
+        `<path d="${band}" fill="#FF5FA2" stroke-width="10"/>` +
+        '<g clip-path="url(#cpohCBand)" stroke="none"><ellipse cx="312" cy="322" rx="84" ry="54" fill="#D9457F"/></g>' +
+        '<path d="M175 263C208 277 292 277 325 263" fill="none" stroke="#B83470" stroke-width="5"/>' +
+        '<g fill="#fff" stroke="none"><circle cx="206" cy="286" r="5"/><circle cx="250" cy="298" r="5"/><circle cx="294" cy="286" r="5"/><circle cx="232" cy="318" r="4"/><circle cx="270" cy="318" r="4"/></g>' +
+        '<path d="M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392" fill="none" stroke-width="14"/>' +
+        '<path d="M222 336C220 356 216 372 214 390M278 336C280 356 284 374 286 392" fill="none" stroke="#fff" stroke-width="6"/>' +
+        '<rect x="207" y="388" width="14" height="18" rx="5" fill="#B5F23D" stroke-width="5"/><rect x="279" y="390" width="14" height="18" rx="5" fill="#B5F23D" stroke-width="5"/>' +
+        '<g id="cpohArm">' +
+        `<g transform="translate(14 14)" fill="${INK}" stroke-width="20"><path d="${sleeve}"/><path d="${fist}"/><rect x="514" y="250" width="46" height="198" rx="9"/></g>` +
+        `<path d="${sleeve}" fill="#3A2A6B" stroke-width="20"/>` +
+        '<path d="M484 328L500 378L518 372L502 322Z" fill="#5B4A99" stroke-width="10"/>' +
+        '<rect x="514" y="274" width="46" height="174" rx="9" fill="#FF5FA2" stroke-width="10"/>' +
+        '<rect x="519" y="372" width="36" height="48" fill="#B5F23D" stroke="none"/>' +
+        '<path d="M514 372h46M514 420h46M514 434h46" fill="none" stroke-width="5"/>' +
+        `<text x="537" y="404" text-anchor="middle" font-family="Bangers, Impact, sans-serif" font-size="22" fill="${INK}" stroke="none">OH</text>` +
+        '<rect x="521" y="360" width="7" height="80" rx="3.5" fill="#fff" opacity=".4" stroke="none"/>' +
+        '<ellipse cx="537" cy="276" rx="23" ry="6" fill="#9B78FF" stroke-width="7"/>' +
+        '<rect x="525" y="250" width="24" height="28" rx="5" fill="#fff" stroke-width="8"/>' +
+        `<circle cx="549" cy="263" r="3.2" fill="${INK}" stroke="none"/>` +
+        '<path d="M508 296C500 278 504 258 518 250C526 246 536 248 540 254" fill="none" stroke-width="22"/>' +
+        '<path d="M508 296C500 278 504 258 518 250C526 246 536 248 540 254" fill="none" stroke="#9B78FF" stroke-width="10"/>' +
+        `<path d="${fist}" fill="#9B78FF" stroke-width="12"/>` +
+        '<path d="M506 312C522 308 544 308 566 314M506 330C522 326 544 326 564 332" fill="none" stroke-width="6"/>' +
+        '<g id="cpohRattle" opacity="0" fill="none" stroke-width="7"><path d="M498 252l-16-8M496 274h-18M584 244l12-12M590 266l16-2"/></g>' +
+        '</g>'
+     );
+    }
+
+    /** En rad av namnet: svart 3D, lila 3D, kontur, rosa fyllning och glans upptill. Rutan (revealN) visar det sprejade. */
+    function rad(n, x, y, ord, l) {
+      const fs = l.fs;
+      const anchor = l.mitt ? 'middle' : 'start';
+      const text = `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Knewave, Bangers, sans-serif" font-size="${fs}">${ord}</text>`;
+      const lager = (attr) => text.replace('<text ', `<text ${attr} `);
+      const w = l.vb[0];
+      return (
+        `<clipPath id="cpohRv${n}"><rect id="cpohRv${n}r" x="0" y="${(y - fs * 1.15).toFixed(0)}" width="${w}" height="${(fs * 1.6).toFixed(0)}"/></clipPath>` +
+        `<clipPath id="cpohSh${n}"><rect x="0" y="${(y - fs * 0.833).toFixed(0)}" width="${w}" height="${(fs * 0.41).toFixed(0)}"/></clipPath>` +
+        `<g id="cpohN${n}" clip-path="url(#cpohRv${n})" stroke-linejoin="round">` +
+        `<g transform="translate(${(fs * 0.09).toFixed(1)} ${(fs * 0.09).toFixed(1)})">${lager(`fill="${INK}" stroke="${INK}" stroke-width="${(fs * 0.2).toFixed(0)}"`)}</g>` +
+        `<g transform="translate(${(fs * 0.045).toFixed(1)} ${(fs * 0.045).toFixed(1)})">${lager(`fill="#5B33D6" stroke="#5B33D6" stroke-width="${(fs * 0.167).toFixed(0)}"`)}</g>` +
+        lager(`fill="${INK}" stroke="${INK}" stroke-width="${(fs * 0.167).toFixed(0)}"`) +
+        lager('fill="#FF5FA2"') +
+        lager(`fill="#fff" opacity=".42" clip-path="url(#cpohSh${n})"`) +
+        '</g>' +
+        lager(`id="cpohM${n}" opacity="0"`)
+     );
+    }
+
+    /** Huvans bild: färgplumpen, figuren, namnet, sprejen och GAMES. Stående på en telefon i porträtt. */
+    function huvanSvg(staende) {
+      const l = staende ? STAENDE : LIGGANDE;
+      const [w, h] = l.vb;
+      const [fx, fy, fs] = l.fig;
+      const k = l.fs / 132;
+      const splat =
+        'M270 60C300 60 312 34 336 40C356 46 350 74 372 86C396 98 420 78 438 96C454 112 432 134 444 154C456 176 488 176 490 202C492 226 462 232 462 256C462 280 494 292 488 316C482 340 450 332 436 352C422 372 440 402 418 416C396 430 378 404 354 410C330 416 322 448 296 448C270 448 264 418 240 414C216 410 196 436 174 424C152 412 166 384 150 366C134 348 100 356 92 332C84 308 114 296 112 272C110 248 78 240 82 216C86 192 118 194 126 172C134 150 112 128 128 110C144 92 170 110 190 96C210 82 206 54 230 46C252 40 252 60 270 60Z';
+      const [gx, gy] = l.games;
+      const [sx, sy] = l.glitter;
+      return (
+        `<svg class="cp-oh-art" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><g id="cpohScene">` +
+        `<defs><clipPath id="cpohCSplat"><path d="${splat}"/></clipPath></defs>` +
+        `<g id="cpohSplat" transform="translate(${fx} ${fy}) scale(${fs})" stroke="${INK}" stroke-linejoin="round">` +
+        `<path d="${splat}" fill="${INK}" stroke-width="10" transform="translate(12 12)"/><path d="${splat}" fill="#B5F23D" stroke-width="10"/>` +
+        '<g clip-path="url(#cpohCSplat)" stroke="none"><ellipse cx="430" cy="420" rx="230" ry="170" fill="#9ED62E"/><ellipse cx="170" cy="130" rx="60" ry="20" fill="#fff" opacity=".35" transform="rotate(-30 170 130)"/></g>' +
+        '<circle cx="58" cy="310" r="8" fill="#B5F23D" stroke-width="7"/><circle cx="104" cy="444" r="7" fill="#B5F23D" stroke-width="7"/></g>' +
+        '<g id="cpohDots"></g>' +
+        `<g id="cpohDrips" fill="#FF5FA2" stroke="${INK}" stroke-width="${(6 * k).toFixed(1)}" stroke-linejoin="round">${DROPPAR.map((_, i) => `<path id="cpohD${i}" d=""/>`).join('')}</g>` +
+        rad(1, l.rad1[0], l.rad1[1], 'ODD', l) +
+        rad(2, l.rad2[0], l.rad2[1], 'HEAD', l) +
+        `<circle class="cp-oh-hole" r="1" cx="${l.rad1[0]}" cy="${l.rad1[1]}" fill="none" stroke="none"/>` +
+        `<g id="cpohFig" transform="translate(${fx} ${fy}) scale(${fs})" stroke="${INK}" stroke-linejoin="round" stroke-linecap="round">${figur()}</g>` +
+        '<polygon id="cpohStr" points="0,0 0,0 0,0" fill="#fff" opacity="0"/><polygon id="cpohStr2" points="0,0 0,0 0,0" fill="#FF5FA2" opacity="0"/>' +
+        `<g id="cpohMist" opacity="0" fill="#FF5FA2"><circle r="${(14 * k).toFixed(1)}" opacity=".5"/><circle r="${(9 * k).toFixed(1)}" opacity=".6"/><circle r="${(6 * k).toFixed(1)}"/></g>` +
+        `<g id="cpohPuff" opacity="0" stroke="${INK}" stroke-width="6" stroke-linejoin="round"><path d="M0 -6C4 -22 26 -24 32 -10C46 -14 54 4 42 12C44 26 24 30 16 20C6 28 -10 20 -6 8C-16 4 -12 -10 0 -6Z" fill="#fff"/><circle cx="20" cy="2" r="5" fill="#FF5FA2" stroke="none"/><circle cx="34" cy="-4" r="3.5" fill="#B5F23D" stroke="none"/></g>` +
+        // GAMES-lappens plats när den sitter (laddaren krymper så att den inte hamnar över lappen)
+        `<rect class="cp-oh-games" x="${gx - 90}" y="${gy - 30}" width="185" height="64" fill="none" stroke="none"/>` +
+        `<g id="cpohGames"><g transform="translate(${gx} ${gy}) rotate(-3)"><rect x="-86" y="-24" width="172" height="48" rx="12" fill="${INK}" transform="translate(7 7)"/>` +
+        `<rect x="-86" y="-24" width="172" height="48" rx="12" fill="#B5F23D" stroke="${INK}" stroke-width="8"/><text x="0" y="13" text-anchor="middle" font-family="Bangers, Impact, sans-serif" font-size="34" letter-spacing="8" fill="${INK}">GAMES</text></g></g>` +
+        `<g id="cpohSpark"><path d="M0 -24l7 17 17 7-17 7-7 17-7-17-17-7 17-7z" fill="#fff" stroke="${INK}" stroke-width="6" stroke-linejoin="round" transform="translate(${sx} ${sy - 20})"/>` +
+        `<path d="M0 -12l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="#FFD21F" stroke="${INK}" stroke-width="4" stroke-linejoin="round" transform="translate(${sx + 32} ${sy + 16})"/></g>` +
+        '</g></svg>'
+     );
+    }
+
+    const cl = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+    const seg = (t, a, b) => cl((t - a) / (b - a));
+    const eOut = (x) => 1 - Math.pow(1 - x, 3);
+    const eIO = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const bOut = (x) => 1 + 2.9 * Math.pow(x - 1, 3) + 1.9 * Math.pow(x - 1, 2);
+
+    /**
+     * Spelar Huvan i bilden (svg från huvanSvg). Mäter bokstäverna (typsnitten ska vara laddade), ställer stänket, dropparna
+     * och hålet i O:et, och spelar sedan animationen en gång. Utan rörelse (lugn) visas slutbilden direkt.
+     */
+    function spelaHuvan(svg, staende, lugn) {
+      const l = staende ? STAENDE : LIGGANDE;
+      const [fx, fy, fs] = l.fig;
+      const k = l.fs / 132;
+      const q = (id) => svg.querySelector(`#${id}`);
+      const s = (id, namn, v) => q(id)?.setAttribute(namn, String(v));
+      const m1 = q('cpohM1'),
+        m2 = q('cpohM2');
+      if (!m1 || !m2) return;
+      const hole = svg.querySelector('.cp-oh-hole');
+      // stänket runt bokstäverna: en fast talföljd, ingen slump
+      const dots = q('cpohDots');
+      const prickar = [];
+      let frö = 20261029;
+      const nasta = () => {
+        frö = (Math.imul(frö, 1664525) + 1013904223) >>> 0;
+        return frö / 4294967296;
+      };
+      for (const r of [1, 2])
+        for (let i = 0; i < 26; i++) {
+          const u = nasta(),
+            v = nasta(),
+            rr = (1.6 + nasta() * 3.2) * k;
+          const c = document.createElementNS(NS, 'circle');
+          c.setAttribute('r', rr.toFixed(1));
+          c.setAttribute('fill', nasta() < 0.75 ? '#FF5FA2' : '#7A4DFF');
+          c.setAttribute('opacity', '0');
+          dots?.append(c);
+          prickar.push({ el: c, u, v, rad: r });
+        }
+      // Bokstävernas mått: rutan som visar det sprejade, dropparna under bokstävernas ben, hålet i O:et och stänket. De
+      // mäts om när namnets bredd ändras (användaren 2026-11-03: "ODD HEAD klipps"; Knewave kom efter att bokstäverna
+      // hade mätts i ett smalare reservtypsnitt, så att rutan klippte av dem och dropparna och hålet hamnade fel).
+      let b1 = null,
+        b2 = null,
+        dr = [];
+      const mat = () => {
+        b1 = m1.getBBox();
+        b2 = m2.getBBox();
+        dr = DROPPAR.map(([r, i, andel, len], n) => {
+          const m = r === 1 ? m1 : m2;
+          const e = m.getExtentOfChar(i);
+          const x = e.x + andel * e.width,
+            y = (r === 1 ? l.rad1[1] : l.rad2[1]) - 10 * k,
+            ln = len * k,
+            bw = 8 * k;
+          s(`cpohD${n}`, 'd', `M${(x - bw).toFixed(1)} ${y.toFixed(1)}v${ln.toFixed(1)}a${bw.toFixed(1)} ${bw.toFixed(1)} 0 0 0 ${(2 * bw).toFixed(1)} 0v-${ln.toFixed(1)}Z`);
+          return [x, y];
+        });
+        const o = m1.getExtentOfChar(0);
+        hole?.setAttribute('cx', (o.x + o.width * 0.5 + l.fs * 0.023).toFixed(1));
+        hole?.setAttribute('cy', (l.rad1[1] - l.fs * 0.33).toFixed(1));
+        hole?.setAttribute('r', (l.fs * 0.075).toFixed(1));
+        for (const d of prickar) {
+          const b = d.rad === 1 ? b1 : b2;
+          d.el.setAttribute('cx', (b.x + d.u * b.width).toFixed(1));
+          d.el.setAttribute('cy', (b.y + b.height * 0.1 + d.v * b.height * 0.7).toFixed(1));
+        }
+      };
+      mat();
+      // har namnet bytt bredd sedan det mättes? (då mäts det om)
+      const bytt = () => Math.abs(m1.getBBox().width - b1.width) > 0.5 || Math.abs(m2.getBBox().width - b2.width) > 0.5;
+      const [ax, ay] = AXEL;
+      const rot = (x, y, a) => {
+        const r = (a * Math.PI) / 180,
+          c = Math.cos(r),
+          sn = Math.sin(r);
+        return [ax + (x - ax) * c - (y - ay) * sn, ay + (x - ax) * sn + (y - ay) * c];
+      };
+      const splatMitt = [fx + fs * 286, fy + fs * 244];
+      const [gx, gy] = l.games;
+      const [sx, sy] = l.glitter;
+
+      const rita = (t) => {
+        const sp = bOut(seg(t, 0, 0.3));
+        s('cpohSplat', 'transform', `translate(${splatMitt[0]} ${splatMitt[1]}) scale(${sp.toFixed(3)}) translate(${-splatMitt[0]} ${-splatMitt[1]}) translate(${fx} ${fy}) scale(${fs})`);
+        const dy = l.upp * (1 - bOut(seg(t, 0.08, 0.45)));
+        s('cpohFig', 'transform', `translate(${fx} ${(fy + dy).toFixed(1)}) scale(${fs})`);
+        const lock = t < 0.45 ? 2.2 : 2.2 - 1.2 * eOut(seg(t, 0.45, 0.56));
+        const blink = Math.sin(Math.PI * seg(t, 2.3, 2.55));
+        s('cpohLidL', 'transform', `translate(0 222) scale(1 ${(lock + 1.2 * blink).toFixed(3)}) translate(0 -222)`);
+        s('cpohLidR', 'transform', `translate(0 220) scale(1 ${lock.toFixed(3)}) translate(0 -220)`);
+        s('cpohBrow', 'transform', `translate(0 ${(-7 * Math.sin(Math.PI * seg(t, 2.25, 2.6))).toFixed(1)})`);
+        const spray1 = t > 1.04 && t < 1.46,
+          spray2 = t > 1.51 && t < 1.96;
+        const blick = 4 * eOut(seg(t, 0.9, 1.05)) * (1 - seg(t, 2.0, 2.15));
+        s('cpohIris', 'transform', `translate(${blick.toFixed(1)} ${(-blick / 4).toFixed(1)})`);
+        let a = l.arm + 38 * (1 - bOut(seg(t, 0.5, 0.72)));
+        if (t > 0.72 && t < 1.0) a += 7 * Math.sin(2 * Math.PI * 8 * (t - 0.72)) * (1 - seg(t, 0.92, 1.0));
+        a += 9 * eIO(seg(t, 1.45, 1.52)) - 9 * eIO(seg(t, 1.95, 2.1));
+        if (spray1 || spray2) a += 1.2 * Math.sin(2 * Math.PI * 15 * t);
+        s('cpohArm', 'transform', `rotate(${a.toFixed(2)} ${ax} ${ay})`);
+        s('cpohRattle', 'opacity', t > 0.73 && t < 0.99 ? (Math.sin(2 * Math.PI * 8 * t) > 0 ? 1 : 0.35) : 0);
+        const n = rot(MUNSTYCKE[0], MUNSTYCKE[1], a);
+        const nx = fx + fs * n[0],
+          ny = fy + dy + fs * n[1];
+        const p1 = eIO(seg(t, 1.06, 1.44)),
+          p2 = eIO(seg(t, 1.53, 1.94));
+        s('cpohRv1r', 'x', (b1.x - 30 * k).toFixed(1));
+        s('cpohRv1r', 'width', (p1 * (b1.width + 70 * k)).toFixed(1));
+        s('cpohRv2r', 'x', (b2.x - 30 * k).toFixed(1));
+        s('cpohRv2r', 'width', (p2 * (b2.width + 70 * k)).toFixed(1));
+        let hx = 0,
+          hy = 0;
+        const pa = spray1 || spray2;
+        if (spray1) {
+          hx = b1.x + p1 * b1.width;
+          hy = b1.y + b1.height * 0.5 + 10 * k * Math.sin(t * 40);
+        } else if (spray2) {
+          hx = b2.x + p2 * b2.width;
+          hy = b2.y + b2.height * 0.5 + 10 * k * Math.sin(t * 40);
+        }
+        if (pa) {
+          const p = (half) => `${nx.toFixed(1)},${ny.toFixed(1)} ${hx.toFixed(1)},${(hy - half * k).toFixed(1)} ${hx.toFixed(1)},${(hy + half * k).toFixed(1)}`;
+          s('cpohStr', 'points', p(40));
+          s('cpohStr2', 'points', p(18));
+          s('cpohStr', 'opacity', 0.5);
+          s('cpohStr2', 'opacity', 0.6);
+          s('cpohMist', 'opacity', 1);
+          s('cpohMist', 'transform', `translate(${hx.toFixed(1)} ${hy.toFixed(1)}) scale(${(1 + 0.25 * Math.sin(t * 55)).toFixed(2)})`);
+        } else for (const id of ['cpohStr', 'cpohStr2', 'cpohMist']) s(id, 'opacity', 0);
+        const pf = eOut(seg(t, 0.98, 1.08)) * (1 - seg(t, 1.95, 2.1));
+        s('cpohPuff', 'opacity', pf > 0 ? 1 : 0);
+        s('cpohPuff', 'transform', `translate(${(nx + 4).toFixed(1)} ${(ny - 6).toFixed(1)}) scale(${(pf * 0.9 * fs / 0.86).toFixed(3)})`);
+        for (const d of prickar) d.el.setAttribute('opacity', (d.rad === 1 ? p1 : p2) >= d.u ? '.85' : '0');
+        dr.forEach(([x, y], i) => {
+          const v = eOut(seg(t, 2.0 + 0.06 * i, 2.35 + 0.06 * i));
+          s(`cpohD${i}`, 'transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(1 ${v.toFixed(3)}) translate(${(-x).toFixed(1)} ${(-y).toFixed(1)})`);
+        });
+        const gs = seg(t, 2.02, 2.22),
+          gsc = t < 2.02 ? 0 : 2.2 - 1.2 * bOut(gs);
+        s('cpohGames', 'opacity', seg(t, 2.02, 2.08));
+        s('cpohGames', 'transform', `translate(${gx} ${gy}) rotate(${(-11 * (1 - eOut(gs))).toFixed(2)}) scale(${gsc.toFixed(3)}) translate(${-gx} ${-gy})`);
+        const sh = t > 2.1 && t < 2.26 ? 7 * k * (1 - seg(t, 2.1, 2.26)) * Math.sin(2 * Math.PI * 28 * t) : 0;
+        s('cpohScene', 'transform', `translate(${sh.toFixed(1)} ${(sh * 0.6).toFixed(1)})`);
+        const sk = t < 2.25 ? 0 : bOut(seg(t, 2.25, 2.45));
+        s('cpohSpark', 'transform', `translate(${sx} ${sy}) scale(${sk.toFixed(3)}) rotate(${(90 * (1 - sk)).toFixed(1)}) translate(${-sx} ${-sy})`);
+      };
+
+      // kommer ett typsnitt först när animationen är klar (eller utan rörelse) mäts namnet om och slutbilden ritas igen:
+      // när typsnittet säger till, och en koll var fjärdedels sekund så länge introt syns
+      let sist = 0,
+        vakt = 0;
+      const omMat = () => {
+        if (!svg.isConnected) {
+          clearInterval(vakt);
+          document.fonts?.removeEventListener?.('loadingdone', omMat);
+          return;
+        }
+        if (bytt()) {
+          mat();
+          rita(sist);
+        }
+      };
+      document.fonts?.addEventListener?.('loadingdone', omMat);
+      vakt = setInterval(omMat, 250);
+      if (lugn) {
+        sist = 9;
+        rita(9);
+        return;
+      }
+      rita(0);
+      let start = null;
+      const ruta = (nu) => {
+        if (!svg.isConnected) return;
+        if (start === null) start = nu;
+        const t = (nu - start) / 1000;
+        if (bytt()) mat();
+        sist = Math.min(t, HUVAN_T);
+        rita(sist);
+        if (t < HUVAN_T) requestAnimationFrame(ruta);
+      };
+      requestAnimationFrame(ruta);
+    }
+    return { svg: huvanSvg, spela: spelaHuvan };
+  })();
   // [när slutet börjar, hur länge slutet tar] i sekunder
   var SI_T = [2.7, 0.7];
-  function studioHtml() {
-    var w = STUDIO.word, name = STUDIO.name;
-    var letters = w.split('').map(function (ch, i) { return '<span style="--i:' + i + '">' + ch + '</span>'; }).join('');
-    var nm = name.split('').map(function (ch, i) { return '<span style="--i:' + i + '">' + ch + '</span>'; }).join('');
-    // färgklicken som flyger ut när symbolen klickar ihop: tio prickar i studions färger, i var sin riktning
-    var dots = ''; for (var k = 0; k < 10; k++) dots += '<i style="--a:' + (k * 36 + 8) + 'deg;--c:' + ['#ffd21f', '#ff8629', '#1d47d1'][k % 3] + ';--d:' + (k % 2 ? 1 : 0.78) + '"></i>';
-    return '<div class="sm-page"><i class="sm-flash"></i><div class="sm-logo"><i class="sm-disc"></i><i class="sm-ring"></i><div class="sm-burst">' + dots + '</div>' +
-      // symbolen: C, ett orange t och ett blått P som hakar i varandra (användaren 2026-10-22: t:et ska synas, men allt ska
-      // hänga ihop): tvärslån går in i C:ets öppning, P:ets stav ligger tätt mot t:et över tvärslåns ände och t:ets krok, och
-      // flygningen in i spelet går genom hålet i P:ets båge
-      '<svg class="sm-mark" viewBox="0 0 240 200" aria-hidden="true">' +
-      '<defs><mask id="smMask"><path d="M131 52A64 64 0 1 0 131 148" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round"/>' +
-      '<rect x="96" y="30" width="92" height="138" rx="12" fill="#fff"/><path d="M176 36h12a44 44 0 0 1 0 88h-12z" fill="#fff"/></mask>' +
-      '<linearGradient id="smShineG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>' +
-      '<g class="sm-c"><path d="M131 52A64 64 0 1 0 131 148" class="sm-ink"/><path d="M131 52A64 64 0 1 0 131 148" class="sm-fill"/></g>' +
-      '<g class="sm-stem"><path d="M124 43a9 9 0 0 1 9-9h8a9 9 0 0 1 9 9v95a6 6 0 0 0 6 6h12a9 9 0 0 1 9 9v2a9 9 0 0 1-9 9h-25a19 19 0 0 1-19-19z"/>' +
-      '<rect x="100" y="60" width="72" height="24" rx="9"/><rect class="sm-join" x="127.5" y="63.5" width="19" height="17"/></g>' +
-      '<g class="sm-bowl"><rect x="160" y="40" width="25" height="124" rx="9"/><path d="M181 40h10a42 42 0 0 1 0 84h-10z"/><rect class="sm-join" x="175" y="43.5" width="13" height="77"/><circle cx="193" cy="82" r="12"/></g>' +
-      '<g mask="url(#smMask)"><rect class="sm-shine" x="-70" y="-20" width="46" height="240" fill="url(#smShineG)"/></g>' +
-      '<g class="sm-spark"><path d="M224 16l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><circle cx="28" cy="36" r="6"/><circle cx="226" cy="172" r="5"/></g></svg>' +
-      '<div class="sm-word">' + letters + '</div><div class="sm-name">' + nm + '</div></div><i class="sm-shade"></i></div>';
+  // ett fönster som är högre än brett (en telefon i porträtt) får Huvan stående: figuren överst och namnet under
+  function siStaende() { return window.innerHeight > window.innerWidth * 1.05; }
+  // Ett sprejdrag (t: ljudmotorns tid, dur: hur länge, n: bokstäver, d: utgång): ett jämnt, tryckt sus högt upp
+  // (lufttryck och färg) som ligger kvar hela draget, med en tryckstöt när munstycket öppnas, en svag puls per bokstav och
+  // lite darr från handen. Samma sprej när Huvan sprejar ODD HEAD (siSpray) och INFINITY LAYER (infinity-chip.js).
+  Sound.sprayHold = function (t, dur, n, d) {
+    var c = this.ctx; if (!c || !this.noise) return;
+    var v = 0.15, kurva = [[0.012, v * 1.7], [0.08, v]];
+    for (var b = 1; b < n; b++) { var x = dur * b / n; kurva.push([x - 0.02, v], [x, v * 0.72], [x + 0.03, v]); }
+    kurva.push([dur - 0.06, v * 0.9], [dur, 0.0001]);
+    // brus genom ett filter med volymkurvan kurva (skala k) och darr [Hz, djup] (Sound.hiss klingar av hela vägen; ett
+    // sprej ligger kvar)
+    function brus(typ, f, q, k, darr) {
+      var src = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = Sound.noise; src.loop = true;
+      fl.type = typ; fl.frequency.value = f; fl.Q.value = q;
+      g.gain.setValueAtTime(0.0001, t);
+      kurva.forEach(function (p) { g.gain.exponentialRampToValueAtTime(Math.max(0.0001, p[1] * k), t + p[0]); });
+      if (darr) { var lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = darr[0]; lg.gain.value = darr[1]; lfo.connect(lg); lg.connect(g.gain); lfo.start(t); lfo.stop(t + dur + 0.05); }
+      src.connect(fl); fl.connect(g); g.connect(d || Sound.sfx);
+      src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.05);
+    }
+    brus('highpass', 2400, 0.6, 1, [15, v * 0.12]);
+    brus('bandpass', 7200, 0.9, 0.6);
+    brus('bandpass', 1300, 0.7, 0.22);
+  };
+  // Sprayljudet när Huvan sprejar (användaren 2026-11-03: "ett sprayljud när min karaktär sprayer upp Odd head games", om
+  // första försöket "Det är inget sprayljud", och sedan "en kula mot plåt och sen sprayljudet som idag och sen räcker det.
+  // Men efterljudet är inte bra", och till sist "Hara bar sprayet kvar och ta bort det andra"). Bara sprejet, på Huvans
+  // tider (spelaHuvan): ett jämnt, tryckt sprej som ligger kvar hela ordet, med en tryckstöt när munstycket öppnas och
+  // lite darr från handen: ODD (1,04–1,46 s) och HEAD (1,51–1,96 s). Inget ljud när han skakar burken och inget efterljud.
+  // Bara brus, inga toner. fran: hur många sekunder animationen redan har gått (det som redan har hänt hoppas över). Ger
+  // tillbaka stop(fade).
+  function siSpray(fran) {
+    var none = { stop: function () {} }, c = Sound.ctx;
+    if (!c || c.state !== 'running' || !Sound.noise) return none;
+    var bus = c.createGain(), t0 = c.currentTime + 0.02 - (fran || 0);
+    bus.gain.value = 1; bus.connect(Sound.sfx);
+    [[1.04, 1.46, 3], [1.51, 1.96, 4]].forEach(function (r) { if (t0 + r[0] >= c.currentTime) Sound.sprayHold(t0 + r[0], r[1] - r[0], r[2], bus); });
+    return { stop: function (fade) {
+      var n = c.currentTime, f = fade || 0.2;
+      try { bus.gain.cancelScheduledValues(n); bus.gain.setValueAtTime(bus.gain.value, n); bus.gain.linearRampToValueAtTime(0.0001, n + f); } catch (e) { /* ignorera */ }
+      setTimeout(function () { try { bus.disconnect(); } catch (e) { /* ignorera */ } }, (f + 0.1) * 1000);
+    } };
+  }
+  function studioHtml(st) {
+    return '<div class="sm-page"><i class="sm-flash"></i><div class="cp-oh' + (st ? ' cp-oh-st' : '') + '">' + HUVAN.svg(st) + '</div><i class="sm-shade"></i></div>';
+  }
+  // Huvan får plats ovanför laddaren, så att spelets namn och stapeln behåller sin storlek: på telefonen på höjden och i
+  // ett lågt, brett fönster så stor som platsen ovanför laddaren medger och mitt i den, men minst 30 % av höjden
+  // (passaHuvan i kärnan)
+  function siPassa(root, st) {
+    var box = document.querySelector('#loader .ld-box'), oh = root.querySelector('.cp-oh'), art = root.querySelector('.cp-oh-art');
+    if (!box || !oh || !art) return;
+    var a = art.getBoundingClientRect(), b = box.getBoundingClientRect();
+    if (!b.height) return;
+    var vb = art.viewBox.baseVal, ih = window.innerHeight;
+    var topp = Math.max(ih * 0.035, 20), luft = Math.max(14, ih * 0.02), plats = b.top - luft - topp;
+    // I ett brett fönster är Huvan stor och står mitt i: där får luvtröjan inte gå in i "presenterar" överst i laddaren
+    // (användaren 2026-11-03). Bilden lyfts så att den slutar luft ovanför laddaren, men inte högre än topp; räcker inte
+    // det krymper den lite.
+    if (!st && a.height >= ih * 0.4) {
+      if (a.bottom <= b.top - luft) return;
+      var hb = Math.min(a.height, plats);
+      if (hb < a.height) art.style.width = (hb * vb.width / vb.height).toFixed(1) + 'px';
+      var yb = Math.max(topp, b.top - luft - hb);
+      oh.style.transform = 'translateY(' + (yb - (ih - hb) / 2).toFixed(1) + 'px)';
+      return;
+    }
+    var h = Math.max(Math.min(a.height || Infinity, plats), ih * 0.3);
+    art.style.width = (h * vb.width / vb.height).toFixed(1) + 'px';
+    var y = topp + Math.max(0, (plats - h) / 2);
+    oh.style.transform = 'translateY(' + (y - (ih - h) / 2).toFixed(1) + 'px)';
+  }
+  // I ett lågt fönster får spelets namn och stapeln inte plats under GAMES: då krymper laddaren nedifrån räknat (fitBox i
+  // kärnan)
+  function siFitBox(root) {
+    var box = document.querySelector('#loader .ld-box'), nm = root.querySelector('.cp-oh-games');
+    if (!box || !nm) return;
+    var b = box.getBoundingClientRect(), n = nm.getBoundingClientRect();
+    if (!b.height || !n.height) return;
+    var plats = b.bottom - (n.bottom + Math.max(12, window.innerHeight * 0.016));
+    if (plats >= b.height) return;
+    box.style.transformOrigin = '50% 100%';
+    box.style.transform = 'translateX(-50%) scale(' + Math.max(0.55, plats / b.height).toFixed(3) + ')';
   }
   // onCover körs när slutet börjar (spelets startskärm läggs fram under introt).
   // opts.hold (det första introt, med spelets namn och laddningsstapeln): introt slutar inte av sig självt utan väntar på
   // release() från laddningsstapeln (när allt är laddat). Ger tillbaka { ended, onEnd, onTitle, release }.
   function studioIntro(onCover, opts) {
     var hold = !!(opts && opts.hold);
-    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, t = SI_T;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, t = SI_T, st = siStaende();
     var old = document.querySelector('.studio'); if (old) old.remove();
     var root = document.createElement('div');
     root.className = 'studio sv-mono';
     root.setAttribute('role', 'img');
-    root.setAttribute('aria-label', STUDIO.word + ' ' + STUDIO.name.toLowerCase());
-    root.innerHTML = studioHtml();
+    root.setAttribute('aria-label', STUDIO);
+    root.innerHTML = studioHtml(st);
     document.body.appendChild(root);
+    if (hold) siPassa(root, st);
     var done = false, timers = [], sting = null;
     function at(s, f) { timers.push(setTimeout(f, s * 1000)); }
     function clear() { timers.forEach(clearTimeout); timers = []; }
-    // fade (det första introt, när spelets logga flyger vidare till rutorna): tyst, och kameran flyger in genom hålet i
-    // CP-symbolens båge (se flyPrep och flyGo) eller papperet löses upp, i stället för att sidan vänds
+    // fade (det första introt, när spelets logga flyger vidare till rutorna): tyst, och kameran flyger in genom O:et i
+    // ODD (se flyPrep och flyGo) eller papperet löses upp, i stället för att sidan vänds
     function cover(fade) {
       if (done) return;
       done = true; clear();
       if (fade !== true) Sound.pageTurn();
       document.removeEventListener('keydown', skip, true);
       // flygningen: spelet (startskärmen bakom loggan) byggs och ritas klart först, och sidan läggs i ett eget lager, innan
-      // zoomen börjar; annars hackar zoomen till i början på telefoner (allt byggdes i samma ögonblick som zoomen startade)
+      // zoomen börjar; annars hackar zoomen till i början på telefoner
       if (fade === true && !calm) {
         try { if (onCover) onCover(); } catch (e) { /* spelet startar ändå */ }
         var prep = flyPrep(), went = false;
@@ -13851,12 +14182,11 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
       try { if (onCover) onCover(); } catch (e) { /* spelet startar ändå */ }
       setTimeout(function () { root.remove(); }, t[1] * 1000 + 80);
     }
-    // Flyg genom loggan: hålet i P:ets båge blir ett fönster (en mask på sidan), och sidan zoomas in mot hålet allt
-    // snabbare tills hålet täcker skärmen och rutorna syns genom det. flyPrep lägger masken och sidans eget lager några
-    // bildrutor innan zoomen (flyGo), så att första bildrutan i zoomen inte behöver ritas om. Svarar false om det inte går
-    // (då löses papperet upp).
+    // Flyg genom loggan: O:et i ODD blir ett fönster (en mask på sidan), och sidan zoomas in mot hålet allt snabbare tills
+    // hålet täcker skärmen och rutorna syns genom det. flyPrep lägger masken och sidans eget lager några bildrutor innan
+    // zoomen (flyGo). Svarar false om det inte går (då löses papperet upp).
     function flyPrep() {
-      var page = root.querySelector('.sm-page'), hole = root.querySelector('.sm-bowl circle');
+      var page = root.querySelector('.sm-page'), hole = root.querySelector('.cp-oh-hole');
       if (!page || !hole || !page.animate) return false;
       var r = hole.getBoundingClientRect(), pr = page.getBoundingClientRect();
       if (!r.width) return false;
@@ -13890,22 +14220,46 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     document.addEventListener('keydown', skip, true);
     function play() {
       if (done || root.classList.contains('si-play')) return;
+      // laddarens storlek är klar först när dess typsnitt har kommit: Huvan ställs igen precis innan han syns
+      if (hold) siPassa(root, st);
       root.classList.add('si-play');
-      // det första introt är tyst (som hos de stora leverantörerna: ljudet kommer när man trycker SPELA, Sound.enter)
-      if (!hold) sting = Sound.studio();
+      var art = root.querySelector('.cp-oh-art');
+      if (art) HUVAN.spela(art, st, calm);
+      // sprayljudet (siSpray) när Huvan sprejar, i stället för CataPa-introts musik: i det första introt bara om
+      // webbläsaren redan tillåter ljud (oftast på datorn, aldrig på telefonen före ett tryck), annars är det tyst som förut
+      var t1 = performance.now();
+      if (!calm) Sound.ready(function (ok) { if (ok && !done) sting = siSpray((performance.now() - t1) / 1000); });
       if (hold) {
-        at(calm ? 0.8 : 1.75, function () { if (ctl.onTitle) ctl.onTitle(); });
+        at(calm ? 0.8 : 1.75, function () { siFitBox(root); if (ctl.onTitle) ctl.onTitle(); });
         at(calm ? 1.4 : t[0], function () { ctl.ended = true; if (ctl.onEnd) ctl.onEnd(); });
       }
       else at(calm ? 1.4 : t[0], cover);
     }
-    // det första introt: onTitle när studions namn är klart (spelets namn visas), ended och onEnd när animationen är klar,
-    // och release() vänder sidan (laddningen är klar)
+    // det första introt: onTitle när studions namn sprejas (spelets namn visas), ended och onEnd när animationen är klar,
+    // och release() lämnar över till spelet (laddningen är klar)
     var ctl = { ended: false, onEnd: null, onTitle: null, release: function (fade) { cover(fade === true); } };
-    // väntar på typsnitten (högst 1,2 s) så att loggan inte byter typsnitt mitt i; under tiden är skärmen svart
-    var need = ['700 20px Fredoka'];
-    var fonts = document.fonts && document.fonts.load ? Promise.all(need.map(function (f) { return document.fonts.load(f); })) : Promise.resolve();
-    function begin() { Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(play, play); }
+    // Väntar på typsnitten så att namnet mäts och sprejas i rätt typsnitt; under tiden syns bara papperet (användaren
+    // 2026-11-03: "ODD HEAD klipps"). Ett typsnitt räknas som klart först när det verkligen ritas (en text i det blir
+    // annorlunda bred än i reservtypsnittet), inte när document.fonts svarar: innan typsnittets stilmall har kommit finns
+    // inget att vänta på, och då svarade fonts.load direkt. Sidans andra typsnitt (laddarens "presenterar" och loggan) ska
+    // också ha kommit, så att laddaren har sin rätta storlek när Huvan ställs ovanför den. Högst 4 s; kommer något ännu
+    // senare mäter Huvan om namnet när det kommer (spelaHuvan).
+    var need = ['400 40px Knewave', '400 34px Bangers'], siMat = document.createElement('canvas').getContext('2d');
+    function siRitas(f) {
+      if (!siMat) return true;
+      siMat.font = f + ', monospace'; var a = siMat.measureText('ODD HEAD GAMES').width;
+      siMat.font = f.replace(/ [^ ]+$/, ' monospace'); return a !== siMat.measureText('ODD HEAD GAMES').width;
+    }
+    function begin() {
+      var t0 = Date.now();
+      (function vanta() {
+        // (ett typsnitt som inte går att hämta ger ett fel som inte ska synas: då gäller reservtypsnittet)
+        try { if (document.fonts && document.fonts.load) need.forEach(function (f) { document.fonts.load(f).catch(function () {}); }); } catch (e) { /* ignorera */ }
+        var klart = need.every(siRitas) && (!document.fonts || document.fonts.status === 'loaded');
+        if (klart || Date.now() - t0 > 4000) { play(); return; }
+        setTimeout(vanta, 50);
+      })();
+    }
     // det första introt: spelas direkt och tyst
     if (hold) { begin(); return ctl; }
     // Ljudet: webbläsare (alltid på telefoner) spelar inget ljud förrän spelaren har tryckt. Är ljudet på i spelet och
