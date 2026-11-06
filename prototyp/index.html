@@ -1550,6 +1550,10 @@ body.tids .stage { box-shadow: none; z-index: 1; }
 .frame-top { position: absolute; pointer-events: none; }
 /* stängslet runt hjulet under bonusväntan (bonus-fence.js, #anticTop) */
 .antic-top { position: absolute; pointer-events: none; }
+/* Bonusen är utlöst: ramen och schackmönstret mörknar med brädet (render.js setTrigHold, användaren 2026-11-06:
+   "Mörka ner hela gridden") */
+.frame-art, .frame-top { transition: filter .3s ease-out; }
+body.trig-dim .frame-art, body.trig-dim .frame-top { filter: brightness(.22); }
 /* Texten ligger kvar men syns inte, så att loggans storlek och plats är desamma och inget annat flyttar sig. Bilden är
    lite högre än textraden, så att den blir lika bred som texten var. */
 .logo-img .logo { position: relative; }
@@ -5338,7 +5342,15 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // ---------------------------------------------------------------- rendering av brädet
   var canvas = $('#board'), ctx = canvas.getContext('2d');
   var stageEl = $('#stage'), frameEl = $('#frame'), gameEl = $('#game');
-  var dpr = 1, boardPx = 480, cell = 80, shade = null, boardLight = 0, boardLightT = 0;
+  var dpr = 1, boardPx = 480, cell = 80, shade = null, boardLight = 0, boardLightT = 0, trigHold = false;
+  // Bonusen är utlöst: hela gridden (brädet och ramen) är mörk tills nästa snurr, så att bara bonussymbolerna lyser
+  // (användaren 2026-11-06: "Mörka ner hela gridden", "inte nästan ser ikonerna, bara lite svagt, så att allt fokus riktar
+  // på bonustriggen"). Förut tändes brädet igen efter 1,5 s, innan bonusfirandet (bombCheer/goldCheer) var klart.
+  function setTrigHold(on) {
+    if (trigHold === !!on) return;
+    trigHold = !!on;
+    document.body.classList.toggle('trig-dim', trigHold);
+  }
   if (/[?&]step\b/.test(location.search)) window.__sprite = function (sym, size) { return makeSprite(sym, size); };
 
   function render(time) {
@@ -5354,16 +5366,18 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     // att bonussymbolerna med sitt ljus står ut ("Du behöver mörka gridden än mer vid bonustrigg"). boardLight glider mot
     // 1 när bonusen utlöses.
     if (gridBoardOn()) {
-      var lightTarget = 0;
+      var lightTarget = trigHold ? 1 : 0;
       for (var lr = 0; lr < REELS; lr++) reels[lr].cells.forEach(function (c) { if (c.celebrate) lightTarget = 1; });
-      boardLight += (lightTarget - boardLight) * Math.min(1, (time - (boardLightT || time)) * 5); boardLightT = time;
-      g.fillStyle = 'rgba(4, 3, 8, ' + (0.42 + 0.48 * boardLight).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
+      boardLight += (lightTarget - boardLight) * Math.min(1, (time - (boardLightT || time)) * 7); boardLightT = time;
+      g.fillStyle = 'rgba(4, 3, 8, ' + (0.42 + 0.53 * boardLight).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
     }
     var highlight = state.phase === 'show';
     // Tidsvägar: brädet mörknar när en vinst visas, så att de vinnande symbolerna syns tydligt
     if (highlight) { g.fillStyle = 'rgba(21,17,31,0.3)'; g.fillRect(0, 0, boardPx, boardPx); }
     // sprayavtrycken efter lavinerna ligger bakom symbolerna (spray-pop.js)
     drawSprayDecals(g);
+    // hålen som symbolerna sugs in i (suck-hole.js)
+    drawSuckHoles(g);
 
     for (var r = 0; r < REELS; r++) {
       var reel = reels[r], x = r * cell;
@@ -5421,8 +5435,9 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     // bonusen utlöses: alla rutor utom bonussymbolerna mörknar, så att fokus landar på bonussymbolerna
     if (boardLight > 0.01 && gridBoardOn()) {
       // (ännu mörkare, användaren 2026-11-06: "gridden måste mörkas ännu mer vid bonustrigg, så fokus enbart landar på hjulen")
-      g.fillStyle = 'rgba(4, 3, 8, ' + (0.86 * boardLight).toFixed(3) + ')';
-      for (var dr = 0; dr < REELS; dr++) reels[dr].cells.forEach(function (c) { if (!c.celebrate && c.y >= -1 && c.y <= ROWS) g.fillRect(dr * cell, c.y * cell, cell, cell); });
+      // ("inte nästan ser ikonerna, bara lite svagt": symbolerna syns med cirka en tiondel av sitt ljus)
+      g.fillStyle = 'rgba(4, 3, 8, ' + (0.9 * boardLight).toFixed(3) + ')';
+      for (var dr = 0; dr < REELS; dr++) reels[dr].cells.forEach(function (c) { if (!c.celebrate && !(trigHold && (c.sym === SCAT || c.goldBomb)) && c.y >= -1 && c.y <= ROWS) g.fillRect(dr * cell, c.y * cell, cell, cell); });
     }
     if (winBall) drawBall(g);
     for (var p = 0; p < parts.length; p++) drawPart(g, parts[p]);
@@ -8973,6 +8988,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // board: startbrädet till en köpt (eller i TEST startad) bonus, då är utfallet redan känt och prototypens längre väntan
   // och guldväntan hoppas över
   function spinReels(res, fs, board) {
+    setTrigHold(false);
     reels.forEach(function (rl) { rl.goldRow = null; rl.cells.forEach(function (c) { c.goldBomb = false; c.goldT0 = null; }); });
     if (res.gold) reels[res.gold.r].goldRow = res.gold.y;
     var t = T();
@@ -9187,6 +9203,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   /** Symbolen sym i rutan med mitten (x, y) exploderar i bitar (och färgklicken kommer fram, om SPRAY_PA). */
   function shatterAt(x, y, sym) {
     var spr = sprites[sym];
+    // (användaren 2026-11-06: symbolerna sugs in i ett hål i stället, suck-hole.js)
+    if (HAL_PA && spr) { suckAt(x, y, spr); if (SPRAY_PA) sprayPop(x, y, sym, HAL_PANG + HAL_SUG); return; }
     if (spr) parts.push({ kind: 'shatter', x: x, y: y, spr: spr, pieces: shatterPieces(), life: 0, max: SHATTER_LIV });
     parts.push({ kind: 'ring', x: x, y: y, life: 0, max: 0.3, c: '#fff6e0', delay: SHATTER_CRACK });
     if (SPRAY_PA) sprayPop(x, y, sym, SHATTER_CRACK);
@@ -9289,6 +9307,124 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     }
     g.restore();
   }
+  // Användaren 2026-11-06: "En animation ... precis som att ikonerna sugs in som ett hål liksom, pang in i ett hål. Och
+  // sen försvinner lite snyggt. Istället för att de exploderar." När en vinnande symbol försvinner i en lavin öppnas ett
+  // svart hål med en orange virvel i rutan. Hålet ligger i brädet, bakom symbolerna, så att nya symboler faller över det.
+  // Symbolen sväller till, snurrar och dras in i hålet allt fortare medan den mörknar, och några korn sugs med. Pang: när
+  // den är borta blixtrar det i mitten med en liten vit ring, och hålet snurrar ihop och försvinner. Det är en enda bild
+  // per symbol och bildruta, och hålet ritas en gång och sparas (lätt för telefonen). HAL_PA = false ger sprängningen i
+  // bitar tillbaka (spray-pop.js).
+  var HAL_PA = true;
+  // tider i sekunder: svällningen, insugningen, ringen när symbolen är borta och hur länge hålet tar på sig att slutas
+  var HAL_PANG = 0.05, HAL_SUG = 0.21, HAL_RING = 0.16, HAL_STANG = 0.15;
+  var halBild = null, halBildPx = 0;
+  /** Hålet som bild (svart mitt, mjuk kant, tre orange virvelarmar), ritat en gång per rutstorlek. */
+  function halSprite() {
+    var pr = typeof dpr === 'number' ? dpr : 1, px = Math.max(24, Math.round(cell * pr));
+    if (halBild && halBildPx === px) return halBild;
+    var c = document.createElement('canvas'); c.width = c.height = px;
+    var g = c.getContext('2d'), R = px / 2;
+    g.translate(R, R);
+    var gr = g.createRadialGradient(0, 0, 0, 0, 0, R);
+    gr.addColorStop(0, 'rgba(0, 0, 0, 1)'); gr.addColorStop(0.45, 'rgba(3, 2, 8, 0.97)');
+    gr.addColorStop(0.72, 'rgba(8, 5, 16, 0.55)'); gr.addColorStop(1, 'rgba(8, 5, 16, 0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, R, 0, Math.PI * 2); g.fill();
+    // virvelarmarna: breda och ljusa ute vid kanten, smala och mörka in mot mitten
+    g.lineCap = 'round';
+    for (var a = 0; a < 3; a++) {
+      for (var i = 0; i < 18; i++) {
+        var k0 = i / 18, k1 = (i + 1) / 18;
+        var r0 = R * (0.84 - 0.68 * k0), r1 = R * (0.84 - 0.68 * k1);
+        var a0 = a * Math.PI * 2 / 3 + k0 * Math.PI * 1.5, a1 = a * Math.PI * 2 / 3 + k1 * Math.PI * 1.5;
+        g.beginPath(); g.moveTo(Math.cos(a0) * r0, Math.sin(a0) * r0); g.lineTo(Math.cos(a1) * r1, Math.sin(a1) * r1);
+        g.strokeStyle = 'rgba(255, 155, 56, ' + (0.62 * Math.pow(1 - k0, 0.8)).toFixed(3) + ')';
+        g.lineWidth = R * (0.02 + 0.08 * (1 - k0)); g.stroke();
+      }
+    }
+    // hålets kant
+    g.beginPath(); g.arc(0, 0, R * 0.36, 0, Math.PI * 2);
+    g.strokeStyle = 'rgba(255, 200, 130, 0.4)'; g.lineWidth = R * 0.035; g.stroke();
+    halBild = c; halBildPx = px;
+    return c;
+  }
+  /** Symbolbilden spr i rutan med mitten (x, y) sugs in i ett hål. */
+  function suckAt(x, y, spr) {
+    parts.push({ kind: 'suck', x: x, y: y, spr: spr, a0: Math.random() * Math.PI * 2, life: 0, max: HAL_PANG + HAL_SUG + Math.max(HAL_RING, HAL_STANG + 0.04) });
+  }
+  function halBack(x) { var u = x - 1; return 1 + 2.7 * u * u * u + 1.7 * u * u; }
+  /** Hålets storlek (0..1) vid tiden t: öppnas snabbt med en liten översväng, sluts efter att symbolen är borta. */
+  function halStorlek(t) {
+    var open = t < 0.08 ? halBack(t / 0.08) : 1, t2 = t - HAL_PANG - HAL_SUG - 0.04;
+    var close = t2 <= 0 ? 0 : Math.min(1, t2 / HAL_STANG);
+    return open * (1 - close * close);
+  }
+  /** Hålen ligger i brädet: ritas före symbolerna (render.js, efter sprayavtrycken). */
+  function drawSuckHoles(g) {
+    var img = null;
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (p.kind !== 'suck') continue;
+      var s = halStorlek(p.life);
+      if (s <= 0.01) continue;
+      if (!img) { img = halSprite(); g.save(); g.imageSmoothingEnabled = true; }
+      // virveln snurrar inåt, och allt fortare när hålet sluts
+      var t2 = Math.max(0, p.life - HAL_PANG - HAL_SUG), D = cell * 0.86 * s;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.translate(p.x * dpr, p.y * dpr); g.scale(dpr, dpr); g.rotate(p.a0 - p.life * 7 - t2 * t2 * 60);
+      g.drawImage(img, -D / 2, -D / 2, D, D);
+    }
+    if (img) g.restore();
+  }
+  /** Symbolen som dras in i hålet, kornen som sugs med och pangen när den är borta (ovanpå symbolerna). */
+  function drawSuck(g, p) {
+    var t = p.life, h = cell / 2;
+    g.save();
+    g.translate(p.x, p.y);
+    if (t < HAL_PANG + HAL_SUG) {
+      var sc, rot = 0, al = 1, dark = 0, flash = 0;
+      if (t < HAL_PANG) { var q = t / HAL_PANG; sc = 1 + 0.12 * Math.sin(q * Math.PI / 2); flash = q; }
+      else {
+        var u = (t - HAL_PANG) / HAL_SUG, e = u * u;
+        sc = 1.12 * (1 - e); rot = -e * Math.PI * 2.6; dark = Math.min(1, u * 1.3);
+        al = u < 0.75 ? 1 : 1 - (u - 0.75) / 0.25; flash = Math.max(0, 1 - u * 4);
+      }
+      if (sc > 0.01 && al > 0) {
+        g.save(); g.rotate(rot); g.scale(sc, sc);
+        g.globalAlpha = al; g.drawImage(p.spr, -h, -h, cell, cell);
+        if (flash > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = al * 0.55 * flash; g.drawImage(p.spr, -h, -h, cell, cell); g.globalCompositeOperation = 'source-over'; }
+        // hålets mörker lägger sig över symbolen ju längre in den dras
+        if (dark > 0) { g.globalAlpha = al * 0.85 * dark; g.drawImage(halSprite(), -h * 0.9, -h * 0.9, cell * 0.9, cell * 0.9); }
+        g.restore();
+      }
+    }
+    // kornen som sugs in i hålet i en spiral
+    var tk = t - 0.02;
+    if (tk > 0 && tk < 0.32) {
+      g.fillStyle = '#ffd7a6';
+      for (var i = 0; i < 5; i++) {
+        var w = tk / (0.2 + i * 0.025);
+        if (w >= 1) continue;
+        var ang = p.a0 + i * 1.2566 - w * w * 2.4, rad = cell * (0.62 - 0.6 * w * w), sz = cell * 0.035 * (1 - 0.6 * w);
+        g.globalAlpha = Math.min(1, w * 5) * (1 - w);
+        g.fillRect(Math.cos(ang) * rad - sz / 2, Math.sin(ang) * rad - sz / 2, sz, sz);
+      }
+    }
+    // pang: när symbolen är borta blixtrar det till i mitten och en liten vit ring går ut
+    var tr = t - HAL_PANG - HAL_SUG;
+    if (tr > 0 && tr < HAL_RING) {
+      var k = tr / HAL_RING;
+      g.globalAlpha = 0.9 * (1 - k) * (1 - k); g.fillStyle = '#fff6e0';
+      g.beginPath(); g.arc(0, 0, cell * 0.07 * (1 + k), 0, Math.PI * 2); g.fill();
+      g.globalAlpha = 0.85 * (1 - k); g.strokeStyle = '#fff6e0'; g.lineWidth = cell * 0.035 * (1 - k) + 0.5;
+      g.beginPath(); g.arc(0, 0, cell * (0.08 + 0.32 * k), 0, Math.PI * 2); g.stroke();
+    }
+    g.restore();
+  }
+  var halPrevDraw = drawPart;
+  drawPart = function (g, p) {
+    if (p.kind === 'suck') { drawSuck(g, p); return; }
+    halPrevDraw(g, p);
+  };
   // Ibland (math.js: layerTedP ger 2 bakåt, layerCarlaP ger 3 bakåt) kommer bandspelaren innan snurret: en boombox glider
   // upp nertill på brädet, kassetten poppar fram, tar sats och hoppar med en volt ner i luckan (klick-klunk, bandspelaren
   // sväljer den). ◀◀ trycks ner och spolarna snurrar bakåt allt fortare medan brädet spolas som ett lila VHS-band
@@ -11236,6 +11372,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     var any = false;
     for (var r = 0; r < REELS; r++) reels[r].cells.forEach(function (c) { if (c.sym === SCAT) { c.celebrate = true; any = true; } });
     if (!any) return;
+    setTrigHold(true);
     Sound.trigger();
     await wait(1.5);
     clearMarks();
@@ -11530,6 +11667,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       var tgGold = false; reels.forEach(function (rl) { rl.cells.forEach(function (c) { if (c.goldBomb) tgGold = true; }); });
       await celebrateScatters();
       if (tgGold) await goldCheer(); else await bombCheer();
+      setTrigHold(false);
     } else if (res.scatters >= 3 && !state.maxShown && game.bonus) {
       var mnc = game.bonus.maniac;
       // autospelet stoppar när en bonus startar (om spelaren har valt det): bonusen startar då med ett tryck
