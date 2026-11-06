@@ -13521,8 +13521,14 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     requestAnimationFrame(tick);
   }
   // ---------------------------------------------------------------- start
+  // PAUSAT I PROTOTYPEN (användaren 2026-11-06: "Eftersom det är så mycket testande kan du ta bort (pausa) själva introt
+  // och 'hur man spelar' så länge i prototypen så man kommer rakt in i spelet?"): studiointrot och startskärmen med
+  // rutorna och SPELA visas inte, spelet öppnas direkt. Musiken börjar på första snurret. "Hur man spelar" finns kvar i
+  // menyn. Sätt INTRO_PAUSAT = false för att få tillbaka introt.
+  var INTRO_PAUSAT = true;
   function start(data) {
     data = data || {};
+    if (INTRO_PAUSAT) data.skipIntro = true;
     state.balance = typeof data.balance === 'number' ? data.balance : store.get('balance', START_BALANCE);
     state.walls = store.get('walls', {}) || {};
     state.wallInit = store.get('wallInit', null);
