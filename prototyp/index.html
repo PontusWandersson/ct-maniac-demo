@@ -4819,6 +4819,9 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     schedule: function () {
       var c = Sound.ctx; if (!c) return;
       if (this.sampled()) return;
+      // bara grundspelets låt (användaren 2026-11-06: "Varför är alla gamla ljud kvar när spelet launchas? ... Bort med det helt",
+      // "ta bort alla andra ljud förutom i basspelet"): ingen syntad musik, varken innan låten har laddats eller i bonusarna
+      if (Sound.bara) return;
       var song = this.song();
       var six = 60 / (song.bpm + 2 * this.heat) / 4;
       if (this.next < c.currentTime - 0.2) this.next = c.currentTime + 0.05;
@@ -5120,6 +5123,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   Sound.enter = function (e) {
     var c = this.ctx; if (!c) return null;
     var t = c.currentTime + 0.01, d = t + e.drop, s = this.sfx, self = this, k;
+    // (inget introljud när bara grundspelets låt, hjärtslagen och hjulen hörs, Sound.bara; låten börjar ändå på droppet)
+    if (this.bara) return d;
     if (this.fx('game_enter')) return d;
     // trycket
     this.kick(t, 0.5, s); this.clap(t, 0.32, s);
@@ -5180,6 +5185,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     tune: [[8, 659.3, 3], [12, 587.3, 2], [14, 523.3, 4], [24, 440, 6], [40, 523.3, 3], [44, 587.3, 2], [46, 659.3, 4], [56, 784, 2], [58, 659.3, 5]],
     start: function () {
       var c = Sound.ctx;
+      // (ingen loungemusik på startskärmen när bara grundspelets låt, hjärtslagen och hjulen hörs, Sound.bara)
+      if (Sound.bara) { this.want = false; return; }
       if (this.timer) return;
       if (!c) { this.want = true; return; }
       this.want = false;
