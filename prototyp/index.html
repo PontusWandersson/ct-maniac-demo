@@ -4430,6 +4430,13 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     ctx: null, out: null, sfx: null, mus: null, noise: null,
     // vol: volymen 0–1 från reglaget under ljudknappen (kvadreras, så att halva reglaget låter som halva volymen)
     on: true, sfxOn: true, musicOn: true, vol: 0.8,
+    // Bara hjärtslagen, hjulen och musiken (användaren 2026-11-06: "Ta bort alla ljud förutom hjärtslagen och hjulen när
+    // dem snurrar. och bakgrundsmusiken"): effektvägen (sfx) är tyst och det som ska höras går genom en egen väg (keep),
+    // inuti keepRun (hjärtslagen, hjulens snurr och stopp, sound-keep.js). Musiken går som förut. bara = false ger alla
+    // ljuden tillbaka.
+    bara: true, keep: null, _keep: false,
+    keepRun: function (fn) { var was = this._keep; this._keep = true; try { return fn(); } finally { this._keep = was; } },
+    dst: function () { return this._keep && this.keep ? this.keep : this.sfx; },
     init: function () {
       // pausad ('suspended') eller avbruten av telefonen ('interrupted' på iPhone, till exempel när skärmen släcktes)
       if (this.ctx) { if (this.ctx.state !== 'running' && this.ctx.state !== 'closed') this.ctx.resume(); return; }
@@ -4446,6 +4453,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       // och före det genom vinstdämparen: musiken går ner och blir dovare när vinster visas (Music.duck, sound-street.js)
       this.duckF = c.createBiquadFilter(); this.duckF.type = 'lowpass'; this.duckF.frequency.value = 20000; this.duckF.Q.value = 0.5;
       this.duck = c.createGain();
+      this.keep = c.createGain(); this.keep.connect(this.out);
       this.sfx.connect(this.out); this.mus.connect(this.duckF); this.duckF.connect(this.duck); this.duck.connect(this.musF); this.musF.connect(this.out);
       this.out.connect(comp); comp.connect(c.destination);
       var len = c.sampleRate, buf = c.createBuffer(1, len, len), ch = buf.getChannelData(0);
@@ -4488,7 +4496,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       var c = this.ctx, src = c.createBufferSource(), g = c.createGain(), t = c.currentTime + (o.when || 0);
       src.buffer = buf; src.playbackRate.value = o.rate || 1; src.loop = !!o.loop;
       g.gain.value = o.vol == null ? 1 : o.vol;
-      src.connect(g); g.connect(o.dest || this.sfx); src.start(t);
+      src.connect(g); g.connect(o.dest || this.dst()); src.start(t);
       if (!o.loop) return true;
       return { src: src, gain: g, stop: function (fade) {
         var n = c.currentTime, f = fade || 0.15;
@@ -4500,7 +4508,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     apply: function () {
       if (!this.ctx) return;
       this.out.gain.value = this.on ? 0.55 * this.vol * this.vol : 0;
-      this.sfx.gain.value = this.sfxOn ? 1 : 0;
+      this.sfx.gain.value = this.sfxOn && !this.bara ? 1 : 0;
+      if (this.keep) this.keep.gain.value = this.sfxOn ? 1 : 0;
       this.mus.gain.value = this.musicOn ? 0.42 : 0;
     },
     tone: function (f, dur, o) {
@@ -4513,7 +4522,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(o.vol || 0.3, t + (o.attack || 0.005));
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.connect(g); g.connect(o.dest || this.sfx);
+      osc.connect(g); g.connect(o.dest || this.dst());
       osc.start(t); osc.stop(t + dur + 0.05);
     },
     hiss: function (dur, o) {
@@ -4527,7 +4536,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(o.vol || 0.2, t + (o.attack || 0.01));
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      src.connect(f); f.connect(g); g.connect(o.dest || this.sfx);
+      src.connect(f); f.connect(g); g.connect(o.dest || this.dst());
       src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.05);
     },
     // klick, snurret, hjulen och bomberna: se sound-street.js
@@ -4930,6 +4939,13 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     this.tone(f, 0.24, { type: 'sine', to: f * 0.45, vol: 0.32 });
     this.hiss(0.07, { f: 2400, q: 0.8, vol: 0.1 });
   };
+  // Användaren 2026-11-06: "Ta bort alla ljud förutom hjärtslagen och hjulen när dem snurrar. och bakgrundsmusiken". Hjulens
+  // ljud (snurret startar, varje hjul stannar) spelas inuti Sound.keepRun, så att de hörs fast effekterna är tysta.
+  ['spinStart', 'reelStop'].forEach(function (k) {
+    var f = Sound[k];
+    if (typeof f !== 'function') return;
+    Sound[k] = function () { var self = this, a = arguments; return Sound.keepRun(function () { return f.apply(self, a); }); };
+  });
   // Webbläsare (alltid på telefoner) spelar inget ljud förrän spelaren har tryckt någonstans. unlock() anropas i ett tryck:
   // den startar ljudmotorn och spelar en tyst buffert, som är det som låser upp ljudet i Safari på iPhone.
   Sound.unlock = function () {
@@ -4956,6 +4972,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   Sound.studio = function () {
     var none = { stop: function () {} };
     if (!this.ctx || this.ctx.state !== 'running') return none;
+    // (studiointrots ljud är effekter, fast de går genom musikvägen: tysta när bara hjärtslagen, hjulen och musiken hörs)
+    if (this.bara) return none;
     var c = this.ctx, bus = c.createGain();
     bus.gain.value = 1; bus.connect(this.mus);
     var file = this.fx('studio_intro', { dest: bus });
@@ -5329,7 +5347,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         }
       }
     }
-    if (landed && !this.landSound) { this.landSound = true; Sound.land(); }
+    if (landed && !this.landSound) { this.landSound = true; if (state.phase === 'tumble') Sound.land(); else Sound.keepRun(function () { Sound.land(); }); }
   };
 
   var reels = [];
@@ -9035,6 +9053,24 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
 
   // board: startbrädet till en köpt (eller i TEST startad) bonus, då är utfallet redan känt och prototypens längre väntan
   // och guldväntan hoppas över
+  // Hjärtslaget under väntan på bonus (användaren 2026-11-06: "Hjärtslag när bonustriggen börjar", hörbart på telefonen,
+  // "Riktigt så det hörs så det blir spännande"): samma dunk-dunk som förut (sinus 62 till 48 Hz och 58 till 45 Hz), men
+  // starkare, med övertoner (2–8 gånger tonen) som glider likadant och klingar av fortare, och en dov knack (brus genom ett
+  // lågpass) i varje slag. Telefonens och datorns små högtalare spelar inte så djupa toner, men de spelar övertonerna och
+  // knacken, och örat hör då slaget och grundtonen ändå (8–11 gånger mer ljud än förut i det tonläge en telefon spelar).
+  // Slaget växer medan väntan går (k från 0 till 1), och mest i guldväntan.
+  function antHeart(gold, k) { Sound.keepRun(function () { antHeartNow(gold, k); }); }
+  function antHeartNow(gold, k) {
+    var lv = (gold ? 1.25 : 1) * (0.85 + 0.45 * Math.max(0, Math.min(1, k || 0)));
+    [[62, 48, 0.12, 1, 0], [58, 45, 0.11, 0.72, 0.16]].forEach(function (b) {
+      var v = 0.26 * b[3] * lv, w = b[4];
+      Sound.tone(b[0], b[2], { to: b[1], vol: v, when: w });
+      [[2, 0.85], [3, 0.7], [4, 0.55], [5, 0.4], [6, 0.3], [8, 0.18]].forEach(function (h) {
+        Sound.tone(b[0] * h[0], b[2] * 0.7, { to: b[1] * h[0], vol: v * h[1], when: w });
+      });
+      Sound.hiss(0.05, { filter: 'lowpass', f: 900, to: 220, q: 0.8, vol: v * 1.5, when: w, attack: 0.002 });
+    });
+  }
   function spinReels(res, fs, board) {
     setTrigHold(false);
     reels.forEach(function (rl) { rl.goldRow = null; rl.cells.forEach(function (c) { c.goldBomb = false; c.goldT0 = null; }); });
@@ -9045,7 +9081,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     showGhost(res);
     state.phase = 'spinning'; hud();
     Sound.spinStart();
-    var spinLoop = Sound.fx('reel_spin_loop', { loop: true, vol: 0.6 });
+    var spinLoop = Sound.keepRun(function () { return Sound.fx('reel_spin_loop', { loop: true, vol: 0.6 }); });
     for (var r = 0; r < REELS; r++) reels[r].start(state.turbo ? 0 : r * t.stagger, strips[r]);
     var stopAntic = null, nAnt = 0, goldSum = 0;
     return wait(fs ? t.fsMinSpin : t.minSpin, true).then(function () {
@@ -9085,7 +9121,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
               (function beat() {
                 if (!reel.anticOn || state.slam) return;
                 var k = Math.min(1, (reel.t - reel.anticT) / reel.anticDur);
-                Sound.tone(62, 0.11, { to: 48, vol: goldAnt ? 0.16 : 0.1 }); Sound.tone(58, 0.1, { to: 45, vol: goldAnt ? 0.12 : 0.07, when: 0.16 });
+                antHeart(goldAnt, k);
                 nxBeatT = clock;
                 setTimeout(beat, goldAnt ? 520 - 270 * k : 620 - 230 * k);
               })();
@@ -9407,6 +9443,33 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     halBild = c; halBildPx = px;
     return c;
   }
+  // Skenet som slukar symbolen (användaren 2026-11-06: "ett litet ljusare sken som liksom slukar iconen lite mer tydligt"):
+  // en varm, ljus ring med tunna virvelarmar som ligger kring symbolens kant och krymper ihop med den medan den sugs in.
+  // Ritas ovanpå symbolen med lighter, så att ljuset äter sig in i kanten. En bild per rutstorlek.
+  var halSkenBild = null, halSkenPx = 0;
+  function halSken() {
+    var pr = typeof dpr === 'number' ? dpr : 1, px = Math.max(32, Math.round(cell * 1.3 * pr));
+    if (halSkenBild && halSkenPx === px) return halSkenBild;
+    var c = document.createElement('canvas'); c.width = c.height = px;
+    var g = c.getContext('2d'), R = px / 2;
+    g.translate(R, R);
+    var gr = g.createRadialGradient(0, 0, 0, 0, 0, R);
+    gr.addColorStop(0, 'rgba(255, 200, 120, 0)'); gr.addColorStop(0.5, 'rgba(255, 200, 120, 0)');
+    gr.addColorStop(0.66, 'rgba(255, 232, 186, 0.85)'); gr.addColorStop(0.76, 'rgba(255, 170, 70, 0.42)');
+    gr.addColorStop(0.9, 'rgba(255, 120, 40, 0.07)'); gr.addColorStop(1, 'rgba(255, 120, 40, 0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, R, 0, Math.PI * 2); g.fill();
+    g.lineCap = 'round';
+    for (var a = 0; a < 3; a++) {
+      for (var i = 0; i < 16; i++) {
+        var k0 = i / 16, k1 = (i + 1) / 16, r0 = R * (0.92 - 0.36 * k0), r1 = R * (0.92 - 0.36 * k1);
+        var a0 = a * Math.PI * 2 / 3 + k0 * Math.PI * 1.3, a1 = a * Math.PI * 2 / 3 + k1 * Math.PI * 1.3;
+        g.beginPath(); g.moveTo(Math.cos(a0) * r0, Math.sin(a0) * r0); g.lineTo(Math.cos(a1) * r1, Math.sin(a1) * r1);
+        g.strokeStyle = 'rgba(255, 240, 210, ' + (0.75 * Math.sin(k0 * Math.PI)).toFixed(3) + ')'; g.lineWidth = R * 0.035; g.stroke();
+      }
+    }
+    halSkenBild = c; halSkenPx = px;
+    return c;
+  }
   /** Symbolbilden spr i rutan med mitten (x, y) sugs in i ett hål. */
   function suckAt(x, y, spr) {
     var k = halFart();
@@ -9452,6 +9515,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         var q = t / HAL_PANG, sc0 = 1 + 0.1 * Math.sin(q * Math.PI / 2);
         g.save(); g.scale(sc0, sc0); g.drawImage(p.spr, -h, -h, cell, cell);
         g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.5 * q; g.drawImage(p.spr, -h, -h, cell, cell);
+        // skenet tänds kring kanten
+        g.globalAlpha = 0.18 * q; g.rotate(-t * 5); g.drawImage(halSken(), -cell * 0.65, -cell * 0.65, cell * 1.3, cell * 1.3);
         g.restore();
       } else {
         var u = (t - HAL_PANG) / HAL_SUG;
@@ -9466,6 +9531,10 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
             if (u < 0.2) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = al * 0.5 * (1 - u * 5); g.drawImage(p.spr, -h, -h, cell, cell); g.globalCompositeOperation = 'source-over'; }
             // hålets mörker lägger sig över symbolen ju längre in den dras
             g.globalAlpha = al * 0.8 * P.dark; g.drawImage(halSprite(), -h * 0.9, -h * 0.9, cell * 0.9, cell * 0.9);
+            // det ljusa skenet kring kanten, som krymper med symbolen och slukar den
+            g.globalCompositeOperation = 'lighter'; g.globalAlpha = (0.3 + 0.5 * u) * (u < 0.9 ? 1 : 1 - (u - 0.9) / 0.1);
+            g.rotate(-t * 5 + u * 2); g.drawImage(halSken(), -cell * 0.65, -cell * 0.65, cell * 1.3, cell * 1.3);
+            g.globalCompositeOperation = 'source-over';
           }
           g.restore();
         }
@@ -10228,12 +10297,27 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   function infHeart() {
     if (!Sound.ctx) return;
     var t = Sound.ctx.currentTime + 0.01;
-    for (var hb = 0; hb < 2; hb++) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb * 0.5 }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb * 0.5 + 0.17 }); }
+    // (hjärtslagen hörs också när bara hjärtslagen, hjulen och musiken är på, Sound.keepRun)
+    Sound.keepRun(function () { for (var hb = 0; hb < 2; hb++) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb * 0.5 }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb * 0.5 + 0.17 }); } });
   }
   // 1. INFINITY öppnas: spelet stannar upp, brädet mörknar och VHS-spolningen rusar bakåt genom brädena från bonusens
   // snurr (det spelaren har sett, nyast först, till sist kassettens lager), snabbare och snabbare med ◀◀ i hörnet; ∞ växer
   // fram mitt på brädet, en vit blixt, och INFINITY-brickan smäller in. Högst en gång per bonus (cirka 1,8 s, turbo hälften).
+  // INFINITY öppnas utan animation (användaren 2026-11-06: "Ta bort hela animationen när infinity layers öppnas (denna ska
+  // vi göra om) och lägg in denna taggen istället med stängsel och utsuddan precis som nu så man inte riktigt ser vad det är
+  // från det öppnas"): ingen spolning, ingen Huva som sprayar INFINITY LAYER, ingen flygning och ingen skallning. ODD
+  // INFINITY-skylten i stegen (odd-infinity.js) står bakom stängslet och är suddig tills nu; nu försvinner stängslet,
+  // skylten är öppen och smäller till som de andra lagren när de öppnas (ladOpen), och INFINITY-musiken börjar (infDrop).
+  // INF_OPPNING_ANIM = true ger den gamla öppningen tillbaka (infPortalAnim) tills den görs om.
+  var INF_OPPNING_ANIM = false;
   async function infPortal() {
+    if (INF_OPPNING_ANIM) return infPortalAnim();
+    var ch = infChipEl();
+    if (ch && typeof oddInfOn !== 'undefined' && oddInfOn) ch.classList.add('oi-open');
+    renderMeter(); ladOpen(infD());
+    await wait(showTime(0.55), true);
+  }
+  async function infPortalAnim() {
     var fs = state.fs, plan = fs && fs.plan, hist = [];
     if (plan) {
       var upto = fs.cur ? plan.spins.indexOf(fs.cur) : -1;
@@ -11203,7 +11287,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       Sound.tone(f0, dur, { type: 'sawtooth', to: f0 * 2, vol: 0.03, attack: dur * 0.8, at: t });
       Sound.hiss(dur, { f: 800, to: 3600, q: 1, vol: 0.05, attack: dur * 0.9, at: t });
       // hjärtslag (dunk-dunk) före sista möjliga lagret
-      if (near) for (var hb = 0; hb + 0.2 < dur; hb += 0.5) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb + 0.17 }); }
+      if (near) Sound.keepRun(function () { for (var hb = 0; hb + 0.2 < dur; hb += 0.5) { Sound.tone(62, 0.11, { type: 'sine', to: 48, vol: 0.14, at: t + hb }); Sound.tone(58, 0.1, { type: 'sine', to: 45, vol: 0.1, at: t + hb + 0.17 }); } });
     }
     var sh = near ? 1.3 : 0.7;
     if (deck.animate) deck.animate([{ transform: 'none' }, { transform: 'translateX(-' + sh + '%) rotate(-' + sh + 'deg)' }, { transform: 'translateX(' + sh + '%) rotate(' + sh + 'deg)' }, { transform: 'none' }],
