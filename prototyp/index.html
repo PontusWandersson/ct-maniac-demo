@@ -2006,11 +2006,15 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
    tillbaka använd iconen som finns"; buy-image.js sätter --cas-img och klassen cas-img) */
 .cas-img .cas > svg { visibility: hidden; }
 .cas-img .cas { background: var(--cas-img) center 46% / 116% auto no-repeat; filter: drop-shadow(6px 8px 0 rgba(5, 4, 30, .55)); }
-/* och i bandspelarens lucka: kassettsymbolens bild i stället för den ritade kassetten (luckan x 100–180, y 80–134 av 280 x 160) */
-.cas-img .cas-deck .deck-tape { visibility: hidden; }
-.cas-img .cas-deck::after { content: ''; position: absolute; left: 34.8%; top: 49%; width: 30.4%; height: 36%; opacity: 0; transition: opacity .15s;
-  background: var(--cas-img) center / 118% auto no-repeat; pointer-events: none; }
-.cas-img .cas-deck.loaded::after { opacity: 1; }
+/* Bandspelaren själv är spelets bergsprängar-ikon (användaren 2026-11-06: "bandspelaren behöver byta icon till den som är i
+   spelet"): den ritade boomboxen syns inte, ikonen står på samma plats (nederkanten i linje), lite större eftersom den är
+   högre, och pumpar i takt när bandet spolas. Kassetten hoppar ner i ikonens kassettfönster. */
+.deck-img .cas-deck > svg { visibility: hidden; }
+.deck-img .cas-deck::before { content: ''; position: absolute; left: 50%; bottom: -14%; width: 80%; aspect-ratio: 1; translate: -50% 0;
+  background: var(--deck-img) center / contain no-repeat; pointer-events: none; filter: drop-shadow(6px 8px 0 rgba(5, 4, 30, .55)); transform-origin: 50% 80%; }
+.deck-img .cas-act.rew .cas-deck::before { animation: deckPump .163s ease-out infinite alternate; }
+@keyframes deckPump { to { transform: scale(1.04, 1.035); } }
+@media (prefers-reduced-motion: reduce) { .deck-img .cas-act.rew .cas-deck::before { animation: none; } }
 .ov-card.bm-card.bv-card { width: min(600px, 100%); background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
 .portrait .ov-card.bm-card.bv-card { padding: 0; }
 /* lite ljusare än bilden (användaren 2026-11-06: "att den är lite ljusare än den är nu"); beloppen och knapparna följer med */
@@ -5307,7 +5311,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // ---------------------------------------------------------------- rendering av brädet
   var canvas = $('#board'), ctx = canvas.getContext('2d');
   var stageEl = $('#stage'), frameEl = $('#frame'), gameEl = $('#game');
-  var dpr = 1, boardPx = 480, cell = 80, shade = null;
+  var dpr = 1, boardPx = 480, cell = 80, shade = null, boardLight = 0, boardLightT = 0;
   if (/[?&]step\b/.test(location.search)) window.__sprite = function (sym, size) { return makeSprite(sym, size); };
 
   function render(time) {
@@ -5318,6 +5322,20 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     g.clearRect(0, 0, boardPx, boardPx);
     // (med användarens bräde, grid-frame.js, är bildens rutor brädets botten: ingen egen ton)
     if (!gridBoardOn()) { g.fillStyle = symImgOn(0) ? 'rgba(11,21,32,0.85)' : 'rgba(255,246,224,0.8)'; g.fillRect(0, 0, boardPx, boardPx); }
+    // Brädet är mörkare (användaren 2026-11-06: "gridden blir än mörkare och när bonusen triggas att den lyser upp mer så
+    // focuset landar på hjulen"): en mörk ton över schackmönstret. När bonusen laddas (stängslet) eller utlöses lyser
+    // brädet upp: tonen glider bort (boardLight) och hjulen får ett varmt ljus (bonusSpot, efter symbolerna).
+    if (gridBoardOn()) {
+      var lightTarget = 0;
+      for (var lr = 0; lr < REELS; lr++) { if (reels[lr].antic > 0.01) lightTarget = Math.max(lightTarget, 0.6); reels[lr].cells.forEach(function (c) { if (c.celebrate) lightTarget = 1; }); }
+      boardLight += (lightTarget - boardLight) * Math.min(1, (time - (boardLightT || time)) * 5); boardLightT = time;
+      g.fillStyle = 'rgba(6, 5, 12, ' + (0.42 * (1 - 0.8 * boardLight)).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
+      if (boardLight > 0.01) {
+        var bl = g.createRadialGradient(boardPx / 2, boardPx / 2, boardPx * 0.1, boardPx / 2, boardPx / 2, boardPx * 0.75);
+        bl.addColorStop(0, 'rgba(255, 226, 170, ' + (0.16 * boardLight).toFixed(3) + ')'); bl.addColorStop(1, 'rgba(255, 226, 170, 0)');
+        g.fillStyle = bl; g.fillRect(0, 0, boardPx, boardPx);
+      }
+    }
     var highlight = state.phase === 'show';
     // Tidsvägar: brädet mörknar när en vinst visas, så att de vinnande symbolerna syns tydligt
     if (highlight) { g.fillStyle = 'rgba(21,17,31,0.3)'; g.fillRect(0, 0, boardPx, boardPx); }
@@ -5449,6 +5467,11 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
         g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, cell * 0.85, i * Math.PI / 4, i * Math.PI / 4 + Math.PI / 9); g.closePath(); g.fill();
       }
       g.restore();
+    } else if (c.celebrate) {
+      // bonussymbolerna som bilder när bonusen utlöses: ett mjukt varmt ljus bakom (ingen stråle), så att fokus landar där
+      var sg = g.createRadialGradient(x + cell / 2, y + cell / 2, cell * 0.1, x + cell / 2, y + cell / 2, cell * 0.72);
+      sg.addColorStop(0, 'rgba(255, 228, 170, ' + (0.42 + 0.12 * Math.sin(time * 6)).toFixed(3) + ')'); sg.addColorStop(1, 'rgba(255, 228, 170, 0)');
+      g.save(); g.fillStyle = sg; g.fillRect(x - cell * 0.25, y - cell * 0.25, cell * 1.5, cell * 1.5); g.restore();
     }
     if (scale !== 1 || rot) {
       var cx = x + cell / 2, cy = y + cell / 2;
@@ -6032,6 +6055,13 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     if (!src) return;
     document.documentElement.classList.add('cas-img');
     document.documentElement.style.setProperty('--cas-img', 'url("' + src + '")');
+  })();
+  // bergsprängarens bild som bandspelaren (buy-image.css, klassen deck-img)
+  (function () {
+    var src = typeof symRawSrc === 'function' ? symRawSrc(4) : '';
+    if (!src) return;
+    document.documentElement.classList.add('deck-img');
+    document.documentElement.style.setProperty('--deck-img', 'url("' + src + '")');
   })();
   // Användaren 2026-11-06 ("ny bild 'köp bonus ruta' som poppar upp, använd och pusha", och sedan "Du har valt fel bild":
   // Bonusval-gra-graffiti-forslag-1.png, den med ODD BONUS och ODD INFINITY BONUS). Bilden har texterna inbakade, även
@@ -9087,12 +9117,15 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     }
     return out;
   }
-  /** Symbolen sym i rutan med mitten (x, y) exploderar i bitar, och färgklicken kommer fram. */
+  // Färgklickarna är avstängda (användaren 2026-11-06: "Ta bort färgklicken helt när lavinerna kommer"): symbolen
+  // exploderar bara i bitar. Sätt SPRAY_PA = true för att få tillbaka färgklicken och stänken.
+  var SPRAY_PA = false;
+  /** Symbolen sym i rutan med mitten (x, y) exploderar i bitar (och färgklicken kommer fram, om SPRAY_PA). */
   function shatterAt(x, y, sym) {
     var spr = sprites[sym];
     if (spr) parts.push({ kind: 'shatter', x: x, y: y, spr: spr, pieces: shatterPieces(), life: 0, max: SHATTER_LIV });
     parts.push({ kind: 'ring', x: x, y: y, life: 0, max: 0.3, c: '#fff6e0', delay: SHATTER_CRACK });
-    sprayPop(x, y, sym, SHATTER_CRACK);
+    if (SPRAY_PA) sprayPop(x, y, sym, SHATTER_CRACK);
   }
   /** Ett sprayavtryck där symbolen sym sprängdes (mitt i rutan x, y), efter delay sekunder. */
   function sprayPop(x, y, sym, delay) {
