@@ -5357,7 +5357,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       var lightTarget = 0;
       for (var lr = 0; lr < REELS; lr++) reels[lr].cells.forEach(function (c) { if (c.celebrate) lightTarget = 1; });
       boardLight += (lightTarget - boardLight) * Math.min(1, (time - (boardLightT || time)) * 5); boardLightT = time;
-      g.fillStyle = 'rgba(6, 5, 12, ' + (0.42 + 0.33 * boardLight).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
+      g.fillStyle = 'rgba(4, 3, 8, ' + (0.42 + 0.48 * boardLight).toFixed(3) + ')'; g.fillRect(0, 0, boardPx, boardPx);
     }
     var highlight = state.phase === 'show';
     // Tidsvägar: brädet mörknar när en vinst visas, så att de vinnande symbolerna syns tydligt
@@ -5420,7 +5420,8 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     drawBonusTension(g, time);
     // bonusen utlöses: alla rutor utom bonussymbolerna mörknar, så att fokus landar på bonussymbolerna
     if (boardLight > 0.01 && gridBoardOn()) {
-      g.fillStyle = 'rgba(6, 5, 12, ' + (0.62 * boardLight).toFixed(3) + ')';
+      // (ännu mörkare, användaren 2026-11-06: "gridden måste mörkas ännu mer vid bonustrigg, så fokus enbart landar på hjulen")
+      g.fillStyle = 'rgba(4, 3, 8, ' + (0.86 * boardLight).toFixed(3) + ')';
       for (var dr = 0; dr < REELS; dr++) reels[dr].cells.forEach(function (c) { if (!c.celebrate && c.y >= -1 && c.y <= ROWS) g.fillRect(dr * cell, c.y * cell, cell, cell); });
     }
     if (winBall) drawBall(g);
