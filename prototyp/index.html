@@ -3750,6 +3750,12 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   SYM_RUTA[GOLD_BOMB] = [0.1443, 0.1738, 0.8397, 0.9681];
   var SYM_FYLL = { 1: 0.96 };
   SYM_FYLL[GOLD_BOMB] = 0.96;
+  // På brädet ritas alla symbolbilder 8 % mindre (användaren 2026-11-06: först "Kan du minska iconernas storlek på gridden typ
+  // 15% det är något som inte klickar när man spelar spelet med iconerna", sedan "15% blev nog lite för mycket ... 8%"). Bara brädets symboler (buildSprites och
+  // animationslagren, sym-anim.js saPrime) krymps; köpaffischen, köpmenyn, reglerna och guiden har sina storlekar kvar.
+  var SYM_BRADE_SKALA = 0.92, symPaBrade = false;
+  var symBuildPrev = buildSprites;
+  buildSprites = function () { symPaBrade = true; try { symBuildPrev(); } finally { symPaBrade = false; } };
   // punkter i bilden (andelar av bildens sida) för animationerna i sym-anim.js: sneakerns sula
   var SYM_PUNKT = { 5: [0.5, 0.82] };
   // Masken och ryggsäcken lyser hela tiden med ett mjukt sken som pulserar (användarens Bonusikoner-v2-animation.css:
@@ -3846,14 +3852,15 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   /** Symbolen sym ritas som bild. */
   function symImgOn(sym) { var im = symImg(sym); return !!(im && im.complete && im.naturalWidth); }
   // Var bilden ligger i en symbolbild med sidan s: [x, y, bredd, höjd], mitt i rutan.
-  function symImgRect(sym, s) {
-    var b = SYM_RUTA[sym];
+  // (brade: symbolen på brädet, 8 % mindre, SYM_BRADE_SKALA)
+  function symImgRect(sym, s, brade) {
+    var b = SYM_RUTA[sym], m = brade ? SYM_BRADE_SKALA : 1;
     if (b) {
       // motivet (alfa-rutan b) mitt i rutan, SYM_FYLL av rutan på sin längsta led
-      var bw = b[2] - b[0], bh = b[3] - b[1], k = (SYM_FYLL[sym] || 0.86) / Math.max(bw, bh), dd = s * k;
+      var bw = b[2] - b[0], bh = b[3] - b[1], k = (SYM_FYLL[sym] || 0.86) * m / Math.max(bw, bh), dd = s * k;
       return [s * (0.5 - (b[0] + bw / 2) * k), s * (0.5 - (b[1] + bh / 2) * k), dd, dd];
     }
-    var d = s * (SYM_SKALA[sym] || 1), o = (s - d) / 2;
+    var d = s * (SYM_SKALA[sym] || 1) * m, o = (s - d) / 2;
     return [o, o, d, d];
   }
   // En punkt i bilden ([x, y] som andelar av bildens sida), eller def om symbolen inte har någon.
@@ -3866,7 +3873,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     var c = document.createElement('canvas');
     c.width = c.height = size;
     if (layer === 'tile') return c;
-    var g = c.getContext('2d'), rc = symImgRect(sym, size);
+    var g = c.getContext('2d'), rc = symImgRect(sym, size, symPaBrade);
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     g.drawImage(symImg(sym), rc[0], rc[1], rc[2], rc[3]);
     return c;
@@ -3967,7 +3974,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     if (!(symImgOn(a.sym) && SYM_GLOW[a.sym])) { g.beginPath(); g.rect(x, y, s, s); g.clip(); }
     // symbolbilderna (symbol-images.js): bildens egna detaljer rör sig inte; bonusburken puffar ur munstycket och
     // sneakerns damm yr där de sitter i bilden, och noterna stiger över bergsprängaren
-    var img = symImgOn(a.sym), rc = img ? symImgRect(a.sym, s) : null;
+    var img = symImgOn(a.sym), rc = img ? symImgRect(a.sym, s, true) : null;
     if (d.icon === 'sneaker') saDust(g, a, x, y, s, rc);
     saTransform(g, a, x, y, s);
     // Mjuk övergång från originalets målade detaljer till deras rörliga motsvarigheter.
@@ -5595,12 +5602,21 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   }
   // Rivet hörn: varje ny symbol är en affisch, och i ett rivet nedre högerhörn syns förra snurrets symbol.
   // c styr hur mycket som är rivet: den del av rutan där x + y >= c (rutans enheter, 0–1 från övre vänstra hörnet).
-  var TEAR_IDLE = 1.4;
   // prototypen (NEXT): större hörn med en kant i lagrets färg (blått: förra snurret), så att man ser att det ligger något under
   // 2026-11-04 (användaren: hörnet tar för mycket av huvudikonen, "Kan man minska den 15%"): hörnet och symbolen i det
   // är 15 % mindre, räknat från rutans nedre högra hörn (rivlinjen 1,337 i stället för 1,22: benen 0,663 i stället för
-  // 0,78; symbolen TEAR_SZ i stället för 0,58 och 0,45 i stället för 0,5 när hörnet viks bort). Telefon och dator lika.
-  var TEAR_NX = 1.337, TEAR_SZ = 0.512, TEAR_SZ_FOLD = 0.45;
+  // 0,78; symbolen 0,512 i stället för 0,58 och 0,45 i stället för 0,5 när hörnet viks bort). Telefon och dator lika.
+  // 2026-11-06 (ikonerna utan ramar: hörnet skar av själva motivet; användaren valde "Mindre hörn"): hörnet ungefär hälften
+  // så stort, från cirka 22 % till cirka 12,5 % av rutan (rivlinjen 1,5: benen 0,5), och symbolen i det krymper lika mycket
+  // mot rutans hörn (TEAR_SZ 0,39, TEAR_SZ_FOLD 0,34, mitten TEAR_CX 0,84 i stället för 0,79). TEAR_IDLE är där rivningen
+  // börjar när ett lager vinner (samma som hörnet, så att det inte hoppar). Guiden (guide-slides.js gCorner), Ljuskulans
+  // hörnträff (win-ball.js) och INFINITY-rutorna (infinity.js) följer samma värden.
+  // Sedan ("Nu är den lite för liten.. Kan du öka den lite?"): mitt emellan, cirka 17 % av rutan (rivlinjen 1,42: benen
+  // 0,58), symbolen 0,45 (0,39 när hörnet viks bort) med mitten 0,82.
+  // Och sedan ("kan du göra hörnet så att det är 19%"): cirka 19 % av rutan (rivlinjen 1,384: benen 0,616), symbolen
+  // 0,48 (0,42 när hörnet viks bort) med mitten 0,80.
+  var TEAR_NX = 1.384, TEAR_SZ = 0.48, TEAR_SZ_FOLD = 0.42, TEAR_CX = 0.8;
+  var TEAR_IDLE = TEAR_NX;
   function tearHash(n) { var x = Math.sin(n) * 43758.5453; return x - Math.floor(x); }
   // Ritar hålets kontur och ger tillbaka punkterna på rivkanten.
   function tearPath(g, x0, y0, c, seed) {
@@ -5629,7 +5645,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     g.save(); g.clip();
     g.fillStyle = '#2e105c'; g.fillRect(x0, y0, cell, cell);
     var open = Math.max(0, Math.min(1, (TEAR_IDLE - c) / (TEAR_IDLE + 0.1)));
-    var sz = cell * (size + (0.94 - size) * open), cx = x0 + cell * (0.79 - 0.29 * open), cy = y0 + cell * (0.79 - 0.29 * open);
+    var sz = cell * (size + (0.94 - size) * open), cx = x0 + cell * (TEAR_CX - (TEAR_CX - 0.5) * open), cy = y0 + cell * (TEAR_CX - (TEAR_CX - 0.5) * open);
     if (spin) {
       g.translate(cx, cy); g.rotate(spin.rot); g.scale(spin.scl, spin.scl);
       g.drawImage(ghostSprite(sym, light), -sz / 2, -sz / 2, sz, sz);
@@ -5730,7 +5746,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
           g.globalAlpha = fade;
           // lagret: förra snurret blått, i bonusarna även 2–5 snurr bakåt
           var dd = ov && ov.d > 1 ? ov.d : 1, x0 = r * cell, y0 = y * cell; if (ov && ov.inf) { infTile(g, r, y, sym, ov, le, lit[r][y]); g.restore(); continue; }
-          drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, 0.5, true);
+          drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, TEAR_SZ, true);
           // LAYER 1 (src/themes/ct/layer-frame.js): symbolen blixtrar till och lyser blått när rivningen är klar,
           // och användarens +1-bricka poppar upp med samma studs som den runda brickan. Ingen extra ram, ton, sken eller
           // ring runt rutan (användaren 2026-11-05).
@@ -7313,9 +7329,9 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
       var ys = [], corner = false, d = 0;
       st.wins.forEach(function (w) {
         (w.cols[r] || []).forEach(function (y) { ys.push(y + 0.5); });
-        if (w.gcols && w.gcols[r] && w.gcols[r].length) { corner = true; d = Math.max(d, (w.depth && w.depth[r]) || 1); w.gcols[r].forEach(function (y) { ys.push(y + 0.76); }); }
+        if (w.gcols && w.gcols[r] && w.gcols[r].length) { corner = true; d = Math.max(d, (w.depth && w.depth[r]) || 1); w.gcols[r].forEach(function (y) { ys.push(y + TEAR_CX - 0.02); }); }
       });
-      if (ys.length) pts.push({ x: (r + (corner ? 0.74 : 0.5)) * cell, y: ys.reduce(function (a, b) { return a + b; }, 0) / ys.length * cell, corner: corner, d: d });
+      if (ys.length) pts.push({ x: (r + (corner ? TEAR_CX - 0.04 : 0.5)) * cell, y: ys.reduce(function (a, b) { return a + b; }, 0) / ys.length * cell, corner: corner, d: d });
     }
     if (!pts.length) { startSweep(pth); return; }
     // hur länge vinsten står (samma som i presentSteps): kulan måste hinna fram och beloppet synas en stund efteråt
@@ -9024,7 +9040,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   // vänds till talet
   function infTile(g, r, y, sym, ov, le, t0) {
     var x0 = r * cell, y0 = y * cell, ke = le * le * (3 - 2 * le), age = clock - t0 - 0.45, num = ov.v > 0;
-    drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, 0.5, true);
+    drawTear(g, r, y, sym, TEAR_IDLE - (TEAR_IDLE + 0.12) * ke, TEAR_SZ, true);
     if (le < 1) return;
     if (!ov.fx) {
       ov.fx = true;
@@ -11799,7 +11815,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
   function gIsIn(list, c, r) { return list.some(function (q) { return q[0] === c && q[1] === r; }); }
   // ett rivet hörn med förra snurrets symbol; open 0 = vanligt hörn, 1 = symbolen täcker hela rutan
   function gCorner(g, x, y, s, sym, open, seed) {
-    var c = 1.4 - 1.46 * open;
+    var c = TEAR_NX - (TEAR_NX + 0.06) * open;
     var a = c >= 1 ? [1, c - 1] : [c, 0], b = c >= 1 ? [c - 1, 1] : [0, c], pts = [], n = 9;
     for (var i = 0; i <= n; i++) {
       var t = i / n, j = i === 0 || i === n ? 0 : (tearHash(seed * 12.9898 + i * 78.233) - 0.5) * 0.08 + (i % 2 ? 0.025 : -0.025);
@@ -11813,7 +11829,7 @@ body.inf-mode .stage.inf-glint { animation: infRingIn .9s ease-out; }
     g.closePath();
     g.save(); g.clip();
     g.fillStyle = '#2e105c'; g.fillRect(x, y, s, s);
-    var sz = s * (0.42 + 0.52 * open), cx = x + s * (0.79 - 0.29 * open), cy = y + s * (0.79 - 0.29 * open);
+    var sz = s * (TEAR_SZ + (0.94 - TEAR_SZ) * open), cx = x + s * (TEAR_CX - (TEAR_CX - 0.5) * open), cy = y + s * (TEAR_CX - (TEAR_CX - 0.5) * open);
     g.drawImage(gGhostSprite(sym, open > 0.5), cx - sz / 2, cy - sz / 2, sz, sz);
     g.restore();
     if (open < 0.95) {
