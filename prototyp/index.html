@@ -1188,6 +1188,20 @@ dialog::backdrop { background: rgba(10, 8, 30, .72); }
 .wb-col { display: grid; gap: 3px; padding: 4px; border-radius: 6px; background: var(--ink); }
 .wb-col i { display: block; width: 9px; height: 9px; border-radius: 50%; background: var(--sun); }
 .wb-cols em { font: 700 14px/1 var(--ui); font-style: normal; opacity: .7; }
+/* 46 656 vinstvägar: pilar på var sida om brädet, vägen som en orange linje, och vägens nummer under (info-ways.js) */
+.wb-way { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 6px 0 2px; }
+.wb-way-svg { flex: 0 1 230px; min-width: 0; }
+.wb-way-svg svg { display: block; width: 100%; height: auto; }
+.wb-way .wb-x { font: 700 14px/1 var(--ui); fill: var(--ink); opacity: .55; }
+.wb-way .wb-line { fill: none; stroke: var(--pink); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.wb-way .wb-line.go { transition: stroke-dashoffset .35s ease-out; }
+.wb-arr { flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 2.5px solid var(--ink); border-radius: 50%;
+  background: var(--sun); color: var(--ink); box-shadow: 0 3px 0 var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.wb-arr svg { width: 20px; height: 20px; }
+.wb-arr:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.wb-arr:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+.wb-way-no { margin-top: 6px; text-align: center; font: 700 13px/1 var(--ui); opacity: .75; }
+@media (prefers-reduced-motion: reduce) { .wb-way .wb-line.go { transition: none; } }
 /* vinsttabellen: namnet efter ikonen; på telefonen under ikonen, i mindre text, så att beloppen får plats */
 .paytable .pt-name { margin-left: 6px; }
 .portrait .paytable td { padding: 4px 4px; }
@@ -3225,6 +3239,9 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     'Wild finns på hjul 2–6 och ersätter alla symboler utom bonusbomben.': 'Wild appears on reels 2–6 and substitutes for all symbols except the bonus bomb.',
     'Saknas symbolen på nästa hjul kan förra snurrets symbol i det rivna hörnet fylla luckan, och vinsten fortsätter.': 'If the symbol is missing on the next reel, the previous spin\'s symbol in the torn corner can fill the gap, and the win continues.',
     '46 656 vinstvägar': '46,656 ways to win',
+    'Väg {n} av {t}': 'Way {n} of {t}',
+    'Föregående väg': 'Previous way',
+    'Nästa väg': 'Next way',
     '6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.': '6 rows on each of the 6 reels: 6 × 6 × 6 × 6 × 6 × 6 = 46,656 ways. All ways count on every spin.',
 
     // ---- reglerna (info.js)
@@ -5310,7 +5327,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   function winShowT(cls, acc, fs) {
     if (state.turbo) return T().show;
     // vinster under insatsen (cls 0) står kort, så att de inte bromsar grundspelet ("vinn ofta")
-    return (fs ? [0.32, 0.7, 1.0] : [0.32, 0.85, 1.4])[cls] * (acc || 1);
+    return (fs ? [0.32, 0.7, 1.0] : FLOW_RAPP ? [0.32, 0.6, 1.4] : [0.32, 0.85, 1.4])[cls] * (acc || 1);
   }
 
   function rng() {
@@ -5833,6 +5850,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     // varje hjul i väggen får ett slag med stigande ton. I bonusen rappare (cirka 3,5–4 s per lavinsteg).
     var pace = state.fs ? [[0.1, 0.1, 0.2, 0.15], [0.2, 0.25, 0.26, 0.18], [0.4, 0.45, 0.4, 0.26]][tier]
       : tier === 0 && tiny ? [0.06, 0, 0.14, 0.1] : [[0.15, 0, 0.28, 0.24], [0.35, 0.4, 0.35, 0.25], [0.8, 0.9, 0.7, 0.5]][tier];
+    if (FLOW_RAPP && !state.fs && tier === 1) pace = [0.15].concat(pace.slice(1));
     pace = pace.map(function (v) { return v * acc; });
     // först bara rutorna före första bytet; resten tänds hjul för hjul nedan
     var part = st.removed.map(function (col) { return col.map(function () { return false; }); });
@@ -9588,7 +9606,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   // turbo och snabbspolning: allt går fortare
   function halFart() { return state.turbo || state.hurry ? 0.6 : 1; }
   // hur länge lavinen väntar innan nya symboler faller: tills symbolen nästan är inne i hålet
-  function halVantan() { return HAL_PA ? (HAL_PANG + HAL_SUG * 0.9) * halFart() : 0; }
+  function halVantan(f) { return HAL_PA ? (HAL_PANG + HAL_SUG * (f == null ? 0.9 : f)) * halFart() : 0; }
   var halBild = null, halBildPx = 0;
   /** Hålet som bild (svart mitt, mjuk kant, fyra orange virvelarmar), ritat en gång per rutstorlek. */
   function halSprite() {
@@ -11625,6 +11643,11 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     await wait(tt(0.3), true);
   }
   var LAVIN_LJUD = false;
+  // FLOW_RAPP (användaren 2026-11-07: "Flowet i spelet stannar upp när man vinner"): vinsterna rullar på i stället för att
+  // stanna spelet. Musiken viker inte undan för vanliga vinster (bara när rundan blir en storvinst i grundspelet), vanliga
+  // vinster i grundspelet står kortare (winShowT) och utan de 15 % lugnare, pausen före spolningen är kortare (time-ways.js),
+  // nya symboler börjar falla medan hålen suger in de sista bitarna och pausen efter lavinen är kortare. false = som förut.
+  var FLOW_RAPP = true;
   async function presentSteps(res, fs) {
     var total = 0, winIdx = 0;
     roundShown = 0; sayTurn = 'T';
@@ -11669,12 +11692,12 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       // bakgrunden runt brädet mörknar medan vinsterna i snurret visas (snurren och vinster under insatsen som förut; i
       // bonusen, där frispinnen inte kostar något, gäller det också lagervinster under insatsen)
       var nxLay = fs && st.wins.some(function (w) { return w.timeAt >= 0 && !w.both; });
-      if ((cls > 0 || nxLay) && !state.turbo) { acc *= 1.15; if (!winDimEl) winDimEl = winDim(); }
+      if ((cls > 0 || nxLay) && !state.turbo) { if (fs || !FLOW_RAPP) acc *= 1.15; if (!winDimEl) winDimEl = winDim(); }
       // musiken viker undan (lägre och dovare) medan vinsterna visas, men bara när rundan är större än insatsen (vinster
       // som inte är större än insatsen firas inte). Förut lade varje vinst på ett lager i musiken (användaren 2026-11-03:
       // "massa olika lager av musik"); musiken glider tillbaka när snurrets vinster är klara (sound-street.js)
       var overStake = state.roundWin + amount > bet();
-      if (amount > 0 && overStake) Music.duck(fs ? 'fs' : 'win');
+      if (amount > 0 && overStake && (!FLOW_RAPP || bigLvl >= 0)) Music.duck(fs ? 'fs' : 'win');
       var tTier = await timeIntro(st, stepX, acc, cls === 0);
       markCells(st.removed);
       state.phase = 'show'; hud();
@@ -11727,7 +11750,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       if (LAVIN_LJUD) Sound.pop(winIdx);
       state.phase = 'tumble';
       // (lavinen väntar tills symbolerna är insugna i hålen, suck-hole.js)
-      await wait(Math.max(showTime(T().popWait * acc * (cls === 0 ? 0.5 : 1)), typeof halVantan === 'function' ? halVantan() : 0));
+      await wait(Math.max(showTime(T().popWait * acc * (cls === 0 ? 0.5 : 1)), typeof halVantan === 'function' ? halVantan(FLOW_RAPP ? 0.5 : 0.9) : 0));
       applyMoves(st.moves);
       await waitFor(function () { return reels.every(function (x) { return x.settled(); }); });
       if (fs) {
@@ -11735,7 +11758,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
         var grow = st.wins.reduce(function (a, x) { return a + (x.deep || 0); }, 0);
         if (grow > 0) { state.fs.mult = st.mult + grow; renderMeter(true); }
       }
-      await wait(showTime(T().between * acc), true);
+      await wait(showTime((FLOW_RAPP ? Math.min(0.05, T().between) : T().between) * acc), true);
       winIdx++;
       if (st.maxed) break;
     }
@@ -12283,12 +12306,61 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     var cards = ex.map(function (e) {
       return '<div class="wb-card"><b class="wb-title">' + e.t + '</b>' + waysBoard(e.b, e.w, e.c) + '<p>' + e.x + '</p></div>';
     }).join('');
-    // hur många vägar: 6 rader på vart och ett av de 6 hjulen
-    var cols = ''; for (var r = 0; r < 6; r++) { var d = ''; for (var y = 0; y < 6; y++) d += '<i></i>'; cols += '<span class="wb-col">' + d + '</span>' + (r < 5 ? '<em>×</em>' : ''); }
-    cards += ('<div class="wb-card wb-count"><b class="wb-title">' + txl('46 656 vinstvägar') + '</b><div class="wb-cols">') + cols + '</div>' +
+    // hur många vägar: 6 rader på vart och ett av de 6 hjulen, och pilar som bläddrar mellan vägarna (wayCardHtml)
+    cards += ('<div class="wb-card wb-count"><b class="wb-title">' + txl('46 656 vinstvägar') + '</b>') + wayPickHtml() +
       ('<p>' + txl('6 rader på vart och ett av de 6 hjulen: 6 × 6 × 6 × 6 × 6 × 6 = 46 656 vägar. Alla vägar räknas varje snurr.') + '</p></div>');
     return '<div class="wb-grid">' + cards + '</div>';
   }
+
+  // 46 656 vinstvägar med pilar (användaren 2026-11-07: "en pil till höger och vänster ... där man ser tydligt kan bläddra
+  // och så på vilka linjer man kan vinna"): sex hjul med sex rader var (som förut), och en väg i taget ritas som en linje
+  // genom en rad på varje hjul. Pilarna bläddrar runt bland ett urval vägar; numret är vägens plats bland alla 46 656
+  // (hjul 1 först, rad 1 överst), så att man ser att varje kombination av rader är en egen väg.
+  var WAY_EX = [[1, 1, 1, 1, 1, 1], [1, 2, 3, 4, 5, 6], [2, 5, 2, 5, 2, 5], [6, 5, 4, 3, 2, 1], [3, 3, 4, 4, 3, 3], [5, 2, 4, 6, 1, 3],
+    [6, 6, 1, 1, 6, 6], [4, 1, 6, 1, 4, 3], [2, 3, 2, 1, 2, 3], [6, 6, 6, 6, 6, 6]];
+  var wayAt = 0;
+  function wayNo(rows) { return rows.reduce(function (a, r) { return a * 6 + (r - 1); }, 0) + 1; }
+  function wayLabel(rows) { return txl('Väg {n} av {t}', { n: num(wayNo(rows)), t: num(46656) }); }
+  // brädet som svg: hjulen är svarta pelare med gula prickar (som förut), vägens rader lyser vitt med orange kant och
+  // binds ihop av en orange linje; de andra prickarna är dämpade
+  function waySvg(rows, draw) {
+    var STEP = 33, PW = 17, PH = 77, s = '', pts = [];
+    for (var r = 0; r < 6; r++) {
+      var x0 = r * STEP;
+      s += '<rect x="' + x0 + '" y="0" width="' + PW + '" height="' + PH + '" rx="6" fill="var(--ink)"/>';
+      for (var k = 0; k < 6; k++) if (k !== rows[r] - 1) s += '<circle cx="' + (x0 + 8.5) + '" cy="' + (8.5 + 12 * k) + '" r="4.5" fill="var(--sun)" opacity=".35"/>';
+      if (r < 5) s += '<text x="' + (x0 + 25) + '" y="43" text-anchor="middle" class="wb-x">×</text>';
+      pts.push((x0 + 8.5) + ',' + (8.5 + 12 * (rows[r] - 1)));
+    }
+    // linjens längd, så att den kan ritas fram när man bläddrar (draw: börjar osynlig, wayDraw drar fram den)
+    var L = 0; for (var i = 1; i < 6; i++) L += Math.hypot(STEP, 12 * (rows[i] - rows[i - 1]));
+    L = Math.ceil(L) + 1;
+    s += '<polyline class="wb-line" points="' + pts.join(' ') + '" stroke-dasharray="' + L + '" stroke-dashoffset="' + (draw ? L : 0) + '"/>';
+    pts.forEach(function (p) { var q = p.split(','); s += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="5.6" fill="#fff" stroke="var(--pink)" stroke-width="2.4"/>'; });
+    return '<svg viewBox="-3 -3 188 83" aria-hidden="true">' + s + '</svg>';
+  }
+  function wayPickHtml() {
+    var chev = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; };
+    return '<div class="wb-way"><button type="button" class="wb-arr prev" aria-label="' + txl('Föregående väg') + '">' + chev('M15 5 8 12l7 7') + '</button>' +
+      '<div class="wb-way-svg">' + waySvg(WAY_EX[wayAt]) + '</div>' +
+      '<button type="button" class="wb-arr next" aria-label="' + txl('Nästa väg') + '">' + chev('M9 5l7 7-7 7') + '</button></div>' +
+      '<div class="wb-way-no" aria-live="polite">' + wayLabel(WAY_EX[wayAt]) + '</div>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('.wb-arr'), card = b && b.closest('.wb-count');
+    if (!card) return;
+    wayAt = (wayAt + (b.classList.contains('prev') ? -1 : 1) + WAY_EX.length) % WAY_EX.length;
+    var box = card.querySelector('.wb-way-svg'), no = card.querySelector('.wb-way-no');
+    if (box) {
+      box.innerHTML = waySvg(WAY_EX[wayAt], true);
+      // linjen ritas fram: börjar osynlig (draw), stilen räknas ut, och sedan glider den fram (ingen requestAnimationFrame,
+      // som inte körs i en dold flik)
+      var ln = box.querySelector('.wb-line'); ln.classList.add('go'); void getComputedStyle(ln).strokeDashoffset; ln.style.strokeDashoffset = '0';
+      // säkerhet: står animationerna still (dold flik) syns linjen ändå efter en stund
+      setTimeout(function () { ln.classList.remove('go'); }, 450);
+    }
+    if (no) no.textContent = wayLabel(WAY_EX[wayAt]);
+  });
   // ---------------------------------------------------------------- info
   function renderInfo() {
     var b = bet();
