@@ -5857,12 +5857,9 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       });
       // tillbaka på brädet: ramen tänds på det här hjulet
       if (!past) { w.cols[c].forEach(function (y) { part[c][y] = true; }); markCells(part); }
-      // i bonusen ger hjulet +n i multi (n = hur många snurr bakåt), en gång per hjul; "+n" visas på hörnet och flyger
-      // till multin när vinsten är visad (growMulti)
-      if (past && state.fs && !infOn()) {
-        var dp = (w.depth && w.depth[c]) || 1;
-        parts.push({ kind: 'tlabel', x: c * cell + cell / 2, y: w.gcols[c][0] * cell + cell * 0.35, text: '+' + dp, c: DEPTH_COL[dp], sticker: true, life: 0, max: 1.4 });
-      }
+      // i bonusen ger hjulet +n i multi (n = hur många snurr bakåt), en gång per hjul; "+n" flyger till multin när vinsten
+      // är visad (growMulti). Inget "+n" som poppar upp och tonar bort på hjulet, inte heller i Bonusspelet: det fanns inte
+      // i INFINITY-bonusen (användaren 2026-11-07: "ta bort den ur mellanbonus")
       // affischen rivs när vinsten går in i väggen, och symbolen landar med en smäll (brädet skakar lite, hårdare för varje hjul)
       if (past && hop) Sound.rip();
       if (past) {
