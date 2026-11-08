@@ -1928,22 +1928,21 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 .intro.ng2 .g-vol .vm-col > i { background: #635d51; }
 .intro.ng2 .g-vol .vm-col.on > i { background: #d69348; box-shadow: none; }
 .intro.ng2 .g-vol b, .intro.ng2 .g-vol em { display: none; }
-/* SPELA: den orange rivna lappen med pilen */
-.intro.ng2 .g-btns { margin-top: 8px; }
+/* "Klicka var som helst för att fortsätta" i stället för SPELA (användaren 2026-11-08): samma vita, studsande text som
+   under affischerna (tap-go), ingen ruta. Hela startskärmen startar spelet (guide.js); knappen finns kvar för tangentbordet. */
+.intro.ng2 { cursor: pointer; }
+.intro.ng2 .g-btns { margin-top: 10px; }
 .intro.ng2 .intro-go {
-  position: relative; width: 276px; min-width: 0; margin: 0; padding: 12px 30px 14px; color: #161917; border: 0; border-radius: 0;
-  font: italic 400 37px/1.15 var(--ng-head); letter-spacing: 1px; background: #eca34d;
-  clip-path: polygon(2% 6%, 97% 0, 100% 90%, 88% 96%, 3% 100%, 0 16%); box-shadow: inset 0 -5px #a9692b; transition: filter .2s, transform .2s;
+  position: relative; width: auto; min-width: 0; margin: 0; padding: 6px 10px; color: #fff; border: 0; border-radius: 0;
+  background: none; box-shadow: none; clip-path: none; font: inherit; cursor: pointer;
 }
-.intro.ng2 .intro-go:hover { filter: brightness(1.13); transform: translateY(-2px); }
-.intro.ng2 .intro-go:active { transform: translateY(1px); box-shadow: inset 0 -3px #a9692b; }
-.intro.ng2 .ng-go-arrow { position: absolute; right: 28px; top: 50%; translate: 0 -54%; font: normal 32px/1 Arial, sans-serif; }
+.intro.ng2 .intro-go:focus-visible { outline: 3px solid #f4a449; outline-offset: 4px; }
 .intro.ng2:not([hidden]) .intro-go { animation: inPop .45s cubic-bezier(.2, 1.6, .4, 1) .75s both; }
 .intro.ng2 .intro-note { font-size: 10px; color: #b7afa0; opacity: 1; margin: 12px 0 0; text-align: center; }
 /* ---------- telefonen: en kolumn, exemplet ovanför texten. Allt ryms på en telefon på 390 x 844 (SPELA syns utan att
    rulla); lägre telefoner får rulla hellre än att texten blir för liten ---------- */
 .portrait .intro.ng2 { place-items: start center; padding: 4px 0 6px; }
-.portrait .intro.ng2 .intro-card { width: min(430px, 100%); gap: 0; padding: 0 0 4px; }
+.portrait .intro.ng2 .intro-card { width: 390px; gap: 0; padding: 0 0 4px; margin-block: auto; }
 .portrait .intro.ng2 .logo { font-size: 46px; margin: 0 0 -6px; }
 .portrait .intro.ng2 .guide-poster { padding: 20px 30px 20px; }
 .portrait .ng-eyebrow { font-size: 8px; letter-spacing: .1em; margin-bottom: 8px; }
@@ -1973,8 +1972,7 @@ body.entering .g-top .logo { animation: logoSlam .5s cubic-bezier(.2, 1.6, .4, 1
 .portrait .intro.ng2 .g-vol { margin: 4px 0 5px; min-height: 24px; }
 .portrait .intro.ng2 .g-vol small { font-size: 11px; }
 .portrait .intro.ng2 .g-btns { margin-top: 2px; }
-.portrait .intro.ng2 .intro-go { width: 255px; max-width: 80vw; padding: 9px 30px 11px; font-size: 33px; }
-.portrait .intro.ng2 .ng-go-arrow { font-size: 28px; right: 26px; }
+.portrait .intro.ng2 .intro-go { padding: 4px 8px; }
 .portrait .intro.ng2 .intro-note { font-size: 9px; max-width: 94%; margin-top: 6px; }
 @media (prefers-reduced-motion: reduce) {
   .intro.ng2:not([hidden]) .guide-poster, .guide-poster.ng-turn .ng-lesson, .guide-poster.ng-newtopic .ng-head, .intro.ng2:not([hidden]) .intro-go { animation: none; }
@@ -2597,7 +2595,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   <div class="intro-card">
     <h2 class="logo"><span class="l-c">C</span><span class="l-amp">&amp;</span><span class="l-t">T</span><span class="l-m">MANIAC</span></h2>
     <div class="guide-poster">
-      <div class="ng-eyebrow"><span>ODD HEAD GAMES</span><span>SNABBGUIDE / <b id="ngTopic">01</b></span></div>
+      <div class="ng-eyebrow"><span>ODD HEAD GAMES</span></div>
       <div class="ng-head">
         <span class="ng-kicker">SÅ FUNKAR DET</span>
         <div class="ng-stack ng-title" id="ngTitle"></div>
@@ -2625,7 +2623,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       <div class="g-max" id="guideMax"><span>MAXVINST</span><b>20 000x</b></div>
     </div>
     <div class="g-btns">
-      <button class="ov-go intro-go" id="introGo" type="button">SPELA<i class="ng-go-arrow" aria-hidden="true">&#8599;</i></button>
+      <button class="intro-go" id="introGo" type="button"><span class="tap-go">Klicka var som helst för att fortsätta</span></button>
     </div>
     <p class="intro-note">Demo med spelpengar. Mynten kan inte tas ut eller köpas.</p>
   </div>
@@ -3565,7 +3563,6 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     'Ruta {i}: {t}': 'Slide {i}: {t}',
     // snabbguiden (design A, 2026-11-08)
     'SÅ FUNKAR DET': 'HOW IT WORKS',
-    'SNABBGUIDE /': 'QUICK GUIDE /',
     'STEG': 'STEP',
     'Visa animationen igen': 'Replay the animation',
     'Välj ruta': 'Choose slide',
@@ -9384,30 +9381,48 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   // skakning, och rutan öppnas ur smällen (en springa på bredden som slås upp på höjden). När affischen sitter poppar dess
   // rader fram en i taget (popInner). Maniac får guldstrålar bakom affischen.
   var BLAST = 1.4;
-  // ljuden (at: sekunder från nu), i mellanregistret så att de hörs i telefonens högtalare
-  function bombSfx(kind, gold, at, dur) {
+  // bonusintrots nya ljud (bonusIntroSfx) är PAUSAT (användaren 2026-11-08: "pausa det du håller på med men behåll punkt 2",
+  // och en helt ny ljudprofil ska tas fram): intrat är tyst som förut. true spelar det.
+  var BONUSINTRO_LJUD = false;
+  // Bonusintrots ljud (användaren 2026-11-08: "Vi behöver ha något nice ljud när man vinner bonus och 'ODD' symbolen hoppar
+  // på skärmen och exploderar"). Effekterna är tysta i spelet (Sound.bara), så det spelas där det hörs (keepRun), i samma
+  // slagverk som SPELA-övergången (som användaren gillar: "Snygg övergång som fan") och utan bas (inga kick eller 808 i
+  // vinstljud, användaren 2026-10-30), i takt med animationen:
+  //  0 s      kastet: ett sus som stiger medan symbolen flyger in i bågen,
+  //  0,55 s   studsarna: två klappar (den andra mindre),
+  //  0,78 s   de nervösa hoppen: fyra trumslag som stiger i låtens tonart (G, A, H, E), ett sus som byggs upp och
+  //           virveln som tätnar sista 0,4 s, med stubinens fräs ovanpå,
+  //  1,4 s    BOOM: klapp, virvel, crash och en explosion av brus som faller från ljust till mörkt (INFINITY: större),
+  //           sedan ett kort sus när affischen slås upp och små tick när raderna poppar fram.
+  function bonusIntroSfx(gold) {
     if (!Sound.ctx) return;
-    var t = Sound.ctx.currentTime + 0.005 + (at || 0), s = Sound.sfx, k;
-    if (kind === 'toss') {
-      Sound.hiss(0.5, { f: 600, to: 2600, q: 0.8, vol: 0.18, at: t, attack: 0.08 });
-    } else if (kind === 'bounce') {
-      Sound.kick(t, 0.45, s); Sound.tone(210, 0.1, { type: 'square', to: 90, vol: 0.08, at: t }); Sound.tone(620, 0.05, { type: 'triangle', vol: 0.05, at: t });
-    } else if (kind === 'fuse') {
-      Sound.hiss(dur, { filter: 'highpass', f: 3800, vol: 0.11, at: t, attack: 0.02 });
-      Sound.tone(300, dur, { type: 'sine', to: 1200, vol: 0.04, at: t, attack: 0.05 });
-      for (k = 0; k < 18; k++) Sound.hiss(0.012, { filter: 'highpass', f: 4000 + Math.random() * 3000, vol: 0.12, at: t + Math.random() * dur, attack: 0.001 });
-    } else if (kind === 'hop') {
-      Sound.tone(480 * (1 + (dur || 0) * 0.12), 0.06, { type: 'triangle', to: 700, vol: 0.07, at: t });
-    } else if (kind === 'boom') {
-      Sound.kick(t, 0.9, s); Sound.clap(t, 0.36, s); Sound.crash(t, 0.18, s);
-      Sound.hiss(1.0, { filter: 'lowpass', f: 2800, to: 180, vol: 0.5, at: t, attack: 0.003 });
-      Sound.bass808(45, t, 1.0, 0.36, s);
-      Sound.rip();
-    }
-    if (gold && kind === 'boom') {
-      Sound.brass([440, 554.4, 659.3, 880], t + 0.08, 0.7, 0.03, s);
-      for (k = 0; k < 7; k++) Sound.bell(penta(9 + k), t + 0.12 + k * 0.045, 0.45, 0.06);
-    }
+    Sound.keepRun(function () {
+      var s = Sound.dst(), t = Sound.ctx.currentTime + 0.01, b = t + BLAST, k;
+      // kastet
+      Sound.hiss(0.55, { f: 420, to: 3200, q: 0.8, vol: 0.2, at: t, attack: 0.42 });
+      // studsarna
+      Sound.clap(t + 0.55, 0.3, s); Sound.snare(t + 0.55, 0.12, s);
+      Sound.clap(t + 0.73, 0.2, s);
+      // hoppen: trumslag (som en trumvirvel på pukor) uppåt i e-moll
+      [196, 220, 246.9, 329.6].forEach(function (f, i) {
+        var at = t + 0.78 + [0.12, 0.38, 0.64, 0.9][i] * (BLAST - 0.78);
+        Sound.tone(f, 0.18, { type: 'sine', to: f * 0.72, vol: 0.2 + i * 0.03, at: at, attack: 0.003, dest: s });
+        Sound.tone(f * 2, 0.06, { type: 'triangle', to: f * 1.5, vol: 0.05, at: at, attack: 0.002, dest: s });
+        Sound.hiss(0.05, { f: 900 + i * 250, q: 1, vol: 0.1, at: at, attack: 0.001, dest: s });
+      });
+      // stubinen fräser, suset byggs upp och virveln tätnar mot smällen
+      Sound.hiss(BLAST - 0.78, { filter: 'highpass', f: 5200, vol: 0.05, at: t + 0.78, attack: 0.05, dest: s });
+      Sound.hiss(BLAST - 0.78, { f: 600, to: 7000, q: 0.7, vol: 0.15, at: t + 0.78, attack: BLAST - 0.83, dest: s });
+      for (k = 0; k < 8; k++) Sound.snare(b - 0.4 + k * 0.05, 0.07 + k * 0.022, s);
+      // BOOM
+      Sound.clap(b, 0.42, s); Sound.snare(b, 0.28, s); Sound.crash(b, gold ? 0.26 : 0.22, s);
+      Sound.hiss(gold ? 1.3 : 1.05, { filter: 'lowpass', f: 6500, to: 260, q: 0.7, vol: 0.42, at: b, attack: 0.003, dest: s });
+      Sound.hiss(0.06, { filter: 'highpass', f: 2500, vol: 0.3, at: b, attack: 0.001, dest: s });
+      if (gold) { Sound.clap(b + 0.09, 0.26, s); Sound.crash(b + 0.18, 0.14, s); }
+      // affischen slås upp och raderna poppar fram
+      Sound.hiss(0.32, { f: 900, to: 5200, q: 0.8, vol: 0.09, at: b + 0.05, attack: 0.2, dest: s });
+      for (k = 0; k < 5; k++) Sound.hat(b + 0.36 + k * 0.055, 0.05 + k * 0.006, s);
+    });
   }
   // blixten, chockvågen och skakningen (mitt på el), och guldstrålarna i Maniac
   function coverBoom(o, el, gold, shake) {
@@ -9446,7 +9461,8 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       { transform: 'translate(0, 0) rotate(0deg) scale(1.1, .88)', offset: 0.94 },
       { transform: 'none' }
     ], { duration: 780, fill: 'both' });
-    bombSfx('toss', gold); bombSfx('bounce', gold, 0.55); bombSfx('bounce', gold, 0.73);
+    // ljudet för hela intro (kastet, studsarna, hoppen och smällen), bonusIntroSfx
+    if (BONUSINTRO_LJUD) bonusIntroSfx(gold);
     // stubinen: bomben hoppar nervöst allt högre och sväller, gnistor från stubinens topp
     anim(cv, [
       { transform: 'none', offset: 0 }, { transform: 'translateY(-14%) scale(.95, 1.06)', offset: 0.12 },
@@ -9455,15 +9471,13 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       { transform: 'translateY(0) scale(1.24, 1.06)', offset: 0.76 }, { transform: 'translateY(-8%) scale(1.3) rotate(-4deg)', offset: 0.9 },
       { transform: 'scale(1.38)' }
     ], { duration: (BLAST - 0.78) * 1000, delay: 780, fill: 'both' });
-    bombSfx('fuse', gold, 0.78, BLAST - 0.78);
-    [0.12, 0.38, 0.64, 0.9].forEach(function (f, i) { bombSfx('hop', gold, 0.78 + f * (BLAST - 0.78), i); });
     var sparks = setInterval(function () {
       var r = cv.getBoundingClientRect(); if (!r.width) return;
       for (var k = 0; k < 2; k++) emberPart(r.left + r.width * 0.72, r.top + r.height * 0.2, k ? '#fff6e0' : (gold ? '#ffd21f' : '#ff9a1f'));
     }, 45);
     setTimeout(function () { clearInterval(sparks); }, BLAST * 1000);
     setTimeout(function () {
-      coverBoom(o, b, gold, 12); bombSfx('boom', gold);
+      coverBoom(o, b, gold, 12);
       anim(b, [{ opacity: 1, scale: 1 }, { opacity: 0, scale: 2.2 }], { duration: 200, fill: 'forwards' });
       setTimeout(function () { b.remove(); }, 220);
     }, BLAST * 1000);
@@ -10431,7 +10445,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
       try {
         var t = c.currentTime + 0.02, sync = own && Music.curAt != null;
         var off = sync ? (((t - Music.curAt) % buf.duration) + buf.duration) % buf.duration : (buf.duration > 30 ? 8 * 240 / MUS_BPM : 0);
-        var src = c.createBufferSource(); src.buffer = buf;
+        var src = c.createBufferSource(); src.buffer = buf; src.loop = true;
         var hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 340; hp.Q.value = 0.8;
         var pk = c.createBiquadFilter(); pk.type = 'peaking'; pk.frequency.value = 1500; pk.gain.value = 5; pk.Q.value = 0.8;
         var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3600; lp.Q.value = 0.9;
@@ -12317,11 +12331,13 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     host.classList.add('load'); deckSound('pop');
     await wait(tt(0.24), true);
     var door = doorOn ? deckDoorEl(host) : host.querySelector('.deck-door');
-    // INFINITY: låten börjar när kassetten klickar fast, lägre och dov, och noterna stiger ur bandspelaren från början
+    // Så fort kassetten klickar fast spelar bandspelaren låten och noterna flyger ur högtalarna (användaren 2026-11-08: "så
+    // fort bandspelaren får i kasseten skall muskien starta och noterna ska flyga ur högtalarna"), tills allt glider undan
+    // (stopPlay); finns INFINITY-låten börjar den i stället, lägre och dov (musTapeIn), och bandspelaren visar bara noterna
     var playOn = null;
-    function tapeIn() { if (!playOn && musTapeIn()) playOn = deckPlay(host, 0, { noAudio: true }); }
+    function tapeIn() { if (!playOn) playOn = musTapeIn() ? deckPlay(host, 0, { noAudio: true }) : deckPlay(host, 120); }
     if (doorOn) await casDoor(host, cas, deck, sp, tapeIn);
-    else if (CAS_SEAT) await casSeat(host, cas, deck, sp);
+    else if (CAS_SEAT) { await casSeat(host, cas, deck, sp); tapeIn(); }
     else if (cas.animate && door) {
       var a = cas.getBoundingClientRect(), b = door.getBoundingClientRect();
       var kk = Math.max(0.1, b.width * 0.86 / a.width), dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
@@ -12400,7 +12416,8 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     var mega = plan.startMult >= mtMegaMin(mn), mb = host.querySelector('.mt-big');
     sumB.textContent = 'x' + plan.startMult; if (mega) mb.classList.add('mega');
     host.classList.add('big'); deckSound('big', 0, mega ? 7 : 5); shakeBoard(mega ? 3 : 2);
-    // ▶: bandspelaren spelar låten tills allt glider undan
+    // ▶: bandspelaren spelar låten tills allt glider undan (den spelar redan sedan kassetten åkte in: displayen visar ▶ igen)
+    if (playOn && led) led.textContent = '▶ PLAY';
     var stopPlay = playOn || deckPlay(host, 6);
     if (mega) setTimeout(function () { deckSound('big', 0, 9); }, 160);
     var gr = sumB.getBoundingClientRect();
@@ -15151,7 +15168,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
 
   // Spelet ger sidorna (NG_PAGES i guide-slides.js: ämne, rubrik, fakta, steg, text, bildtext och exemplet, antingen
   // lavinrutnätet eller en liten animation, GUIDE_W x GUIDE_H). Design A (användarens hur-man-spelar-v1, 2026-11-08: "Ja
-  // lägg till regnet och kör A"): den mörka rivna affischen med SNABBGUIDE / ämne, rubriken, STEG n / 7, texten och
+  // lägg till regnet och kör A"): den mörka rivna affischen med rubriken, STEG n / 7, texten och
   // pilarna. Alla rubriker och texter ligger på varandra i samma ruta (den högsta bestämmer höjden), så affischen och
   // SPELA flyttar sig aldrig när man bläddrar. Bara exemplet som syns ritas, varje bildruta, så länge startskärmen är
   // framme. SPELA finns alltid (rakt in i spelet); pilarna, prickarna och svep bläddrar runt.
@@ -15181,7 +15198,7 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   function guideShow(fresh) {
     if (!guide.built) guideBuild();
     gClear();
-    if (fresh) { guide.topic = -1; guideGo(0); } else guideGo(guide.i);
+    if (fresh) { guide.topic = -1; guideGo(0); ngShownAt = performance.now(); } else guideGo(guide.i);
     ngFit();
     if (!guide.raf) guide.raf = requestAnimationFrame(guideTick);
   }
@@ -15191,7 +15208,6 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     i = ((i % n) + n) % n;
     var p = NG_PAGES[i], turn = i !== guide.i, topic = p.topic !== guide.topic;
     guide.i = i; guide.t0 = performance.now(); guide.topic = p.topic;
-    $('#ngTopic').textContent = ngPad(p.topic + 1);
     $('#ngStep').textContent = ngPad(i + 1);
     ['#ngTitle', '#ngSpecs', '#ngH2', '#ngCopy', '#ngCap'].forEach(function (sel) {
       Array.prototype.forEach.call($(sel).children, function (c, j) { c.classList.toggle('on', j === i); });
@@ -15224,19 +15240,23 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
     guideDraw(now);
     guide.raf = requestAnimationFrame(guideTick);
   }
-  // Datorn: hela guiden (loggan, affischen, volatiliteten och SPELA) skalas lika mycket för att rymmas i fönstret, som i
-  // prototypen (fit.mjs): aldrig större än sin storlek, och i låga fönster högst ner till 76 % (då får sidan rulla hellre än
-  // att texten blir oläslig). Telefonen (portrait) har en egen flytande layout utan skalning.
+  // Hela guiden (loggan, affischen, volatiliteten och texten under) skalas som en bild för att rymmas i fönstret.
+  //  - Datorn: som i prototypen (fit.mjs): aldrig större än sin storlek, och i låga fönster högst ner till 76 % (då får
+  //    sidan rulla hellre än att texten blir oläslig).
+  //  - Telefonen (portrait): en fast design, 390 px bred som spelet, som skalas så att allt alltid syns på skärmen, större
+  //    på breda telefoner och mindre på låga (användaren 2026-11-08: "Allting skalar fel på telefonen"; förut flöt den
+  //    och fick rulla, så på en telefon med adressfält hamnade texten under kanten).
   var ngFitRaf = 0;
   function ngFit() {
     ngFitRaf = 0;
-    var card = introEl.querySelector('.intro-card'); if (!card) return;
-    if (document.documentElement.classList.contains('portrait') || introEl.hidden) { card.style.zoom = ''; return; }
+    var card = introEl.querySelector('.intro-card'); if (!card || introEl.hidden) return;
     card.style.zoom = '';
     var w = card.offsetWidth, h = card.offsetHeight;
     if (!w || !h) return;
-    var z = Math.min(1, (document.documentElement.clientWidth - 32) / w, Math.max(0.76, (window.innerHeight - 32) / h));
-    card.style.zoom = z < 0.999 ? z.toFixed(4) : '';
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight, z;
+    if (document.documentElement.classList.contains('portrait')) z = Math.min(vw / w, (vh - 10) / h);
+    else z = Math.min(1, (vw - 32) / w, Math.max(0.76, (vh - 32) / h));
+    card.style.zoom = Math.abs(z - 1) > 0.001 ? z.toFixed(4) : '';
   }
   function ngFitSoon() { if (!ngFitRaf) ngFitRaf = requestAnimationFrame(ngFit); }
   window.addEventListener('resize', ngFitSoon);
@@ -15246,12 +15266,22 @@ body .bsi-tap2 .tap-go { font-size: 22px; }
   // ↻: exemplet börjar om
   $('#ngReplay').addEventListener('click', function () { guideGo(guide.i); });
   // svep åt sidan (telefonen): på hela affischen
-  var ngSwipe = $('.guide-poster');
-  ngSwipe.addEventListener('pointerdown', function (e) { guide.x0 = e.clientX; });
+  var ngSwipe = $('.guide-poster'), ngSwiped = false, ngShownAt = 0;
+  ngSwipe.addEventListener('pointerdown', function (e) { guide.x0 = e.clientX; ngSwiped = false; });
   ngSwipe.addEventListener('pointerup', function (e) {
     if (guide.x0 == null) return;
     var dx = e.clientX - guide.x0; guide.x0 = null;
-    if (Math.abs(dx) > 40) guideGo(guide.i + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 40) { ngSwiped = true; guideGo(guide.i + (dx < 0 ? 1 : -1)); }
+  });
+  // "Klicka var som helst för att fortsätta" i stället för SPELA (användaren 2026-11-08): ett tryck var som helst på
+  // startskärmen startar spelet (som SPELA, #introGo), utom på pilarna, prickarna och ↻, efter ett svep mellan sidorna och
+  // precis när startskärmen har kommit fram
+  introEl.addEventListener('click', function (e) {
+    if (introEl.hidden || introEl.classList.contains('leaving')) return;
+    if (e.target.closest && e.target.closest('button')) return;
+    if (ngSwiped) { ngSwiped = false; return; }
+    if (performance.now() - ngShownAt < 500) return;
+    $('#introGo').click();
   });
   ngSwipe.addEventListener('pointercancel', function () { guide.x0 = null; });
   document.addEventListener('keydown', function (e) {
