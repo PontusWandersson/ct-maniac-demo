@@ -1906,6 +1906,9 @@ body.tids .bp-price {
 /* Neonramen runt brädet (kq-frame, en canvas som ritas i kq-ui.js av användarens bild): den har sitt eget neonsken, så
    inget sken eller skugga läggs på (förut ett varmt sken och C&T:s skugga runt guldramen) */
 .kq-frame { position: absolute; z-index: 3; pointer-events: none; }
+/* Snurrknappen ligger framför neonramen (användaren 2026-11-08: "gridden ligger bakom snurrknappen"); ramens kobåge nådde
+   ner över knappens överkant. Samma lager som saldo- och vinstskyltarna (ftag, z 4), fortfarande under småhjulens effekter. */
+.machine .spinctl .spinwrap { z-index: 4; }
 .stage { border-color: #15111f !important; box-shadow: 0 0 calc(var(--cell) * 1.4) rgba(150, 90, 255, .35) !important; border-radius: 12px !important; }
 /* Vinstpresentationens typsnitt (användaren 2026-10-25): presentationen är alltid C&T:s, men typsnittet är spelets eget och
    ställs här på ett ställe (--win-font). Gäller vinstsmällen och storvinst-rutan (BIG WIN, beloppet och maxraden). */
