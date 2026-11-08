@@ -13359,8 +13359,14 @@ body.tids .g-dots button[aria-current="true"] { background: #ffcc33; border-colo
     requestAnimationFrame(tick);
   }
   // ---------------------------------------------------------------- start
+  // Rakt in i spelet (användaren 2026-11-08: "Ta även bort hela introt och hur man spelar sålänge … när jag nu kommer testa
+  // spelet mycket behöver jag komma rakt in i spelet"): studiointrot, laddningssidan och rutorna som visar hur spelet
+  // fungerar hoppas över vid start, precis som när visaren laddar om (skipIntro). Musiken börjar vid första snurret.
+  // ?intro i adressen visar dem som förut, och RAKT_IN = false tar tillbaka dem för alla. Menyns "Hur man spelar" finns kvar.
+  var RAKT_IN = true;
   function start(data) {
     data = data || {};
+    if (RAKT_IN && !/[?&]intro\b/.test(location.search)) data.skipIntro = true;
     state.balance = typeof data.balance === 'number' ? data.balance : store.get('balance', START_BALANCE);
     state.walls = store.get('walls', {}) || {};
     state.wallInit = store.get('wallInit', null);
